@@ -1,0 +1,6 @@
+@HRSystem.Csharp.Api_HostAddress = http://localhost:5067
+
+GET {{HRSystem.Csharp.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
