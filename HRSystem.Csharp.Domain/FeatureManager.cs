@@ -27,6 +27,7 @@ namespace HRSystem.Csharp.Domain
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
             }, ServiceLifetime.Transient, ServiceLifetime.Transient);
             
+            builder.AddServices();
         }
 
 
