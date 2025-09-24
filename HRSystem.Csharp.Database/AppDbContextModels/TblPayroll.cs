@@ -9,37 +9,29 @@ public partial class TblPayroll
 
     public string PayrollCode { get; set; } = null!;
 
-    public decimal BaseSalary { get; set; }
+    public string? EmployeeCode { get; set; }
 
-    public decimal? AttendenceDeduction { get; set; }
+    public DateTime? PayrollDate { get; set; }
 
-    public decimal? OvertimePay { get; set; }
+    public string? PayrollStatus { get; set; }
 
-    public decimal? Tax { get; set; }
-
-    public string EmployeeCode { get; set; } = null!;
-
-    public decimal? Bonus { get; set; }
+    public decimal? BaseSalary { get; set; }
 
     public decimal? Allowance { get; set; }
 
-    public decimal? TotalOvertimeHours { get; set; }
+    public int? TotalWorkingHour { get; set; }
 
-    public decimal? TotalLeaveDays { get; set; }
+    public decimal? LeaveHour { get; set; }
 
-    public decimal TotalSalary { get; set; }
+    public decimal? ActualWorkingHour { get; set; }
 
-    public DateTime PaymentDate { get; set; }
+    public decimal? Deduction { get; set; }
 
-    public string PaymentStatus { get; set; } = null!;
+    public decimal? TotalPayroll { get; set; }
 
-    public string CreatedBy { get; set; } = null!;
+    public decimal? Tax { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public decimal? Bonus { get; set; }
 
-    public string? ModifiedBy { get; set; }
-
-    public DateTime? ModifiedAt { get; set; }
-
-    public bool? DeleteFlag { get; set; }
+    public decimal? GrandTotalPayroll { get; set; }
 }

@@ -3,15 +3,17 @@ using System.Collections.Generic;
 
 namespace HRSystem.Csharp.Database.AppDbContextModels;
 
-public partial class TblRole
+public partial class TblVerification
 {
-    public string RoleId { get; set; } = null!;
+    public string VerificationId { get; set; } = null!;
 
-    public string RoleCode { get; set; } = null!;
+    public string? VerificationCode { get; set; }
 
-    public string? RoleName { get; set; }
+    public string? Email { get; set; }
 
-    public string? UniqueName { get; set; }
+    public DateTime? ExpiredTime { get; set; }
+
+    public bool? IsUsed { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

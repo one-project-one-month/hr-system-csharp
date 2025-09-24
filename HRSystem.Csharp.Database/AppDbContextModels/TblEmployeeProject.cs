@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace HRSystem.Csharp.Database.AppDbContextModels;
 
-public partial class TblRole
+public partial class TblEmployeeProject
 {
-    public string RoleId { get; set; } = null!;
+    public string EmployeeProjectId { get; set; } = null!;
 
-    public string RoleCode { get; set; } = null!;
+    public string EmployeeProjectCode { get; set; } = null!;
 
-    public string? RoleName { get; set; }
+    public string? ProjectCode { get; set; }
 
-    public string? UniqueName { get; set; }
+    public string? EmployeeCode { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
