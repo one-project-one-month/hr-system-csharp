@@ -1,4 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Features;
+using HRSystem.Csharp.Domain.Features.Project;
 
 namespace HRSystem.Csharp.Domain
 {
@@ -10,13 +11,14 @@ namespace HRSystem.Csharp.Domain
             #region User Management BL
 
             builder.Services.AddScoped<BL_Role>();
+            builder.Services.AddScoped<BL_Project>();
 
             #endregion
 
             #region User Management DA
 
             builder.Services.AddScoped<DA_Role>();
-
+            builder.Services.AddScoped<DA_Project>();
             #endregion
         }
         
