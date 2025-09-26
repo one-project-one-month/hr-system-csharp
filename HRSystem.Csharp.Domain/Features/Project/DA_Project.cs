@@ -1,6 +1,7 @@
 ﻿
 using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared;
+using HRSystem.Csharp.Shared.Helpers;
 
 namespace HRSystem.Csharp.Domain.Features.Project;
 
@@ -17,19 +18,7 @@ public class DA_Project
         {
                 try
                 {
-                        var newProject = new TblProject
-                        {
-                                ProjectId = Ulid.NewUlid().ToString(),
-                                ProjectCode = project.ProjectCode,
-                                ProjectName = project.ProjectName,
-                                ProjectDescription = project.ProjectDescription,
-                                StartDate = project.StartDate,
-                                EndDate = project.EndDate,
-                                ProjectStatus = "Pending",
-                                CreatedAt = DateTime.Now,
-                                CreatedBy = "TestingUser",
-                                DeleteFlag = false
-                        };
+                        var newProject = project.Map();
 
                         _appDbContext.TblProjects.Add(newProject);
                         var result = _appDbContext.SaveChanges();
@@ -50,19 +39,8 @@ public class DA_Project
                 {
                         var projects = _appDbContext.TblProjects
                                 .Where(p => p.DeleteFlag == false)
-                                .Select(p => new ProjectResponseModel
-                                {
-                                        ProjectCode = p.ProjectCode,
-                                        ProjectName = p.ProjectName,
-                                        ProjectDescription = p.ProjectDescription,
-                                        StartDate = p.StartDate,
-                                        EndDate = p.EndDate,
-                                        ProjectStatus = p.ProjectStatus,
-                                        CreatedAt = p.CreatedAt,
-                                        CreatedBy = p.CreatedBy,
-                                        ModifiedAt = p.ModifiedAt,
-                                        ModifiedBy = p.ModifiedBy,
-                                }).ToList();
+                                .Select(p => p.Map())
+                                .ToList();
 
                         if (projects is null || projects.Count is 0) 
                                 return Result<List<ProjectResponseModel>>.NotFoundError("no projects found!");
@@ -83,19 +61,8 @@ public class DA_Project
                 {
                         var project = _appDbContext.TblProjects
                                 .Where(p => p.DeleteFlag == false)
-                                .Select(p => new ProjectResponseModel
-                                {
-                                        ProjectCode = p.ProjectCode,
-                                        ProjectName = p.ProjectName,
-                                        ProjectDescription = p.ProjectDescription,
-                                        StartDate = p.StartDate,
-                                        EndDate = p.EndDate,
-                                        ProjectStatus = p.ProjectStatus,
-                                        CreatedAt = p.CreatedAt,
-                                        CreatedBy = p.CreatedBy,
-                                        ModifiedAt = p.ModifiedAt,
-                                        ModifiedBy = p.ModifiedBy,
-                                }).FirstOrDefault(p => p.ProjectCode == code);
+                                .Select(p => p.Map())
+                                .FirstOrDefault(p => p.ProjectCode == code);
 
                         if (project is null) return Result<ProjectResponseModel>.NotFoundError("no project found!");
 
@@ -122,7 +89,7 @@ public class DA_Project
                         existingProject.ProjectDescription = project.ProjectDescription;
                         existingProject.StartDate = project.StartDate;
                         existingProject.EndDate = project.EndDate;
-                        existingProject.ProjectStatus = project.ProjectStatus;
+                        existingProject.ProjectStatus = project.ProjectStatus.ToString();
                         existingProject.ModifiedAt = DateTime.Now;
                         existingProject.ModifiedBy = "TestingUser";
 

@@ -1,4 +1,7 @@
-﻿namespace HRSystem.Csharp.Domain.Models.Project;
+﻿using HRSystem.Csharp.Shared.Enums;
+using System.Text.Json.Serialization;
+
+namespace HRSystem.Csharp.Domain.Models.Project;
 
 public class ProjectResponseModel
 {
@@ -12,7 +15,8 @@ public class ProjectResponseModel
 
         public DateTime? EndDate { get; set; }
 
-        public string? ProjectStatus { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public EnumProjectStatus ProjectStatus { get; set; }
 
         public DateTime? CreatedAt { get; set; }
 
