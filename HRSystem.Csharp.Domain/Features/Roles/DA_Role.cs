@@ -1,5 +1,4 @@
-﻿using HRSystem.Csharp.Domain.DTOs;
-using HRSystem.Csharp.Domain.Models;
+﻿using HRSystem.Csharp.Domain.Models;
 using HRSystem.Csharp.Domain.Models.Roles;
 using HRSystem.Csharp.Shared;
 using System;
@@ -12,7 +11,7 @@ namespace HRSystem.Csharp.Domain.Features.Roles
 {
     public class DA_Role
     {
-
+        
         private readonly AppDbContext _appDbContext;
 
         public DA_Role(AppDbContext appDbContext)
@@ -172,6 +171,7 @@ namespace HRSystem.Csharp.Domain.Features.Roles
             }
         }
 
-
+        
     }
+        
 }

@@ -1,5 +1,4 @@
-﻿using HRSystem.Csharp.Domain.DTOs;
-using HRSystem.Csharp.Domain.Models;
+﻿using HRSystem.Csharp.Domain.Models;
 using HRSystem.Csharp.Domain.Models.Roles;
 using HRSystem.Csharp.Shared;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -13,6 +12,7 @@ namespace HRSystem.Csharp.Domain.Features.Roles
 {
     public class BL_Role
     {
+        
         private readonly DA_Role _daRole;
 
         public BL_Role(DA_Role daRole)
@@ -82,5 +82,7 @@ namespace HRSystem.Csharp.Domain.Features.Roles
 
 
         }
+        
     }
+        
 }

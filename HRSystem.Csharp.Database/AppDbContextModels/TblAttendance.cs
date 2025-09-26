@@ -7,35 +7,37 @@ public partial class TblAttendance
 {
     public string AttendanceId { get; set; } = null!;
 
-    public DateOnly Date { get; set; }
+    public string AttendanceCode { get; set; } = null!;
 
-    public string EmployeeShiftCode { get; set; } = null!;
+    public DateTime? AttendanceDate { get; set; }
 
-    public TimeOnly CheckInTime { get; set; }
+    public DateTime? CheckInTime { get; set; }
 
-    public TimeOnly? CheckOutTime { get; set; }
+    public string? CheckInLocation { get; set; }
 
-    public string CheckInLocation { get; set; } = null!;
+    public DateTime? CheckOutTime { get; set; }
 
     public string? CheckOutLocation { get; set; }
 
     public decimal? WorkingHour { get; set; }
 
-    public bool? CheckInWarningFlag { get; set; }
+    public int? HourLateFlag { get; set; }
 
-    public bool? CheckOutWarningFlag { get; set; }
+    public int? HalfDayFlag { get; set; }
 
-    public string? Status { get; set; }
+    public int? FullDayFlag { get; set; }
 
-    public string? Reason { get; set; }
+    public string? Remark { get; set; }
 
-    public decimal? OvertimeHour { get; set; }
+    public bool? IsSavedLocation { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public string? CreatedBy { get; set; }
 
-    public string CreatedBy { get; set; } = null!;
+    public DateTime? CreatedAt { get; set; }
 
     public string? ModifiedBy { get; set; }
 
     public DateTime? ModifiedAt { get; set; }
+
+    public bool? DeleteFlag { get; set; }
 }

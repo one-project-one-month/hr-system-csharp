@@ -11,6 +11,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
 });
+
 builder.Services.AddScoped<BL_Role>();
 builder.Services.AddScoped<DA_Role>();
 builder.Services.AddControllers();

@@ -1,11 +1,11 @@
-﻿using HRSystem.Csharp.Domain.DTOs;
-using HRSystem.Csharp.Domain.Features.Roles;
+﻿using HRSystem.Csharp.Domain.Features.Roles;
 using HRSystem.Csharp.Domain.Models.Roles;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.Csharp.Api.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class RoleController : ControllerBase
@@ -88,4 +88,5 @@ namespace HRSystem.Csharp.Api.Controllers
         }
 
     }
+    
 }
