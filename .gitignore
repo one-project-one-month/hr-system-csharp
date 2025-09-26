@@ -482,18 +482,3 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-/HRSystem.Csharp.Database/AppDbContextModels/AppDbContext.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblAttendance.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblCompanyRule.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblEmployee.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblEmployeeProject.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblLocation.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblMenu.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblMenuGroup.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblPayroll.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblProject.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblRole.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblRoleAndMenuPermission.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblSequence.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblTask.cs
-/HRSystem.Csharp.Database/AppDbContextModels/TblVerification.cs
