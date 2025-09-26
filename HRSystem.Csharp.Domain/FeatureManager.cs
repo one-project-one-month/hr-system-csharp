@@ -1,4 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features;
+﻿using HRSystem.Csharp.Domain.Features.Roles;
 
 namespace HRSystem.Csharp.Domain
 {
