@@ -18,6 +18,11 @@ public class DA_Project
         {
                 try
                 {
+                        var existingProject = _appDbContext.TblProjects.FirstOrDefault(p => p.ProjectCode == project.ProjectCode);
+
+                        if (existingProject is not null)
+                                return Result<Boolean>.DuplicateRecordError( $"A project with code '{project.ProjectCode}' already exists!");
+
                         var newProject = project.Map();
 
                         _appDbContext.TblProjects.Add(newProject);
@@ -60,9 +65,9 @@ public class DA_Project
                 try
                 {
                         var project = _appDbContext.TblProjects
-                                .Where(p => p.DeleteFlag == false)
+                                .Where(p => p.DeleteFlag == false &&  p.ProjectCode == code)
                                 .Select(p => p.Map())
-                                .FirstOrDefault(p => p.ProjectCode == code);
+                                .FirstOrDefault();
 
                         if (project is null) return Result<ProjectResponseModel>.NotFoundError("no project found!");
 
