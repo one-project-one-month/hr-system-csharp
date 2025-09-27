@@ -20,8 +20,11 @@ public class ProjectController : ControllerBase
         {
                 var result = _blProject.GetAllProjects();
 
-                if (!result.IsSuccess) return BadRequest(result);
-                return StatusCode(200, result.Data);
+                if (result.IsSuccess) return Ok(result);
+
+                if (result.IsNotFound) return NotFound(result);
+
+                return StatusCode(500, result);
         }
 
         [HttpGet("{code}")]
@@ -29,8 +32,11 @@ public class ProjectController : ControllerBase
         {
                 var result = _blProject.GetProject(code);
 
-                if (!result.IsSuccess) return BadRequest(result);
-                return StatusCode(200, result.Data);
+                if (result.IsSuccess) return Ok(result);
+
+                if (result.IsNotFound) return NotFound(result);
+
+                return StatusCode(500, result);
         }
 
         [HttpPost]
@@ -38,8 +44,13 @@ public class ProjectController : ControllerBase
         {
                 var result = _blProject.CreateProject(project);
 
-                if (!result.IsSuccess) return BadRequest(result);
-                return StatusCode(201, result.Data);
+                if (result.IsSuccess) return Ok(result);
+
+                if (result.IsDuplicateRecord) return BadRequest(result);
+
+                if (result.IsInvalidData) return BadRequest(result);
+
+                return StatusCode(500, result);
         }
 
         [HttpPut("{code}")]
@@ -47,8 +58,13 @@ public class ProjectController : ControllerBase
         {
                 var result = _blProject.UpdateProject(code, project);
 
-                if (!result.IsSuccess) return BadRequest(result);
-                return StatusCode(204);
+                if (result.IsSuccess) return Ok(result);
+
+                if (result.IsNotFound) return NotFound(result);
+
+                if (result.IsValidationError) return BadRequest(result);
+
+                return StatusCode(500, result);
         }
 
         [HttpDelete("{code}")]
@@ -56,7 +72,10 @@ public class ProjectController : ControllerBase
         {
                 var result = _blProject.DeleteProject(code);
 
-                if (result.IsSuccess) return BadRequest(result);
-                return StatusCode(204);
+                if (result.IsSuccess) return Ok(result);
+
+                if (result.IsNotFound) return NotFound(result);
+
+                return StatusCode(500, result);
         }
 }
