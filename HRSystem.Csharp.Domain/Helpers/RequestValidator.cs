@@ -45,14 +45,3 @@ public class ProjectUpdateValidator : AbstractValidator<ProjectUpdateRequestMode
                         .IsInEnum().WithMessage("Project status must be one of: Pending, InProgress, Finished");
         }
 }
-
-
-// to handle displaying request errors
-public static class ValidationHelper
-{
-        public static Result<Boolean> FormatErrors(List<ValidationFailure> err)
-        {
-                var errors = err.Select(e => e.ErrorMessage).ToList();
-                return Result<Boolean>.BadRequestError(string.Join("; ", errors));
-        }
-}

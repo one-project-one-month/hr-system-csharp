@@ -24,7 +24,7 @@ public class BL_Project
         {
                 var validator = _projCreateValidator.Validate(project);
                 if (!validator.IsValid) 
-                        return ValidationHelper.FormatErrors(validator.Errors);
+                        return Result<Boolean>.InvalidDataError(validator.Errors.FirstOrDefault().ErrorMessage!);
 
                 return _daProject.CreateProject(project);
         }
@@ -47,8 +47,8 @@ public class BL_Project
         public Result<Boolean> UpdateProject(string code, ProjectUpdateRequestModel project)
         {
                  var validator = _projUpdateValidator.Validate(project);
-                if (!validator.IsValid) 
-                        return ValidationHelper.FormatErrors(validator.Errors);
+                 if (!validator.IsValid) 
+                        return Result<Boolean>.InvalidDataError(validator.Errors.FirstOrDefault().ErrorMessage!);
 
                 return _daProject.UpdateProject(code, project);
         }
