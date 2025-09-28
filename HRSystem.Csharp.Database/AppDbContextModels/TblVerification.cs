@@ -5,7 +5,7 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblVerification
 {
-    public string VerificationId { get; set; } = null!;
+    public Guid VerificationId { get; set; }
 
     public string? VerificationCode { get; set; }
 

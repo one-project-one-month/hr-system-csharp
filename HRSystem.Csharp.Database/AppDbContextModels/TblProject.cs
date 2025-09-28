@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblProject
 {
-    public string ProjectId { get; set; } = null!;
+    public Guid ProjectId { get; set; }
 
-    public string ProjectCode { get; set; } = null!;
+    public string? ProjectCode { get; set; }
 
     public string? ProjectName { get; set; }
 

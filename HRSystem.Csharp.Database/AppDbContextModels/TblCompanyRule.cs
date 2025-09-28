@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblCompanyRule
 {
-    public string CompanyRuleId { get; set; } = null!;
+    public Guid CompanyRuleId { get; set; }
 
-    public string CompanyRuleCode { get; set; } = null!;
+    public string? CompanyRuleCode { get; set; }
 
     public string? Description { get; set; }
 

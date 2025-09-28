@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblEmployee
 {
-    public string EmployeeId { get; set; } = null!;
+    public Guid EmployeeId { get; set; }
 
-    public string EmployeeCode { get; set; } = null!;
+    public string? EmployeeCode { get; set; }
 
     public string? RoleCode { get; set; }
 
@@ -17,12 +17,6 @@ public partial class TblEmployee
 
     public string? Password { get; set; }
 
-    public int? WrongPasswordCount { get; set; }
-
-    public bool? IsFirstTime { get; set; }
-
-    public bool? IsLocked { get; set; }
-
     public string? PhoneNo { get; set; }
 
     public string? ProfileImage { get; set; }
@@ -30,6 +24,10 @@ public partial class TblEmployee
     public DateTime? StartDate { get; set; }
 
     public DateTime? ResignDate { get; set; }
+
+    public decimal? Salary { get; set; }
+
+    public bool? IsFirstTimeLogin { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

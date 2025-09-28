@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblSequence
 {
-    public string SequenceId { get; set; } = null!;
+    public Guid SequenceId { get; set; }
 
-    public string UniqueName { get; set; } = null!;
+    public string? UniqueName { get; set; }
 
     public string? SequenceNo { get; set; }
 
