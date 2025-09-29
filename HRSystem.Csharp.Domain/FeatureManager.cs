@@ -1,4 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Features;
+using HRSystem.Csharp.Domain.Features.Task;
 
 namespace HRSystem.Csharp.Domain
 {
@@ -13,13 +14,24 @@ namespace HRSystem.Csharp.Domain
 
             #endregion
 
+            #region Main Nav Bar BL
+
+            builder.Services.AddScoped<BL_Task>();
+
+            #endregion
+
             #region User Management DA
 
             builder.Services.AddScoped<DA_Role>();
 
             #endregion
+
+            #region Main Nav Bar DA
+
+            builder.Services.AddScoped<DA_Task>();
+            #endregion
         }
-        
+
         public static void AddDomain(this WebApplicationBuilder builder)
         {
             builder.Services.AddDbContext<AppDbContext>(opt =>
