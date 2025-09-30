@@ -17,6 +17,12 @@ public class BL_Task
         _daTask = daTask;
     }
 
+    public async Task<Result<TaskListResponseModel>> ListAsync()
+    {
+        var result = await _daTask.List();
+        return result;
+    }
+
     public async Task<Result<TaskCreateResponseModel>> CreateAsync(TaskCreateRequestModel requestModel)
     {
         var result = await _daTask.Create(requestModel);

@@ -17,6 +17,32 @@ public class DA_Task
         _db = db;
     }
 
+    public async Task<Result<TaskListResponseModel>> List()
+    {
+        try
+        {
+            var tasks = await _db.TblTasks.Where(t => t.DeleteFlag == false)
+                .OrderByDescending(t => t.CreatedAt)
+                .ToListAsync();
+
+            if (!tasks.Any() || tasks is null)
+            {
+                return Result<TaskListResponseModel>.NotFoundError("No tasks found.");
+            }
+
+            var model = new TaskListResponseModel()
+            {
+                Tasks = tasks.Select(t => TaskModel.FromTblTask(t)).ToList()
+            };
+
+            return Result<TaskListResponseModel>.Success(model);
+        }
+        catch (Exception ex)
+        {
+            return Result<TaskListResponseModel>.SystemError(ex.Message);
+        }
+    }
+
     public async Task<Result<TaskCreateResponseModel>> Create(TaskCreateRequestModel requestModel)
     {
         try
