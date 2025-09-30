@@ -15,6 +15,13 @@ public class TaskController : ControllerBase
         _blTask = blTask;
     }
 
+    [HttpGet("list")]
+    public IActionResult List()
+    {
+        var result = _blTask.ListAsync();
+        return Ok(result);
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> CreateAsync(TaskCreateRequestModel requestModel)
     {
