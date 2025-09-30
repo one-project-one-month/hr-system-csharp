@@ -19,10 +19,17 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
 
         public async Task<Result<AttendanceListResponseModel>> GetAllAttendances()
         {
-            await _db.TblAttendances.Where(x => !x.DeleteFlag)
-                .OrderByDecending(x => x.AttendanceDate)
-                .ToList();
-        }
+            var attendanceList = await _db.TblAttendances.Where(x => x.DeleteFlag == false)
+                .OrderByDescending(x => x.AttendanceDate)
+                .ToListAsync();
 
+            var model = new AttendanceListResponseModel
+            {
+                AttendanceList = attendanceList
+                .Select(AttendanceListModel.FromTblAttendance)
+                .ToList()
+            };
+
+        }
     }
 }

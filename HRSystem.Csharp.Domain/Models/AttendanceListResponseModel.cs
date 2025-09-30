@@ -8,6 +8,11 @@ namespace HRSystem.Csharp.Domain.Models
 {
     public class AttendanceListResponseModel
     {
+        public List<AttendanceListModel> AttendanceList { get; set; } = new List<AttendanceListModel>();
+    }
+
+        public class AttendanceListModel
+    {
         public Guid AttendanceId { get; set; }
 
         public string? AttendanceCode { get; set; }
@@ -30,5 +35,21 @@ namespace HRSystem.Csharp.Domain.Models
 
         public bool? IsSavedLocation { get; set; }
 
+        public static AttendanceListModel FromTblAttendance(TblAttendance attendance)
+        {
+            return new AttendanceListModel()
+            {
+                AttendanceId = attendance.AttendanceId,
+                AttendanceCode = attendance.AttendanceCode,
+                EmployeeCode = attendance.EmployeeCode,
+                AttendanceDate = attendance.AttendanceDate,
+                CheckInTime = attendance.CheckInTime,
+                CheckInLocation = attendance.CheckInLocation,
+                CheckOutTime = attendance.CheckOutTime,
+                CheckOutLocation = attendance.CheckOutLocation,
+                WorkingHour = attendance.WorkingHour,
+                IsSavedLocation = attendance.IsSavedLocation
+            };
+        }
     }
 }
