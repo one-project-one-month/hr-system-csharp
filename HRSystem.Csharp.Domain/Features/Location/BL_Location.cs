@@ -1,7 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models.Location;
-using HRSystem.Csharp.Shared;
-
-namespace HRSystem.Csharp.Domain.Features.Location;
+﻿namespace HRSystem.Csharp.Domain.Features.Location;
 
 public class BL_Location
 {

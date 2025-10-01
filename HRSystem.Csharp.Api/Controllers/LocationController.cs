@@ -1,8 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features.Location;
-using HRSystem.Csharp.Domain.Models.Location;
-using Microsoft.AspNetCore.Mvc;
-
-namespace HRSystem.Csharp.Api.Controllers;
+﻿namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

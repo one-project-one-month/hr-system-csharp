@@ -1,7 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models.Location;
-using HRSystem.Csharp.Shared;
-
-namespace HRSystem.Csharp.Domain.Features.Location;
+﻿namespace HRSystem.Csharp.Domain.Features.Location;
 
 public class DA_Location
 {
@@ -14,23 +11,18 @@ public class DA_Location
 
     public Result<Boolean> CreateLocation(LocationCreateRequestModel location)
     {
-        var newLocation = new TblLocation
-        {
-            LocationId = Ulid.NewUlid().ToString(),
-            LocationCode = location.LocationCode,
-            Name = location.Name,
-            Latitude = location.Latitude,
-            Longitude = location.Longitude,
-            Radius = location.Radius,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = "system",
-            DeleteFlag = false
-        };
+        var existingLocation = _appDbContext.TblLocations
+            .FirstOrDefault(l => l.LocationCode == location.LocationCode && l.DeleteFlag == false);
+
+        if (existingLocation != null)
+            return Result<Boolean>.DuplicateRecordError("Location with the same code already exists");
+
+        var newLocation = location.Map();
 
         _appDbContext.TblLocations.Add(newLocation);
         var result = _appDbContext.SaveChanges();
 
-        return result > 0 ? Result<Boolean>.Success(true) 
+        return result > 0 ? Result<Boolean>.Success(true)
             : Result<Boolean>.Error("Failed to create location");
     }
 
@@ -38,22 +30,10 @@ public class DA_Location
     {
         var locations = _appDbContext.TblLocations
             .Where(l => l.DeleteFlag == false)
-            .Select(l => new LocationResponseModel
-            {
-                LocationCode = l.LocationCode,
-                Name = l.Name,
-                Latitude = l.Latitude,
-                Longitude = l.Longitude,
-                Radius = l.Radius,
-                CreatedAt = l.CreatedAt,
-                CreatedBy = l.CreatedBy,
-                ModifiedAt = l.ModifiedAt,
-                ModifiedBy = l.ModifiedBy,
-                DeleteFlag = l.DeleteFlag
-            })
+            .Select(l => l.Map())
             .ToList();
 
-        if(locations == null || locations.Count == 0)
+        if (locations == null || locations.Count == 0)
         {
             return Result<List<LocationResponseModel>>.NotFoundError("No locations found");
         }
@@ -64,22 +44,10 @@ public class DA_Location
     {
         var location = _appDbContext.TblLocations
             .Where(l => l.DeleteFlag == false)
-            .Select(l => new LocationResponseModel
-            {
-                LocationCode = l.LocationCode,
-                Name = l.Name,
-                Latitude = l.Latitude,
-                Longitude = l.Longitude,
-                Radius = l.Radius,
-                CreatedAt = l.CreatedAt,
-                CreatedBy = l.CreatedBy,
-                ModifiedAt = l.ModifiedAt,
-                ModifiedBy = l.ModifiedBy,
-                DeleteFlag = l.DeleteFlag
-            })
+            .Select(l => l.Map())
             .FirstOrDefault(l => l.LocationCode == locationCode);
 
-        if(location == null)
+        if (location == null)
         {
             return Result<LocationResponseModel>.NotFoundError("Location not found");
         }
@@ -91,7 +59,7 @@ public class DA_Location
         var existingLocation = _appDbContext.TblLocations
             .FirstOrDefault(l => l.LocationCode == locationCode && l.DeleteFlag == false);
 
-        if(existingLocation == null)
+        if (existingLocation == null)
         {
             return Result<Boolean>.NotFoundError("Location not found");
         }
@@ -105,7 +73,7 @@ public class DA_Location
 
         _appDbContext.TblLocations.Update(existingLocation);
         var result = _appDbContext.SaveChanges();
-        return result > 0 ? Result<Boolean>.Success(true) 
+        return result > 0 ? Result<Boolean>.Success(true)
             : Result<Boolean>.Error("Failed to update location");
     }
 
@@ -114,7 +82,7 @@ public class DA_Location
         var existingLocation = _appDbContext.TblLocations
             .FirstOrDefault(l => l.LocationCode == locationCode && l.DeleteFlag == false);
 
-        if(existingLocation == null)
+        if (existingLocation == null)
         {
             return Result<Boolean>.NotFoundError("Location not found");
         }
@@ -125,7 +93,7 @@ public class DA_Location
 
         _appDbContext.TblLocations.Update(existingLocation);
         var result = _appDbContext.SaveChanges();
-        return result > 0 ? Result<Boolean>.Success(true) 
+        return result > 0 ? Result<Boolean>.Success(true)
             : Result<Boolean>.Error("Failed to delete location");
     }
 }
