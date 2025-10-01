@@ -16,9 +16,9 @@ public class TaskController : ControllerBase
     }
 
     [HttpGet("list")]
-    public IActionResult List()
+    public async Task<IActionResult> ListAsync()
     {
-        var result = _blTask.ListAsync();
+        var result = await _blTask.ListAsync();
         return Ok(result);
     }
 
