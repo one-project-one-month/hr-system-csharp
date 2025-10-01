@@ -59,6 +59,8 @@ public class DA_Task
                 EndDate = requestModel.EndDate,
                 TaskStatus = requestModel.TaskStatus,
                 WorkingHour = requestModel.WorkingHour,
+                DeleteFlag = false,
+                CreatedAt = DateTime.UtcNow,
             };
 
             await _db.TblTasks.AddAsync(task);
