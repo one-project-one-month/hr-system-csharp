@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Models;
 using HRSystem.Csharp.Shared;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using NUlid;
 
@@ -68,7 +69,7 @@ namespace HRSystem.Csharp.Domain.Features
             return Result<bool>.Success(true);
         }
 
-        public async Task<Result<TblMenu>> CreateMenuAsync(Menu requestMenu)
+        public async Task<Result<TblMenu>> CreateMenuAsync(MenuRequestModel requestMenu)
         {
             if(requestMenu.MenuCode is null)
             {
@@ -83,6 +84,13 @@ namespace HRSystem.Csharp.Domain.Features
             if(requestMenu is null)
             {
                 return Result<TblMenu>.BadRequestError("Request Menu cannot be null.");
+            }
+
+            var duplicateMenu = await _daMenu.MenuCodeExists(requestMenu);
+
+            if(duplicateMenu)
+            {
+                return Result<TblMenu>.DuplicateRecordError("Menu with that MenuCode or MenuName is existed");
             }
 
             var response = await _daMenu.CreateMenuAsync(requestMenu);

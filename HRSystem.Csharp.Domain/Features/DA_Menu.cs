@@ -82,6 +82,18 @@ namespace HRSystem.Csharp.Domain.Features
 
         }
 
+        public async Task<bool> MenuCodeExists(MenuRequestModel menu)
+        {
+            return await (
+                from m in _dbContext.TblMenus
+                join g in _dbContext.TblMenuGroups on m.MenuGroupCode equals g.MenuGroupCode
+                where
+                (m.MenuCode == menu.MenuCode || m.MenuName == menu.MenuName) &&
+                m.DeleteFlag == false && g.DeleteFlag == false &&
+                m.MenuGroupCode == menu.MenuGroupCode
+                select m).AnyAsync();
+        }
+
         public async Task<bool> UpdateMenu(TblMenu menu)
         {
 
@@ -90,7 +102,7 @@ namespace HRSystem.Csharp.Domain.Features
             return rows > 0;
         }
 
-        public async Task<Result<TblMenu>> CreateMenuAsync(Menu requestMenu)
+        public async Task<Result<TblMenu>> CreateMenuAsync(MenuRequestModel requestMenu)
         {
             try
             {
@@ -104,7 +116,7 @@ namespace HRSystem.Csharp.Domain.Features
                 // create new
                 var menu = new TblMenu
                 {
-                    MenuId = Guid.NewGuid().ToString(),
+                    MenuId = Ulid.NewUlid().ToString(),
                     MenuCode = requestMenu.MenuCode,
                     MenuName = requestMenu.MenuName,
                     MenuGroupCode = requestMenu.MenuGroupCode,
@@ -112,7 +124,7 @@ namespace HRSystem.Csharp.Domain.Features
                     Icon = requestMenu.Icon,
                     SortOrder = requestMenu.SortOrder,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = requestMenu.CreatedBy,
+                    //CreatedBy =loggined User,
                     DeleteFlag = false,
                 };
 

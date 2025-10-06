@@ -15,7 +15,7 @@ namespace HRSystem.Csharp.Api.Controllers
         {
             _blMenuGroup = blMenuGroup;
         }
-        [HttpGet("MenuGroups")]
+        [HttpGet("menu-groups")]
         public async Task<IActionResult> GetAll()
         {
             var response = await _blMenuGroup.GetAllMenuGroups();
@@ -26,7 +26,7 @@ namespace HRSystem.Csharp.Api.Controllers
             return BadRequest(response);
         }
 
-        [HttpGet("MenuGroup/{id}")]
+        [HttpGet("menu-group/{id}")]
         public async Task<IActionResult> Get(string id)
         {
              var response = await _blMenuGroup.GetMenuGroup(id);
@@ -38,9 +38,13 @@ namespace HRSystem.Csharp.Api.Controllers
         }
 
 
-        [HttpPut("MenuGroup/{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] MenuGroupRequestModel menuGroup)
+        [HttpPut("menu-group/{id}")]
+        public async Task<IActionResult> Put(string id, [FromBody] MenuGroupUpdateRequestModel menuGroup)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var response = await _blMenuGroup.UpdateMenuGroup(id, menuGroup);
             if(response.IsSuccess)
             {
@@ -49,8 +53,8 @@ namespace HRSystem.Csharp.Api.Controllers
             return BadRequest(response);
         }
         
-        [HttpPost("menugroup")]
-        public async Task<IActionResult> CreateMenuGroupAsync(MenuGroup requestMenuGroup)
+        [HttpPost("menu-group")]
+        public async Task<IActionResult> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
         {
             var result = await _blMenuGroup.CreateMenuGroupAsync(requestMenuGroup);
             if(result.IsSuccess)
@@ -62,7 +66,7 @@ namespace HRSystem.Csharp.Api.Controllers
         }
 
 
-        [HttpDelete("menugroup/{menuGroupCode}")]
+        [HttpDelete("menu-group/{menuGroupCode}")]
         public async Task<IActionResult> DeleteMenuGroup(string menuGroupCode)
         {
             var result = await _blMenuGroup.DeleteMenuGroupAsync(menuGroupCode);

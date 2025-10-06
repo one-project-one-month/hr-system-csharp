@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.Csharp.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/")]
     public class MenuController : ControllerBase
     {
         private readonly BL_Menu _blMenu;
@@ -29,9 +29,13 @@ namespace HRSystem.Csharp.Api.Controllers
         }
 
 
-        [HttpPost("create-menu")]
-        public async Task<IActionResult> CreateMenu(Menu requestMenu)
-        {
+        [HttpPost("menu")]
+        public async Task<IActionResult> CreateMenu([FromBody] MenuRequestModel requestMenu)
+        {   
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var result =await _blMenu.CreateMenuAsync(requestMenu);
             if(result.IsSuccess)
             {
@@ -55,11 +59,15 @@ namespace HRSystem.Csharp.Api.Controllers
         [HttpPut("menu/{id}")]
         public async Task<IActionResult> Put(string id, [FromBody] MenuRequestModel menu)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var result = await _blMenu.UpdateMenu(id, menu);
             return result.IsSuccess ? Ok(result.Data) : BadRequest(result);
         }
 
-        [HttpDelete("delete-menu/{menuCode}")]
+        [HttpDelete("menu/{menuCode}")]
         public async Task<IActionResult> DeleteMenu(string menuCode)
         {
             var result = await _blMenu.DeleteMenuAsync(menuCode);

@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 
 namespace HRSystem.Csharp.Domain.Models
 {
-    public class MenuGroupRequestModel
+    public class MenuGroupUpdateRequestModel
     {
         [Required]
-        public string MenuGroupCode { get; set; } = "";
-        [Required]
-        public string? MenuGroupName { get; set; }
+        public string MenuGroupName { get; set; } = "";
 
         public string? Url { get; set; }
 
@@ -21,6 +19,6 @@ namespace HRSystem.Csharp.Domain.Models
         public int? SortOrder { get; set; }
 
         public bool? HasMenuGroup { get; set; }
-       
     }
 }
+

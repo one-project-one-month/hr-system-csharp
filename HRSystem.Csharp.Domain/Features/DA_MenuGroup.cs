@@ -53,29 +53,42 @@ namespace HRSystem.Csharp.Domain.Features
                 .SingleOrDefaultAsync();
             
         }
+
+  
     
-        public async Task<Result<bool>> UpdateMenuGroup(string menuGroupId, MenuGroupRequestModel menuGroup)
+        public async Task<Result<bool>> UpdateMenuGroup(string menuGroupId, MenuGroupUpdateRequestModel menuGroup)
         {
             try
             {
                 var existingMenuGroup = await _context.TblMenuGroups
                 .Where(mg => mg.MenuGroupId.Equals(menuGroupId) && mg.DeleteFlag == false)
                 .SingleOrDefaultAsync();
+
                 if (existingMenuGroup == null)
                 {
                     return Result<bool>.Error("Menu group not found.");
                 }
-                existingMenuGroup.MenuGroupCode = menuGroup.MenuGroupCode;
+
+                var duplicate = await _context.TblMenuGroups
+                    .AnyAsync(mg => 
+                    mg.MenuGroupName == menuGroup.MenuGroupName 
+                    && menuGroupId != mg.MenuGroupId 
+                    && mg.DeleteFlag == false);
+
+                if (duplicate)
+                { 
+                    return  Result<bool>.DuplicateRecordError("Menu Group Name already exists!");
+                }
                 existingMenuGroup.MenuGroupName = menuGroup.MenuGroupName;
                 existingMenuGroup.Url = menuGroup.Url;
                 existingMenuGroup.Icon = menuGroup.Icon;
                 existingMenuGroup.SortOrder = menuGroup.SortOrder;
                 existingMenuGroup.HasMenuGroup = menuGroup.HasMenuGroup;
                 existingMenuGroup.ModifiedAt = DateTime.UtcNow;
-                //existingMenuGroup.ModifiedBy = menuGroup.ModifiedBy;
+                //existingMenuGroup.ModifiedBy = logginedUser;
                 _context.Update(existingMenuGroup);
-                await _context.SaveChangesAsync();
-                return Result<bool>.Success(true);
+                var count = await _context.SaveChangesAsync();
+                return count > 0 ? Result<bool>.Success(true) : Result<bool>.Error("Error occurred while updating MenuGroup");
             }
             catch (Exception ex)
             {
@@ -85,7 +98,7 @@ namespace HRSystem.Csharp.Domain.Features
         }
     
 
-        public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroup requestMenuGroup)
+        public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
         {
             try
             {
@@ -101,7 +114,7 @@ namespace HRSystem.Csharp.Domain.Features
                 // create new
                 var menuGroup = new TblMenuGroup
                 {
-                    MenuGroupId = Guid.NewGuid().ToString(),
+                    MenuGroupId = Ulid.NewUlid().ToString(),
                     MenuGroupCode = requestMenuGroup.MenuGroupCode,
                     MenuGroupName = requestMenuGroup.MenuGroupName,
                     Url = requestMenuGroup.Url,
@@ -109,7 +122,7 @@ namespace HRSystem.Csharp.Domain.Features
                     SortOrder = requestMenuGroup.SortOrder,
                     HasMenuGroup = requestMenuGroup.HasMenuGroup,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = requestMenuGroup.CreatedBy,
+                    //CreatedBy = loggedIn User,
                     DeleteFlag = false,
                 };
                 await _context.AddAsync(menuGroup);
