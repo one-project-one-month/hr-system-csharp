@@ -10,16 +10,20 @@ namespace HRSystem.Csharp.Domain
             #region User Management BL
 
             builder.Services.AddScoped<BL_Role>();
+            builder.Services.AddScoped<BL_Menu>();
+            builder.Services.AddScoped<BL_MenuGroup>();
 
             #endregion
 
             #region User Management DA
 
             builder.Services.AddScoped<DA_Role>();
+            builder.Services.AddScoped<DA_Menu>(); 
+            builder.Services.AddScoped<DA_MenuGroup>();
 
             #endregion
         }
-        
+
         public static void AddDomain(this WebApplicationBuilder builder)
         {
             builder.Services.AddDbContext<AppDbContext>(opt =>

@@ -44,12 +44,9 @@ namespace HRSystem.Csharp.Domain.Features
             }
         }
 
-        public async Task<Result<Menu>> GetMenu(string menuId)
+        public async Task<Menu?> GetMenuById(string menuId)
         {
-            try
-            {
-
-                Menu? menu = await _dbContext.TblMenus
+            return await _dbContext.TblMenus
                     .Where(m => m.MenuId.Equals(menuId) && m.DeleteFlag == false)
                     .Select(m => new Menu
                     {
@@ -63,100 +60,51 @@ namespace HRSystem.Csharp.Domain.Features
                         ModifiedAt = m.ModifiedAt,
 
                     }).SingleOrDefaultAsync();
-
-                if (menu == null)
-                {
-                    return Result<Menu>.NotFoundError("Menu not found.");
-                }
-                return Result<Menu>.Success(menu);
-            }
-            catch (Exception ex)
-            {
-                return Result<Menu>.Error($"An error occurred while retrieving menus: {ex.Message}");
-            }
-
         }
 
-        public async Task<Result<Menu>> CreateMenu(MenuCreateModel menu)
+        public async Task<Menu?> GetMenuByCode(string menuCode)
         {
-            var menugroup = await _dbContext.TblMenuGroups
-                .Where(mg => mg.MenuGroupCode.Equals(menu.MenuGroupCode) && mg.DeleteFlag == false)
-                .FirstOrDefaultAsync();
-
-            if(menugroup == null)
-            {
-                return Result<Menu>.Error("Menu group not found.");
-            }
-
-            _dbContext.TblMenus.Add(new TblMenu
-            {
-                MenuId = Ulid.NewUlid().ToString(),
-                MenuCode= menu.MenuCode,
-                MenuName = menu.MenuName,
-                MenuGroupCode = menu.MenuGroupCode,
-                Url = menu.Url,
-                Icon = menu.Icon,
-                SortOrder = menu.SortOrder,
-                CreatedAt = DateTime.Now,
-                ModifiedAt = DateTime.Now,
-                DeleteFlag = false
-            });
-            await _dbContext.SaveChangesAsync();
-            return Result<Menu>.Success(new Menu
-            {
-                MenuName = menu.MenuName,
-                MenuCode = menu.MenuCode,
-                MenuGroupCode = menu.MenuGroupCode,
-                Url = menu.Url,
-                Icon = menu.Icon,
-                SortOrder = menu.SortOrder,
-                CreatedAt = DateTime.Now,
-                ModifiedAt = DateTime.Now,
-            });
-        }
-
-        public async Task<Result<bool>> MenuExists(string menuCode)
-        {
-            var result =  await _dbContext.TblMenus.AnyAsync(m => m.MenuCode.Equals(menuCode) && m.DeleteFlag == false);
-            return Result<bool>.Success(result);
-        }
-
-        public async Task<Result<bool>> UpdateMenu(string menuId, MenuCreateModel menu)
-        {
-            var result = await _dbContext.TblMenus
-                .Where(m => m.MenuId.Equals(menuId) && m.DeleteFlag == false)
-                .SingleOrDefaultAsync();
-
-            if (result == null)
-            { 
-                return Result<bool>.NotFoundError(); 
-            }
-
-            result.MenuName = menu.MenuName;
-            result.MenuCode = menu.MenuCode;
-            result.MenuGroupCode = menu.MenuGroupCode;
-            result.Url = menu.Url;
-            result.Icon = menu.Icon;
-            result.SortOrder = menu.SortOrder;
-            _dbContext.TblMenus.Update(result);
-            await _dbContext.SaveChangesAsync();
-
-            return Result<bool>.Success(true);
+            return await _dbContext.TblMenus
+                    .Where(m => m.MenuCode.Equals(menuCode) && m.DeleteFlag == false)
+                    .Select(m => new Menu
+                    {
+                        MenuId = m.MenuId,
+                        MenuName = m.MenuName,
+                        MenuCode = m.MenuCode,
+                        MenuGroupCode = m.MenuGroupCode,
+                        Url = m.Url,
+                        Icon = m.Icon,
+                        CreatedAt = m.CreatedAt,
+                        ModifiedAt = m.ModifiedAt,
+                    }).SingleOrDefaultAsync();
 
         }
-        public async Task<Result<bool>> DeleteMenu(string menuId)
+        public async Task<bool> CreateMenu(TblMenu menu)
         {
-            var result = await _dbContext.TblMenus
-                .Where(m => m.MenuId.Equals(menuId) && m.DeleteFlag == false)
-                .SingleOrDefaultAsync();
-            if (result == null)
-            {
-                return Result<bool>.NotFoundError();
-            }
-            result.DeleteFlag = true;
-            _dbContext.TblMenus.Update(result);
-            await _dbContext.SaveChangesAsync();
-            return Result<bool>.Success(true);
+            
+            _dbContext.TblMenus.Add(menu);
+            int rows = await _dbContext.SaveChangesAsync();
+            return rows > 0;
+        }
+
+        public async Task<bool> MenuExists(string menuCode)
+        {
+            return await _dbContext.TblMenus.AnyAsync(m => m.MenuCode.Equals(menuCode) && m.DeleteFlag == false);
+           
+        }
+
+        public async Task<bool> UpdateMenu(TblMenu menu)
+        {
+            
+            _dbContext.TblMenus.Update(menu);
+            int rows = await _dbContext.SaveChangesAsync();
+            return rows > 0;
+        }
+        public async Task<bool> DeleteMenu(TblMenu menu)
+        {
+            _dbContext.TblMenus.Update(menu);
+            int rows = await _dbContext.SaveChangesAsync();
+            return rows > 0;
         }
     }
 }

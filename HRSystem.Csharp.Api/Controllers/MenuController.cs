@@ -38,7 +38,7 @@ namespace HRSystem.Csharp.Api.Controllers
         }
 
         [HttpPost("menu")]
-        public async Task<IActionResult> Post([FromBody] MenuCreateModel menu)
+        public async Task<IActionResult> Post([FromBody] MenuRequestModel menu)
         {
             var result = await _blMenu.CreateMenu(menu);
             if (result.IsSuccess)
@@ -49,7 +49,7 @@ namespace HRSystem.Csharp.Api.Controllers
         }
 
         [HttpPut("menu/{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] MenuCreateModel menu)
+        public async Task<IActionResult> Put(string id, [FromBody] MenuRequestModel menu)
         {
             var result = await _blMenu.UpdateMenu(id, menu);
             return result.IsSuccess ? Ok(result.Data) : BadRequest(result);
