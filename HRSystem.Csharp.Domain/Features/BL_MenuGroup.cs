@@ -1,11 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Models;
 using HRSystem.Csharp.Shared;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace HRSystem.Csharp.Domain.Features
 {
@@ -61,13 +56,34 @@ namespace HRSystem.Csharp.Domain.Features
 
         }
 
-        public async Task<Result<bool>> DeleteMenuGroup(string menuGroupId)
+        
+
+        public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroup requestMenuGroup)
         {
-            if(menuGroupId == null || menuGroupId == "")
+            if(requestMenuGroup.MenuGroupCode is null)
             {
-                return Result<bool>.BadRequestError("MenuGroupId is required.");
+                return Result<TblMenuGroup>.BadRequestError("MenuGroupCode cannot be null");
             }
-            return await _daMenuGroup.DeleteMenuGroup(menuGroupId);
+
+            if(requestMenuGroup is null)
+            {
+                return Result<TblMenuGroup>.BadRequestError("Request MenuGroup cannot be null");
+            }
+
+
+            var response = await _daMenuGroup.CreateMenuGroupAsync(requestMenuGroup);
+            return response;
+        }
+
+
+        public async Task<Result<TblMenuGroup>> DeleteMenuGroupAsync(string menuGroupCode)
+        {
+            if(menuGroupCode is null)
+            {
+                return Result<TblMenuGroup>.BadRequestError("Menu Group Code is required.");
+            }
+            var response = await _daMenuGroup.DeleteMenuGroup(menuGroupCode);
+            return response;
         }
     }
 }

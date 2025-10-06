@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
+
+
 namespace HRSystem.Csharp.Api.Controllers
 {
-    [Route("api/")]
-    [ApiController]
+    [Route("api/[controller]")]
     public class MenuController : ControllerBase
     {
         private readonly BL_Menu _blMenu;
@@ -15,6 +16,7 @@ namespace HRSystem.Csharp.Api.Controllers
         {
             _blMenu = blMenu;
         }
+
         [HttpGet("menus")]
         public async Task<IActionResult> Get()
         {
@@ -22,6 +24,18 @@ namespace HRSystem.Csharp.Api.Controllers
             if (result.IsSuccess)
             {
                 return Ok(result.Data);
+            }
+            return BadRequest(result);
+        }
+
+
+        [HttpPost("create-menu")]
+        public async Task<IActionResult> CreateMenu(Menu requestMenu)
+        {
+            var result =await _blMenu.CreateMenuAsync(requestMenu);
+            if(result.IsSuccess)
+            {
+                return Ok(result);
             }
             return BadRequest(result);
         }
@@ -37,16 +51,6 @@ namespace HRSystem.Csharp.Api.Controllers
             return BadRequest(result);
         }
 
-        [HttpPost("menu")]
-        public async Task<IActionResult> Post([FromBody] MenuRequestModel menu)
-        {
-            var result = await _blMenu.CreateMenu(menu);
-            if (result.IsSuccess)
-            {
-                return Ok(result.Data);
-            }
-            return BadRequest(result);
-        }
 
         [HttpPut("menu/{id}")]
         public async Task<IActionResult> Put(string id, [FromBody] MenuRequestModel menu)
@@ -55,11 +59,15 @@ namespace HRSystem.Csharp.Api.Controllers
             return result.IsSuccess ? Ok(result.Data) : BadRequest(result);
         }
 
-        [HttpDelete("menu/{id}")]
-        public async Task<IActionResult> Delete(string id)
+        [HttpDelete("delete-menu/{menuCode}")]
+        public async Task<IActionResult> DeleteMenu(string menuCode)
         {
-            var result = await _blMenu.DeleteMenu(id);
-            return result.IsSuccess ? Ok(result.Data) : BadRequest(result);
+            var result = await _blMenu.DeleteMenuAsync(menuCode);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
         }
     }
 }

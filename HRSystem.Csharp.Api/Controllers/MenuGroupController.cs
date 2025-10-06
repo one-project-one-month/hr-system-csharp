@@ -37,16 +37,6 @@ namespace HRSystem.Csharp.Api.Controllers
             return BadRequest(response);
         }
 
-        [HttpPost("MenuGroup")]
-        public async Task<IActionResult> Post([FromBody] MenuGroupRequestModel menuGroup)
-        {
-            var response = await _blMenuGroup.CreateMenuGroup(menuGroup);
-            if (response.IsSuccess)
-            {
-                return Ok(response.Data);
-            }
-            return BadRequest(response);
-        }
 
         [HttpPut("MenuGroup/{id}")]
         public async Task<IActionResult> Put(string id, [FromBody] MenuGroupRequestModel menuGroup)
@@ -58,16 +48,29 @@ namespace HRSystem.Csharp.Api.Controllers
             }   
             return BadRequest(response);
         }
-
-        [HttpDelete("MenuGroup/{id}")]
-        public async Task<IActionResult> Delete(string id)
+        
+        [HttpPost("menugroup")]
+        public async Task<IActionResult> CreateMenuGroupAsync(MenuGroup requestMenuGroup)
         {
-            var response = await _blMenuGroup.DeleteMenuGroup(id);
-            if (response.IsSuccess)
+            var result = await _blMenuGroup.CreateMenuGroupAsync(requestMenuGroup);
+            if(result.IsSuccess)
             {
-                return Ok(response.Data);
+                return Ok(result);
             }
-            return BadRequest(response);    
+
+            return BadRequest(result);
+        }
+
+
+        [HttpDelete("menugroup/{menuGroupCode}")]
+        public async Task<IActionResult> DeleteMenuGroup(string menuGroupCode)
+        {
+            var result = await _blMenuGroup.DeleteMenuGroupAsync(menuGroupCode);
+            if(result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
         }
     }
 }
