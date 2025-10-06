@@ -23,6 +23,7 @@ namespace HRSystem.Csharp.Domain.Features
 
         public async Task<Result<List<Menu>>> GetAllMenus()
         {
+
             return await _daMenu.GetAllMenus();
         }
 
@@ -43,7 +44,14 @@ namespace HRSystem.Csharp.Domain.Features
             {
                 return Result<bool>.NotFoundError();
             }
-            TblMenu creatingMenu = new TblMenu
+
+            var duplicateMenu = await _daMenu.MenuExists(menuId, menu);
+            if (duplicateMenu)
+            {
+                return Result<bool>.DuplicateRecordError("Menu with that MenuCode or MenuName is existed");
+            }
+
+            TblMenu updatingMenu = new TblMenu
             {
                 MenuId = menuId,
                 MenuCode = menu.MenuCode,
@@ -56,7 +64,7 @@ namespace HRSystem.Csharp.Domain.Features
                 //ModifiedBy = menu.ModifiedBy,
             };
             
-            await _daMenu.UpdateMenu(creatingMenu);
+            await _daMenu.UpdateMenu(updatingMenu);
             return Result<bool>.Success(true);
         }
 

@@ -10,11 +10,11 @@ namespace HRSystem.Csharp.Domain.Models
     public class MenuRequestModel
     {
         [Required]
-        public string MenuGroupCode { get; set; } = "";
+        public required string MenuGroupCode { get; set; } = "";
         [Required]
-        public string MenuCode { get; set; } = "";
+        public required string MenuCode { get; set; } = "";
         [Required]
-        public string MenuName { get; set; } = "";
+        public required string MenuName { get; set; } = "";
         public string? Url { get; set; }
         public string? Icon { get; set; }
         public int? SortOrder { get; set; }

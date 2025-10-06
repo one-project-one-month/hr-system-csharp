@@ -53,59 +53,35 @@ namespace HRSystem.Csharp.Domain.Features
                 .SingleOrDefaultAsync();
             
         }
-   
-        public async Task<Result<MenuGroup>> CreateMenuGroup(MenuGroupRequestModel menuGroup)
-        {
-            var newMenuGroup = new TblMenuGroup
-            {
-                MenuGroupId = Ulid.NewUlid().ToString(),
-                MenuGroupCode = menuGroup.MenuGroupCode,
-                MenuGroupName = menuGroup.MenuGroupName,
-                Url = menuGroup.Url,
-                Icon = menuGroup.Icon,
-                SortOrder = menuGroup.SortOrder,
-                HasMenuGroup = menuGroup.HasMenuGroup,
-                CreatedAt = DateTime.UtcNow,
-                //CreatedBy = menuGroup.CreatedBy,
-                DeleteFlag = false
-            };
-            _context.TblMenuGroups.Add(newMenuGroup);
-            await _context.SaveChangesAsync();
-            var createdMenuGroup = new MenuGroup
-            {
-                MenuGroupId = newMenuGroup.MenuGroupId,
-                MenuGroupCode = newMenuGroup.MenuGroupCode,
-                MenuGroupName = newMenuGroup.MenuGroupName,
-                Url = newMenuGroup.Url,
-                Icon = newMenuGroup.Icon,
-                SortOrder = newMenuGroup.SortOrder,
-                HasMenuGroup = newMenuGroup.HasMenuGroup,
-                CreatedAt = newMenuGroup.CreatedAt,
-                CreatedBy = newMenuGroup.CreatedBy
-            };
-            return Result<MenuGroup>.Success(createdMenuGroup);
-        }
     
         public async Task<Result<bool>> UpdateMenuGroup(string menuGroupId, MenuGroupRequestModel menuGroup)
         {
-            var existingMenuGroup = await _context.TblMenuGroups
+            try
+            {
+                var existingMenuGroup = await _context.TblMenuGroups
                 .Where(mg => mg.MenuGroupId.Equals(menuGroupId) && mg.DeleteFlag == false)
                 .SingleOrDefaultAsync();
-            if (existingMenuGroup == null)
-            {
-                return Result<bool>.Error("Menu group not found.");
+                if (existingMenuGroup == null)
+                {
+                    return Result<bool>.Error("Menu group not found.");
+                }
+                existingMenuGroup.MenuGroupCode = menuGroup.MenuGroupCode;
+                existingMenuGroup.MenuGroupName = menuGroup.MenuGroupName;
+                existingMenuGroup.Url = menuGroup.Url;
+                existingMenuGroup.Icon = menuGroup.Icon;
+                existingMenuGroup.SortOrder = menuGroup.SortOrder;
+                existingMenuGroup.HasMenuGroup = menuGroup.HasMenuGroup;
+                existingMenuGroup.ModifiedAt = DateTime.UtcNow;
+                //existingMenuGroup.ModifiedBy = menuGroup.ModifiedBy;
+                _context.Update(existingMenuGroup);
+                await _context.SaveChangesAsync();
+                return Result<bool>.Success(true);
             }
-            existingMenuGroup.MenuGroupCode = menuGroup.MenuGroupCode;
-            existingMenuGroup.MenuGroupName = menuGroup.MenuGroupName;
-            existingMenuGroup.Url = menuGroup.Url;  
-            existingMenuGroup.Icon = menuGroup.Icon;
-            existingMenuGroup.SortOrder = menuGroup.SortOrder;
-            existingMenuGroup.HasMenuGroup = menuGroup.HasMenuGroup;
-            existingMenuGroup.ModifiedAt = DateTime.UtcNow;
-            //existingMenuGroup.ModifiedBy = menuGroup.ModifiedBy;
-            _context.Update(existingMenuGroup);
-            await _context.SaveChangesAsync();
-            return Result<bool>.Success(true);
+            catch (Exception ex)
+            {
+                return Result<bool>.Error($"An error occured while updating MenuGroup: ${ex.Message}");
+            }
+
         }
     
 
@@ -188,7 +164,7 @@ namespace HRSystem.Csharp.Domain.Features
             catch (Exception ex)
             {
                 {
-                    return Result<TblMenuGroup>.Error($"An error occured while retrieving roles: {ex.Message}");
+                    return Result<TblMenuGroup>.Error($"An error occured while deleting menugroups: {ex.Message}");
                 }
             }
 

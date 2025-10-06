@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,11 +9,12 @@ namespace HRSystem.Csharp.Domain.Models
 {
     public class MenuGroup
     {
+        [Required]
         public string MenuGroupId { get; set; } = null!;
-
+        [Required]
         public string MenuGroupCode { get; set; } = null!;
-
-        public string? MenuGroupName { get; set; }
+        [Required]
+        public string MenuGroupName { get; set; } = null!;
 
         public string? Url { get; set; }
 

@@ -31,18 +31,6 @@ namespace HRSystem.Csharp.Domain.Features
             return Result<MenuGroup>.Success(menuGroup);
         }
 
-        public async Task<Result<MenuGroup>> CreateMenuGroup(MenuGroupRequestModel menuGroup)
-        {
-            return (menuGroup) switch
-            {
-                (null) => Result<MenuGroup>.BadRequestError("MenuGroup Data is required!"),
-                ({ MenuGroupCode: null or "" }) => Result<MenuGroup>.BadRequestError("MenuGroupCode is required!"),
-                ({ MenuGroupName: null or "" }) => Result<MenuGroup>.BadRequestError("MenuGroupName is required!"),
-                (_) => await _daMenuGroup.CreateMenuGroup(menuGroup)
-            };
-          
-        }
-
         public async Task<Result<bool>> UpdateMenuGroup(string menuGroupId, MenuGroupRequestModel menuGroup)
         {
             return (menuGroupId, menuGroup) switch
@@ -55,9 +43,7 @@ namespace HRSystem.Csharp.Domain.Features
             };
 
         }
-
         
-
         public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroup requestMenuGroup)
         {
             if(requestMenuGroup.MenuGroupCode is null)

@@ -1,6 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Models;
 using HRSystem.Csharp.Shared;
 using NUlid;
+using System.Text.RegularExpressions;
 
 
 namespace HRSystem.Csharp.Domain.Features
@@ -18,20 +19,25 @@ namespace HRSystem.Csharp.Domain.Features
             try
             {
                 var menus = await _dbContext.TblMenus
-                    .Where(m => m.DeleteFlag == false)
+                    .Join(_dbContext.TblMenuGroups,
+                    menu => menu.MenuGroupCode,
+                    menuGroup => menuGroup.MenuGroupCode,
+                    (menu, menuGroup) => new { menu, menuGroup })
+                    .Where(m => m.menu.DeleteFlag == false && m.menuGroup.DeleteFlag == false)
                     .Select(m => new Menu
                     {
-                        MenuId = m.MenuId,
-                        MenuName = m.MenuName,
-                        MenuCode = m.MenuCode,
-                        MenuGroupCode = m.MenuGroupCode,
-                        Url = m.Url,
-                        Icon = m.Icon,
-                        CreatedAt = m.CreatedAt,
-                        ModifiedAt = m.ModifiedAt,
-                        SortOrder = m.SortOrder,
+                        MenuId = m.menu.MenuId,
+                        MenuName = m.menu.MenuName,
+                        MenuCode = m.menu.MenuCode,
+                        MenuGroupCode = m.menu.MenuGroupCode,
+                        Url = m.menu.Url,
+                        Icon = m.menu.Icon,
+                        CreatedAt = m.menu.CreatedAt,
+                        ModifiedAt = m.menu.ModifiedAt,
+                        SortOrder = m.menu.SortOrder,
                     })
                     .ToListAsync();
+               
                 return Result<List<Menu>>.Success(menus);
             }
             catch (Exception ex)
@@ -43,53 +49,47 @@ namespace HRSystem.Csharp.Domain.Features
         public async Task<Menu?> GetMenuById(string menuId)
         {
             return await _dbContext.TblMenus
-                    .Where(m => m.MenuId.Equals(menuId) && m.DeleteFlag == false)
+                    .Join(_dbContext.TblMenuGroups,
+                    menu => menu.MenuGroupCode, 
+                    menuGroup => menuGroup.MenuGroupCode,
+                    (menu, menuGroup) => new { menu, menuGroup })
+                    .Where(m => m.menu.MenuId.Equals(menuId) && m.menu.DeleteFlag == false && m.menuGroup.DeleteFlag == false)
                     .Select(m => new Menu
                     {
-                        MenuId = m.MenuId,
-                        MenuName = m.MenuName,
-                        MenuCode = m.MenuCode,
-                        MenuGroupCode = m.MenuGroupCode,
-                        Url = m.Url,
-                        Icon = m.Icon,
-                        CreatedAt = m.CreatedAt,
-                        ModifiedAt = m.ModifiedAt,
+                        MenuId = m.menu.MenuId,
+                        MenuName = m.menu.MenuName,
+                        MenuCode = m.menu.MenuCode,
+                        MenuGroupCode = m.menu.MenuGroupCode,
+                        Url = m.menu.Url,
+                        Icon = m.menu.Icon,
+                        CreatedAt = m.menu.CreatedAt,
+                        ModifiedAt = m.menu.ModifiedAt,
 
                     }).SingleOrDefaultAsync();
         }
 
-        public async Task<Menu?> GetMenuByCode(string menuCode)
+        public async Task<bool> MenuExists(string menuId, MenuRequestModel menu)
         {
-            return await _dbContext.TblMenus
-                    .Where(m => m.MenuCode.Equals(menuCode) && m.DeleteFlag == false)
-                    .Select(m => new Menu
-                    {
-                        MenuId = m.MenuId,
-                        MenuName = m.MenuName,
-                        MenuCode = m.MenuCode,
-                        MenuGroupCode = m.MenuGroupCode,
-                        Url = m.Url,
-                        Icon = m.Icon,
-                        CreatedAt = m.CreatedAt,
-                        ModifiedAt = m.ModifiedAt,
-                    }).SingleOrDefaultAsync();
+            return await (
+                from m in _dbContext.TblMenus
+                join g in _dbContext.TblMenuGroups on m.MenuGroupCode equals g.MenuGroupCode
+                where
+                m.MenuId != menuId &&
+                (m.MenuCode == menu.MenuCode || m.MenuName == menu.MenuName) &&
+                m.DeleteFlag == false && g.DeleteFlag == false &&
+                m.MenuGroupCode == menu.MenuGroupCode
+                select m).AnyAsync();
 
-        }
-       
-        public async Task<bool> MenuExists(string menuCode)
-        {
-            return await _dbContext.TblMenus.AnyAsync(m => m.MenuCode.Equals(menuCode) && m.DeleteFlag == false);
-           
         }
 
         public async Task<bool> UpdateMenu(TblMenu menu)
         {
-            
+
             _dbContext.TblMenus.Update(menu);
             int rows = await _dbContext.SaveChangesAsync();
             return rows > 0;
         }
-       
+
         public async Task<Result<TblMenu>> CreateMenuAsync(Menu requestMenu)
         {
             try
@@ -123,7 +123,8 @@ namespace HRSystem.Csharp.Domain.Features
                     return Result<TblMenu>.Error("Failed to create Menu.");
                 }
                 return Result<TblMenu>.Success(menu);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Result<TblMenu>.Error($"An error is occured while creating Menu: {ex.Message}");
             }
@@ -151,7 +152,8 @@ namespace HRSystem.Csharp.Domain.Features
                 }
                 return Result<TblMenu>.Success(foundMenu);
 
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Result<TblMenu>.Error($"An error is occured while deleting the menu: {ex.Message}");
             }
