@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HRSystem.Csharp.Domain.Models
+namespace HRSystem.Csharp.Domain.Models.Attendance
 {
     public class AttendanceListResponseModel
     {
         public List<AttendanceListModel> AttendanceList { get; set; } = new List<AttendanceListModel>();
     }
 
-        public class AttendanceListModel
+    public class AttendanceListModel
     {
         public Guid AttendanceId { get; set; }
 

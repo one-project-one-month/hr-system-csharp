@@ -1,4 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models;
+﻿using HRSystem.Csharp.Domain.Models.Attendance;
 using HRSystem.Csharp.Shared;
 using System;
 using System.Collections.Generic;
