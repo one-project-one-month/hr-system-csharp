@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Models.Task;
 using HRSystem.Csharp.Shared;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,6 +72,36 @@ public class DA_Task
         catch (Exception ex)
         {
             return Result<TaskCreateResponseModel>.SystemError(ex.Message);
+        }
+    }
+
+    public async Task<Result<TaskDeleteResponseModel>> Delete(string taskId)
+    {
+        if (taskId.IsNullOrEmpty())
+        {
+            return Result<TaskDeleteResponseModel>.BadRequestError("TaskId is required.");
+        }
+
+        try
+        {
+            var task = await _db.TblTasks.FirstOrDefaultAsync(t => t.TaskId.ToString() == taskId && t.DeleteFlag == false);
+
+            if (task is null)
+            {
+                return Result<TaskDeleteResponseModel>.NotFoundError("Task not found.");
+            }
+
+            task.DeleteFlag = true;
+            task.ModifiedAt = DateTime.UtcNow;
+            _db.Entry(task).State = EntityState.Modified;
+            _db.SaveChanges();
+
+            return Result<TaskDeleteResponseModel>.Success(null, "Task is deleted successfully.");
+        }
+
+        catch (Exception ex)
+        {
+            return Result<TaskDeleteResponseModel>.SystemError(ex.Message);
         }
     }
 }

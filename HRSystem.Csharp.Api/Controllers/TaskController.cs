@@ -28,4 +28,11 @@ public class TaskController : ControllerBase
         var result = await _blTask.CreateAsync(requestModel);
         return Ok(result);
     }
+
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteAsync(string taskId)
+    {
+        var result = await _blTask.DeleteAsync(taskId);
+        return Ok(result);
+    }
 }
