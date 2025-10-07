@@ -1,5 +1,7 @@
-﻿using HRSystem.Csharp.Domain.Models;
+﻿using HRSystem.Csharp.Domain.Models.Attendance;
 using HRSystem.Csharp.Shared;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,7 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             _db = appDbContext;
         }
 
-        public async Task<Result<AttendanceListResponseModel>> GetAllAttendances()
+        public async Task<Result<AttendanceListResponseModel>> List()
         {
             try
             {
@@ -42,9 +44,63 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                 return Result<AttendanceListResponseModel>.SystemError(ex.Message);
                
             }
-
-            
-
         }
+
+        public Result<AttendanceCreateResponseModel> Create(AttendanceCreateRequestModel requestModel) 
+        {
+            if(requestModel.EmployeeCode.IsNullOrEmpty())
+            {
+                return Result<AttendanceCreateResponseModel>.ValidationError("Employee Code is required!");
+            }
+
+            if (requestModel.AttendanceDate.HasValue)
+            {
+                return Result<AttendanceCreateResponseModel>.ValidationError("Attendance Date is required!");
+            }
+
+            if (requestModel.CheckInTime.HasValue)
+            {
+                return Result<AttendanceCreateResponseModel>.ValidationError("CheckIn Time is required!");
+            }
+
+            if (requestModel.CheckInLocation.IsNullOrEmpty())
+            {
+                return Result<AttendanceCreateResponseModel>.ValidationError("CheckIn Location is required!");
+            }
+
+            try
+            {
+
+                var newAttendance = new TblAttendance()
+                {
+                    AttendanceId = Ulid.NewUlid().ToString(),
+                    AttendanceCode = 
+                    EmployeeCode = 
+                    AttendanceDate =
+                    CheckInTime =
+                    CheckInLocation =
+                    CheckOutTime =
+                    CheckOutLocation =
+                    WorkingHour =
+                    HourLateFlag =
+                    HalfDayFlag =
+                    FullDayFlag =
+                    Remark =
+                    IsSavedLocation =
+                    CreatedBy =
+                    CreatedAt =
+                    DeleteFlag =
+                };
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
+
+
     }
 }

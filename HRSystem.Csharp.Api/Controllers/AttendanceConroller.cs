@@ -18,7 +18,7 @@ namespace HRSystem.Csharp.Api.Controllers
         [HttpGet("AttendanceList")]
         public async Task<IActionResult> AttendanceLists()
         {
-            var data = await _bL_Attendance.GetAllAttendances();
+            var data = await _bL_Attendance.List();
             return Ok(data);
         }
     }

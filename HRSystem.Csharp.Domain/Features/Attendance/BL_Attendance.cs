@@ -1,4 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models;
+﻿using HRSystem.Csharp.Domain.Models.Attendance;
 using HRSystem.Csharp.Shared;
 using System;
 using System.Collections.Generic;
@@ -17,9 +17,9 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             _attendance = attendance;
         }
 
-        public async Task<Result<AttendanceListResponseModel>> GetAllAttendances()
+        public async Task<Result<AttendanceListResponseModel>> List()
         {
-            var data = await _attendance.GetAllAttendances();
+            var data = await _attendance.List();
             return data;
         }
     }
