@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HRSystem.Csharp.Domain.Models
 {
-    public class Menu
+    public class MenuRequestModel
     {
         public string MenuCode { get; set; } = null!;
 

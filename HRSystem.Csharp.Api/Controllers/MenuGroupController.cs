@@ -17,8 +17,8 @@ namespace HRSystem.Csharp.Api.Controllers
         }
 
 
-        [HttpPost("create-menugroup")]
-        public async Task<IActionResult> CreateMenuGroupAsync(MenuGroup requestMenuGroup)
+        [HttpPost("menu-group")]
+        public async Task<IActionResult> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
         {
             var result = await _blMenuGroup.CreateMenuGroupAsync(requestMenuGroup);
             if(result.IsSuccess)
@@ -30,7 +30,7 @@ namespace HRSystem.Csharp.Api.Controllers
         }
 
 
-        [HttpDelete("delete-menugroup/{menuGroupCode}")]
+        [HttpDelete("menu-group/{menuGroupCode}")]
         public async Task<IActionResult> DeleteMenuGroup(string menuGroupCode)
         {
             var result = await _blMenuGroup.DeleteMenuGroupAsync(menuGroupCode);

@@ -17,16 +17,16 @@ namespace HRSystem.Csharp.Domain.Features
             _daMenu = daMenu;
         }
 
-        public async Task<Result<TblMenu>> CreateMenuAsync(Menu requestMenu)
+        public async Task<Result<TblMenu>> CreateMenuAsync(MenuRequestModel requestMenu)
         {
-            if(requestMenu.MenuCode is null)
+            if(requestMenu.MenuCode is null || string.IsNullOrWhiteSpace(requestMenu.MenuCode))
             {
-                return Result<TblMenu>.BadRequestError("MenuCode is required.");
+                return Result<TblMenu>.BadRequestError("MenuCode cannot be empty.");
             }
 
-            if(requestMenu.MenuGroupCode is null)
+            if(requestMenu.MenuGroupCode is null || string.IsNullOrWhiteSpace(requestMenu.MenuGroupCode))
             {
-                return Result<TblMenu>.BadRequestError("MenuGroupCode is required.");
+                return Result<TblMenu>.BadRequestError("MenuGroupCode cannot be empty.");
             }
 
             if(requestMenu is null)

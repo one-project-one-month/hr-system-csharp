@@ -18,8 +18,8 @@ namespace HRSystem.Csharp.Api.Controllers
         }
 
 
-        [HttpPost("create-menu")]
-        public async Task<IActionResult> CreateMenu(Menu requestMenu)
+        [HttpPost("menu")]
+        public async Task<IActionResult> CreateMenu(MenuRequestModel requestMenu)
         {
             var result =await _blMenu.CreateMenuAsync(requestMenu);
             if(result.IsSuccess)
@@ -29,7 +29,7 @@ namespace HRSystem.Csharp.Api.Controllers
             return BadRequest(result);
         }
 
-        [HttpDelete("delete-menu/{menuCode}")]
+        [HttpDelete("menu/{menuCode}")]
         public async Task<IActionResult> DeleteMenu(string menuCode)
         {
             var result = await _blMenu.DeleteMenuAsync(menuCode);

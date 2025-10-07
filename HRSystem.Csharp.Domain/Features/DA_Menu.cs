@@ -17,7 +17,7 @@ namespace HRSystem.Csharp.Domain.Features
             _appDbContext = appDbContext;
         }
 
-        public async Task<Result<TblMenu>> CreateMenuAsync(Menu requestMenu)
+        public async Task<Result<TblMenu>> CreateMenuAsync(MenuRequestModel requestMenu)
         {
             try
             {
@@ -31,7 +31,7 @@ namespace HRSystem.Csharp.Domain.Features
                 // create new
                 var menu = new TblMenu
                 {
-                    MenuId = Guid.NewGuid().ToString(),
+                    MenuId = Ulid.NewUlid().ToString(),
                     MenuCode = requestMenu.MenuCode,
                     MenuName = requestMenu.MenuName,
                     MenuGroupCode = requestMenu.MenuGroupCode,

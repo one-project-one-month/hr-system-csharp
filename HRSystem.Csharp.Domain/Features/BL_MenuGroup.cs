@@ -19,9 +19,9 @@ namespace HRSystem.Csharp.Domain.Features
         }
 
 
-        public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroup requestMenuGroup)
+        public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
         {
-            if(requestMenuGroup.MenuGroupCode is null)
+            if(requestMenuGroup.MenuGroupCode is null || string.IsNullOrWhiteSpace(requestMenuGroup.MenuGroupCode))
             {
                 return Result<TblMenuGroup>.BadRequestError("MenuGroupCode cannot be null");
             }

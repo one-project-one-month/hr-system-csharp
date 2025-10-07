@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HRSystem.Csharp.Domain.Models
 {
-    public class MenuGroup
+    public class MenuGroupRequestModel
     {
 
         public string MenuGroupCode { get; set; } = null!;
@@ -21,6 +21,6 @@ namespace HRSystem.Csharp.Domain.Models
 
         public bool? HasMenuGroup { get; set; }
 
-        public string? CreatedBy { get; set; }
+        //public string? CreatedBy { get; set; }
     }
 }

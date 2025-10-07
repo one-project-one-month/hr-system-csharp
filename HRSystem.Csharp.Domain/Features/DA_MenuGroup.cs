@@ -7,6 +7,8 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
+
+
 namespace HRSystem.Csharp.Domain.Features
 {
     public class DA_MenuGroup
@@ -19,7 +21,7 @@ namespace HRSystem.Csharp.Domain.Features
         }
 
 
-        public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroup requestMenuGroup)
+        public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
         {
             try
             {
@@ -35,7 +37,7 @@ namespace HRSystem.Csharp.Domain.Features
                 // create new
                 var menuGroup = new TblMenuGroup
                 {
-                    MenuGroupId = Guid.NewGuid().ToString(),
+                    MenuGroupId = Ulid.NewUlid().ToString(),
                     MenuGroupCode = requestMenuGroup.MenuGroupCode,
                     MenuGroupName = requestMenuGroup.MenuGroupName,
                     Url = requestMenuGroup.Url,
@@ -43,7 +45,7 @@ namespace HRSystem.Csharp.Domain.Features
                     SortOrder = requestMenuGroup.SortOrder,
                     HasMenuGroup = requestMenuGroup.HasMenuGroup,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = requestMenuGroup.CreatedBy,
+                    //CreatedBy = requestMenuGroup.CreatedBy,
                     DeleteFlag = false,
                 };
                 await _appDbContext.AddAsync(menuGroup);
