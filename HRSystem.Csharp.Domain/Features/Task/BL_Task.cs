@@ -28,4 +28,10 @@ public class BL_Task
         var result = await _daTask.Create(requestModel);
         return result;
     }
+
+    public async Task<Result<TaskDeleteResponseModel>> DeleteAsync(string taskCode)
+    {
+        var result = await _daTask.Delete(taskCode);
+        return result;
+    }
 }
