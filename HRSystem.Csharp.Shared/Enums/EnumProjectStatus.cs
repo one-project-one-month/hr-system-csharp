@@ -1,5 +1,4 @@
-﻿
-namespace HRSystem.Csharp.Shared.Enums;
+﻿namespace HRSystem.Csharp.Shared.Enums;
 
 public enum EnumProjectStatus
 {

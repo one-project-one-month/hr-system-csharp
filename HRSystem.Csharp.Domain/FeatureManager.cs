@@ -1,8 +1,5 @@
-﻿using FluentValidation;
-using HRSystem.Csharp.Domain.Features;
+﻿using HRSystem.Csharp.Domain.Features;
 using HRSystem.Csharp.Domain.Features.Project;
-using HRSystem.Csharp.Domain.Helpers;
-using HRSystem.Csharp.Domain.Models.Project;
 
 namespace HRSystem.Csharp.Domain
 {
@@ -24,14 +21,9 @@ namespace HRSystem.Csharp.Domain
             builder.Services.AddScoped<DA_Project>();
             #endregion
 
-            #region Request Validator
-            builder.Services.AddScoped<IValidator<ProjectCreateRequestModel>, ProjectCreateValidator>();
-            builder.Services.AddScoped<IValidator<ProjectUpdateRequestModel>, ProjectUpdateValidator>();
-            #endregion
-
         }
 
-                public static void AddDomain(this WebApplicationBuilder builder)
+        public static void AddDomain(this WebApplicationBuilder builder)
         {
             builder.Services.AddDbContext<AppDbContext>(opt =>
             {
