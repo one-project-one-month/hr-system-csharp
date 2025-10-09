@@ -75,6 +75,34 @@ public class DA_Task
         }
     }
 
+    public async Task<Result<TaskEditResponseModel>> EditAsync(string taskId)
+    {
+        if (taskId.IsNullOrEmpty())
+        {
+            return Result<TaskEditResponseModel>.BadRequestError("TaskId is required.");
+        }
+        try
+        {
+            var task = await _db.TblTasks.FirstOrDefaultAsync(t => t.TaskId.ToString() == taskId && t.DeleteFlag == false);
+
+            if (task is null)
+            {
+                return Result<TaskEditResponseModel>.NotFoundError("Task not found.");
+            }
+
+            var model = new TaskEditResponseModel()
+            {
+                Tasks = TaskEditModel.FromTblTask(task)
+            };
+
+            return Result<TaskEditResponseModel>.Success(model);
+        }
+        catch (Exception ex)
+        {
+            return Result<TaskEditResponseModel>.SystemError(ex.Message);
+        }
+    }
+
     public async Task<Result<TaskDeleteResponseModel>> Delete(string taskId)
     {
         if (taskId.IsNullOrEmpty())

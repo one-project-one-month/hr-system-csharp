@@ -29,6 +29,13 @@ public class TaskController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("edit")]
+    public async Task<IActionResult> EditAsync(string taskId)
+    {
+        var result = await _blTask.EditAsync(taskId);
+        return Ok(result);
+    }
+
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteAsync(string taskId)
     {

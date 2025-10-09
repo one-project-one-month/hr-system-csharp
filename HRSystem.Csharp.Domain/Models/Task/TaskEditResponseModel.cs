@@ -8,7 +8,7 @@ namespace HRSystem.Csharp.Domain.Models.Task;
 
 public class TaskEditResponseModel
 {
-    public List<TaskModel>? Tasks { get; set; }
+    public TaskEditModel? Tasks { get; set; }
 }
 
 public class TaskEditModel

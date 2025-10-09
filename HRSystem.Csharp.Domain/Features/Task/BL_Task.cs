@@ -29,6 +29,12 @@ public class BL_Task
         return result;
     }
 
+    public async Task<Result<TaskEditResponseModel>> EditAsync(string taskId)
+    {
+        var result = await _daTask.EditAsync(taskId);
+        return result;
+    }
+
     public async Task<Result<TaskDeleteResponseModel>> DeleteAsync(string taskCode)
     {
         var result = await _daTask.Delete(taskCode);
