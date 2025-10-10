@@ -19,6 +19,7 @@ namespace HRSystem.Csharp.Api.Controllers
 
         [HttpGet("menus")]
         public async Task<IActionResult> Get()
+
         {
             var result = await _blMenu.GetAllMenus();
             if (result.IsSuccess)
@@ -27,7 +28,6 @@ namespace HRSystem.Csharp.Api.Controllers
             }
             return BadRequest(result);
         }
-
 
         [HttpPost("menu")]
         public async Task<IActionResult> CreateMenu([FromBody] MenuRequestModel requestMenu)
@@ -44,10 +44,10 @@ namespace HRSystem.Csharp.Api.Controllers
             return BadRequest(result);
         }
 
-        [HttpGet("menu/{id}")]
-        public async Task<IActionResult> Get(string id)
+        [HttpGet("menu/{menuCode}")]
+        public async Task<IActionResult> Get(string menuCode)
         {
-            var result = await _blMenu.GetMenu(id);
+            var result = await _blMenu.GetMenu(menuCode);
             if (result.IsSuccess)
             {
                 return Ok(result.Data);
@@ -55,15 +55,14 @@ namespace HRSystem.Csharp.Api.Controllers
             return BadRequest(result);
         }
 
-
-        [HttpPut("menu/{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] MenuRequestModel menu)
+        [HttpPut("menu/{menuCode}")]
+        public async Task<IActionResult> Put(string menuCode, [FromBody] MenuRequestModel menu)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var result = await _blMenu.UpdateMenu(id, menu);
+            var result = await _blMenu.UpdateMenu(menuCode, menu);
             return result.IsSuccess ? Ok(result.Data) : BadRequest(result);
         }
 

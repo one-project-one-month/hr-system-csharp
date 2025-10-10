@@ -1,16 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Models;
 using HRSystem.Csharp.Shared;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.EntityFrameworkCore;
-using NUlid;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace HRSystem.Csharp.Domain.Features
 {
@@ -28,9 +18,9 @@ namespace HRSystem.Csharp.Domain.Features
             return await _daMenu.GetAllMenus();
         }
 
-        public async Task<Result<Menu>> GetMenu(string menuId)
+        public async Task<Result<Menu>> GetMenu(string menuCode)
         {
-            Menu? menu = await _daMenu.GetMenuById(menuId);
+            Menu? menu = await _daMenu.GetMenuByCode(menuCode);
             if(menu == null)
             {
                 return Result<Menu>.Error("Menu not found.");
@@ -38,15 +28,15 @@ namespace HRSystem.Csharp.Domain.Features
             return Result<Menu>.Success(menu);
         }
 
-        public async Task<Result<bool>> UpdateMenu(string menuId, MenuRequestModel menu)
+        public async Task<Result<bool>> UpdateMenu(string menuCode, MenuRequestModel menu)
         {
-            var result = await _daMenu.GetMenuById(menuId);
+            var result = await _daMenu.GetMenuByCode(menuCode);
             if (result == null)
             {
                 return Result<bool>.NotFoundError();
             }
 
-            var duplicateMenu = await _daMenu.MenuExists(menuId, menu);
+            var duplicateMenu = await _daMenu.MenuExists(menuCode, menu);
             if (duplicateMenu)
             {
                 return Result<bool>.DuplicateRecordError("Menu with that MenuCode or MenuName is existed");
@@ -54,7 +44,7 @@ namespace HRSystem.Csharp.Domain.Features
 
             TblMenu updatingMenu = new TblMenu
             {
-                MenuId = menuId,
+                MenuId = result.MenuId,
                 MenuCode = menu.MenuCode,
                 MenuName = menu.MenuName,
                 MenuGroupCode = menu.MenuGroupCode,
@@ -71,14 +61,14 @@ namespace HRSystem.Csharp.Domain.Features
 
         public async Task<Result<TblMenu>> CreateMenuAsync(MenuRequestModel requestMenu)
         {
-            if(requestMenu.MenuCode is null)
+            if(requestMenu.MenuCode is null || string.IsNullOrWhiteSpace(requestMenu.MenuCode))
             {
-                return Result<TblMenu>.BadRequestError("MenuCode is required.");
+                return Result<TblMenu>.BadRequestError("MenuCode cannot be empty.");
             }
 
-            if(requestMenu.MenuGroupCode is null)
+            if(requestMenu.MenuGroupCode is null || string.IsNullOrWhiteSpace(requestMenu.MenuGroupCode))
             {
-                return Result<TblMenu>.BadRequestError("MenuGroupCode is required.");
+                return Result<TblMenu>.BadRequestError("MenuGroupCode cannot be empty.");
             }
 
             if(requestMenu is null)

@@ -14,7 +14,9 @@ namespace HRSystem.Csharp.Domain.Features
             _dbContext = dbContext;
         }
 
+
         public async Task<Result<List<Menu>>> GetAllMenus()
+
         {
             try
             {
@@ -46,14 +48,14 @@ namespace HRSystem.Csharp.Domain.Features
             }
         }
 
-        public async Task<Menu?> GetMenuById(string menuId)
+        public async Task<Menu?> GetMenuByCode(string menuCode)
         {
             return await _dbContext.TblMenus
                     .Join(_dbContext.TblMenuGroups,
                     menu => menu.MenuGroupCode, 
                     menuGroup => menuGroup.MenuGroupCode,
                     (menu, menuGroup) => new { menu, menuGroup })
-                    .Where(m => m.menu.MenuId.Equals(menuId) && m.menu.DeleteFlag == false && m.menuGroup.DeleteFlag == false)
+                    .Where(m => m.menu.MenuCode.Equals(menuCode) && m.menu.DeleteFlag == false && m.menuGroup.DeleteFlag == false)
                     .Select(m => new Menu
                     {
                         MenuId = m.menu.MenuId,
@@ -68,13 +70,13 @@ namespace HRSystem.Csharp.Domain.Features
                     }).SingleOrDefaultAsync();
         }
 
-        public async Task<bool> MenuExists(string menuId, MenuRequestModel menu)
+        public async Task<bool> MenuExists(string menuCode, MenuRequestModel menu)
         {
             return await (
                 from m in _dbContext.TblMenus
                 join g in _dbContext.TblMenuGroups on m.MenuGroupCode equals g.MenuGroupCode
                 where
-                m.MenuId != menuId &&
+                m.MenuCode != menuCode && 
                 (m.MenuCode == menu.MenuCode || m.MenuName == menu.MenuName) &&
                 m.DeleteFlag == false && g.DeleteFlag == false &&
                 m.MenuGroupCode == menu.MenuGroupCode

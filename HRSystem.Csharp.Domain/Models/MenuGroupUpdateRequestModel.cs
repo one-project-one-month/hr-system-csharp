@@ -9,7 +9,7 @@ namespace HRSystem.Csharp.Domain.Models
 {
     public class MenuGroupUpdateRequestModel
     {
-        [Required]
+        [Required(ErrorMessage ="Menu Group Name is required!")]
         public string MenuGroupName { get; set; } = "";
 
         public string? Url { get; set; }

@@ -30,6 +30,6 @@ namespace HRSystem.Csharp.Domain.Models
 
         public string? ModifiedBy { get; set; }
 
-        public bool DeleteFlag { get; set; } = false;
+        public bool? DeleteFlag { get; set; }
     }
 }

@@ -31,14 +31,15 @@ namespace HRSystem.Csharp.Domain.Features
             return Result<MenuGroup>.Success(menuGroup);
         }
 
-        public async Task<Result<bool>> UpdateMenuGroup(string menuGroupId, MenuGroupUpdateRequestModel menuGroup)
+
+        public async Task<Result<bool>> UpdateMenuGroup(string menuGroupCode, MenuGroupUpdateRequestModel menuGroup)
         {
-            return await _daMenuGroup.UpdateMenuGroup(menuGroupId, menuGroup);
+            return await _daMenuGroup.UpdateMenuGroup(menuGroupCode, menuGroup);
         }
-        
+
         public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
         {
-            if(requestMenuGroup.MenuGroupCode is null)
+            if(requestMenuGroup.MenuGroupCode is null || string.IsNullOrWhiteSpace(requestMenuGroup.MenuGroupCode))
             {
                 return Result<TblMenuGroup>.BadRequestError("MenuGroupCode cannot be null");
             }

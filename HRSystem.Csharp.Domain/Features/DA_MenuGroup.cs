@@ -2,6 +2,8 @@
 using HRSystem.Csharp.Shared;
 using NUlid;
 
+
+
 namespace HRSystem.Csharp.Domain.Features
 {
     public class DA_MenuGroup
@@ -32,10 +34,10 @@ namespace HRSystem.Csharp.Domain.Features
                 .ToListAsync();
         }
 
-        public async Task<MenuGroup?> GetMenuGroupById(string menuGroupId)
+        public async Task<MenuGroup?> GetMenuGroupById(string menuGroupCode)
         {
             return await _context.TblMenuGroups
-                .Where(mg => mg.MenuGroupId.Equals(menuGroupId) && mg.DeleteFlag == false)
+                .Where(mg => mg.MenuGroupCode.Equals(menuGroupCode) && mg.DeleteFlag == false)
                 .Select(mg => new MenuGroup
                 {
                     MenuGroupId = mg.MenuGroupId,
@@ -56,12 +58,12 @@ namespace HRSystem.Csharp.Domain.Features
 
   
     
-        public async Task<Result<bool>> UpdateMenuGroup(string menuGroupId, MenuGroupUpdateRequestModel menuGroup)
+        public async Task<Result<bool>> UpdateMenuGroup(string menuGroupCode, MenuGroupUpdateRequestModel menuGroup)
         {
             try
             {
                 var existingMenuGroup = await _context.TblMenuGroups
-                .Where(mg => mg.MenuGroupId.Equals(menuGroupId) && mg.DeleteFlag == false)
+                .Where(mg => mg.MenuGroupCode.Equals(menuGroupCode) && mg.DeleteFlag == false)
                 .SingleOrDefaultAsync();
 
                 if (existingMenuGroup == null)
@@ -72,7 +74,7 @@ namespace HRSystem.Csharp.Domain.Features
                 var duplicate = await _context.TblMenuGroups
                     .AnyAsync(mg => 
                     mg.MenuGroupName == menuGroup.MenuGroupName 
-                    && menuGroupId != mg.MenuGroupId 
+                    && menuGroupCode != mg.MenuGroupCode
                     && mg.DeleteFlag == false);
 
                 if (duplicate)

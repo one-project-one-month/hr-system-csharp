@@ -26,10 +26,10 @@ namespace HRSystem.Csharp.Api.Controllers
             return BadRequest(response);
         }
 
-        [HttpGet("menu-group/{id}")]
-        public async Task<IActionResult> Get(string id)
+        [HttpGet("menu-group/{menuGroupCode}")]
+        public async Task<IActionResult> Get(string menuGroupCode)
         {
-             var response = await _blMenuGroup.GetMenuGroup(id);
+             var response = await _blMenuGroup.GetMenuGroup(menuGroupCode);
             if (response.IsSuccess)
             {
                 return Ok(response.Data);
@@ -37,15 +37,14 @@ namespace HRSystem.Csharp.Api.Controllers
             return BadRequest(response);
         }
 
-
-        [HttpPut("menu-group/{id}")]
-        public async Task<IActionResult> Put(string id, [FromBody] MenuGroupUpdateRequestModel menuGroup)
+        [HttpPut("menu-group/{menuGroupCode}")]
+        public async Task<IActionResult> Put(string menuGroupCode, [FromBody] MenuGroupUpdateRequestModel menuGroup)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var response = await _blMenuGroup.UpdateMenuGroup(id, menuGroup);
+            var response = await _blMenuGroup.UpdateMenuGroup(menuGroupCode, menuGroup);
             if(response.IsSuccess)
             {
                 return Ok(response.Data);
