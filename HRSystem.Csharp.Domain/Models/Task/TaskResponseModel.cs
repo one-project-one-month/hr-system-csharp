@@ -14,3 +14,7 @@ public class TaskDeleteResponseModel
 {
 
 }
+public class TaskUpdateResponseModel
+{
+
+}
