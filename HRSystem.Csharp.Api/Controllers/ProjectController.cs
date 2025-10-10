@@ -16,9 +16,9 @@ public class ProjectController : ControllerBase
         }
 
         [HttpGet]
-        public IActionResult GetALlProjects()
+        public async Task<IActionResult> GetALlProjects()
         {
-                var result = _blProject.GetAllProjects();
+                var result = await _blProject.GetAllProjects();
 
                 if (result.IsSuccess) return Ok(result);
 
@@ -28,9 +28,9 @@ public class ProjectController : ControllerBase
         }
 
         [HttpGet("{code}")]
-        public IActionResult GetProject(string code)
+        public async Task<IActionResult> GetProject(string code)
         {
-                var result = _blProject.GetProject(code);
+                var result = await _blProject.GetProject(code);
 
                 if (result.IsSuccess) return Ok(result);
 
@@ -40,9 +40,9 @@ public class ProjectController : ControllerBase
         }
 
         [HttpPost]
-        public IActionResult CreateProject(ProjectCreateRequestModel project)
+        public async Task<IActionResult> CreateProject(ProjectRequestModel project)
         {
-                var result = _blProject.CreateProject(project);
+                var result = await _blProject.CreateProject(project);
 
                 if (result.IsSuccess) return Ok(result);
 
@@ -54,9 +54,9 @@ public class ProjectController : ControllerBase
         }
 
         [HttpPut("{code}")]
-        public IActionResult UpdateProject(string code, ProjectUpdateRequestModel project)
+        public async Task<IActionResult> UpdateProject(string code, ProjectRequestModel project)
         {
-                var result = _blProject.UpdateProject(code, project);
+                var result = await _blProject.UpdateProject(code, project);
 
                 if (result.IsSuccess) return Ok(result);
 
@@ -68,9 +68,9 @@ public class ProjectController : ControllerBase
         }
 
         [HttpDelete("{code}")]
-        public IActionResult DeleteProject(string code)
+        public async Task<IActionResult> DeleteProject(string code)
         {
-                var result = _blProject.DeleteProject(code);
+                var result = await _blProject.DeleteProject(code);
 
                 if (result.IsSuccess) return Ok(result);
 

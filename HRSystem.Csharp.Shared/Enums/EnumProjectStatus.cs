@@ -2,7 +2,8 @@
 
 public enum EnumProjectStatus
 {
-        Pending,
-        InProgress,
-        Finished,
+        Planned,
+        Active,
+        Completed,
+        Cancelled,
 }

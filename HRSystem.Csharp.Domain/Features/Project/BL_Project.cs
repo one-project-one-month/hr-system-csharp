@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.Project;
+﻿using HRSystem.Csharp.Domain.Helpers;
+using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared;
 
 namespace HRSystem.Csharp.Domain.Features.Project;
@@ -6,34 +7,37 @@ namespace HRSystem.Csharp.Domain.Features.Project;
 public class BL_Project
 {
         private readonly DA_Project _daProject;
+        private readonly Generator _generator;
 
-        public BL_Project(DA_Project daProject)
+        public BL_Project(DA_Project daProject, Generator generator)
         {
                 _daProject = daProject;
+                _generator = generator;
         }
 
-        public Result<Boolean> CreateProject(ProjectCreateRequestModel project)
+        public async Task<Result<Boolean>> CreateProject(ProjectRequestModel project)
         {
-                return _daProject.CreateProject(project);
+
+                return await _daProject.CreateProject(project);
         }
 
-        public Result<List<ProjectResponseModel>> GetAllProjects()
+        public async Task<Result<List<ProjectResponseModel>>> GetAllProjects()
         {
-                return _daProject.GetAllProjects();
+                return await _daProject.GetAllProjects();
         }
 
-        public Result<ProjectResponseModel> GetProject(string code)
+        public async Task<Result<ProjectResponseModel>> GetProject(string code)
         {
-                return _daProject.GetProjectByCode(code);
+                return await _daProject.GetProjectByCode(code);
         }
 
-        public Result<Boolean> DeleteProject(string code)
+        public async Task<Result<Boolean>> DeleteProject(string code)
         {
-                return _daProject.DeleteProject(code);
+                return await _daProject.DeleteProject(code);
         }
 
-        public Result<Boolean> UpdateProject(string code, ProjectUpdateRequestModel project)
+        public async Task<Result<Boolean>> UpdateProject(string code, ProjectRequestModel project)
         {
-                return _daProject.UpdateProject(code, project);
+                return await _daProject.UpdateProject(code, project);
         }
 }

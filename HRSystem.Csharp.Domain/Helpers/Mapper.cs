@@ -6,17 +6,17 @@ namespace HRSystem.Csharp.Shared.Helpers;
 // To impelemnt map functions between classes and tbls
 public static class Mapper
 {
-        public static TblProject Map(this ProjectCreateRequestModel project)
+        public static TblProject Map(this ProjectRequestModel project)
         {
                 return new TblProject
                 {
                         ProjectId = Ulid.NewUlid().ToString(),
-                        ProjectCode = project.ProjectCode,
+                       // ProjectCode = project.ProjectCode,
                         ProjectName = project.ProjectName,
                         ProjectDescription = project.ProjectDescription,
                         StartDate = project.StartDate,
                         EndDate = project.EndDate,
-                        ProjectStatus = "Pending",
+                        ProjectStatus = project.ProjectStatus.ToString(),
                         CreatedAt = DateTime.Now,
                         CreatedBy = "TestingUser",
                         DeleteFlag = false

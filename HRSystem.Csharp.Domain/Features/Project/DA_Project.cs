@@ -1,4 +1,5 @@
 ﻿
+using HRSystem.Csharp.Domain.Helpers;
 using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared;
 using HRSystem.Csharp.Shared.Helpers;
@@ -8,22 +9,30 @@ namespace HRSystem.Csharp.Domain.Features.Project;
 public class DA_Project
 {
         private readonly AppDbContext _appDbContext;
+        private readonly Generator _generator;
 
-        public DA_Project(AppDbContext appDbContext)
+        public DA_Project(AppDbContext appDbContext, Generator generator)
         {
                 _appDbContext = appDbContext;
+                _generator = generator;
         }
 
-        public Result<Boolean> CreateProject(ProjectCreateRequestModel project)
+        public async Task<Result<Boolean>> CreateProject(ProjectRequestModel project)
         {
                 try
                 {
-                        var existingProject = _appDbContext.TblProjects.FirstOrDefault(p => p.ProjectCode == project.ProjectCode);
-
-                        if (existingProject is not null)
-                                return Result<Boolean>.DuplicateRecordError( $"A project with code '{project.ProjectCode}' already exists!");
+                        var lastProjectCode = await _appDbContext.TblProjects
+                                .OrderByDescending(p => p.CreatedAt)
+                                .Select(p => p.ProjectCode)
+                                .FirstOrDefaultAsync();
 
                         var newProject = project.Map();
+                        newProject.ProjectCode = _generator.GenerateProjectCode(lastProjectCode);
+
+                        var existingProject = await _appDbContext.TblProjects.FirstOrDefaultAsync(p => p.ProjectCode == newProject.ProjectCode);
+
+                        if (existingProject is not null)
+                                return Result<Boolean>.DuplicateRecordError($"A project with code '{newProject.ProjectCode}' already exists!");
 
                         _appDbContext.TblProjects.Add(newProject);
                         var result = _appDbContext.SaveChanges();
@@ -38,14 +47,14 @@ public class DA_Project
                 }
         }
 
-        public Result<List<ProjectResponseModel>> GetAllProjects()
+        public async Task<Result<List<ProjectResponseModel>>> GetAllProjects()
         {
                 try
                 {
-                        var projects = _appDbContext.TblProjects
+                        var projects = await _appDbContext.TblProjects
                                 .Where(p => p.DeleteFlag == false)
                                 .Select(p => p.Map())
-                                .ToList();
+                                .ToListAsync();
 
                         if (projects is null || projects.Count is 0) 
                                 return Result<List<ProjectResponseModel>>.NotFoundError("no projects found!");
@@ -60,14 +69,14 @@ public class DA_Project
                 }
         }
 
-        public Result<ProjectResponseModel> GetProjectByCode(string code)
+        public async Task<Result<ProjectResponseModel>> GetProjectByCode(string code)
         {
                 try
                 {
-                        var project = _appDbContext.TblProjects
+                        var project = await _appDbContext.TblProjects
                                 .Where(p => p.DeleteFlag == false &&  p.ProjectCode == code)
                                 .Select(p => p.Map())
-                                .FirstOrDefault();
+                                .FirstOrDefaultAsync();
 
                         if (project is null) return Result<ProjectResponseModel>.NotFoundError("no project found!");
 
@@ -80,12 +89,12 @@ public class DA_Project
                 }
         }
 
-        public Result<Boolean> UpdateProject(string code, ProjectUpdateRequestModel project)
+        public async Task<Result<Boolean>> UpdateProject(string code, ProjectRequestModel project)
         {
                 try
                 {
-                        var existingProject = _appDbContext.TblProjects
-                                .FirstOrDefault(p => p.ProjectCode == code && p.DeleteFlag == false);
+                        var existingProject = await _appDbContext.TblProjects
+                                .FirstOrDefaultAsync(p => p.ProjectCode == code && p.DeleteFlag == false);
 
                         if (existingProject is null) 
                                 return Result<Boolean>.NotFoundError("no project found to update!");
@@ -112,12 +121,12 @@ public class DA_Project
                 }
         }
 
-        public Result<Boolean> DeleteProject(string code)
+        public async Task<Result<Boolean>> DeleteProject(string code)
         {
                 try
                 {
-                        var project = _appDbContext.TblProjects
-                                .FirstOrDefault(p => p.ProjectCode == code && p.DeleteFlag == false);
+                        var project = await _appDbContext.TblProjects
+                                .FirstOrDefaultAsync(p => p.ProjectCode == code && p.DeleteFlag == false);
 
                         if (project is null) return Result<Boolean>.NotFoundError("no project found to delete!");
 
