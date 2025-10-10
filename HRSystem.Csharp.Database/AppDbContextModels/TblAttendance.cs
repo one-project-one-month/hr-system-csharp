@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblAttendance
 {
-    public Guid AttendanceId { get; set; }
+    public string AttendanceId { get; set; } = null!;
 
-    public string? AttendanceCode { get; set; }
+    public string AttendanceCode { get; set; } = null!;
 
     public string? EmployeeCode { get; set; }
 

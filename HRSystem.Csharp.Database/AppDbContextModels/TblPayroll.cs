@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblPayroll
 {
-    public Guid PayrollId { get; set; }
+    public string PayrollId { get; set; } = null!;
 
-    public string? PayrollCode { get; set; }
+    public string PayrollCode { get; set; } = null!;
 
     public string? EmployeeCode { get; set; }
 

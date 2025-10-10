@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblRole
 {
-    public Guid RoleId { get; set; }
+    public string RoleId { get; set; } = null!;
 
-    public string? RoleCode { get; set; }
+    public string RoleCode { get; set; } = null!;
 
     public string? RoleName { get; set; }
 
