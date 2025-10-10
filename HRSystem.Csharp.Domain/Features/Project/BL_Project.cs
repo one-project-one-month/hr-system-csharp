@@ -7,16 +7,19 @@ namespace HRSystem.Csharp.Domain.Features.Project;
 public class BL_Project
 {
         private readonly DA_Project _daProject;
-        private readonly Generator _generator;
 
-        public BL_Project(DA_Project daProject, Generator generator)
+        public BL_Project(DA_Project daProject)
         {
                 _daProject = daProject;
-                _generator = generator;
         }
 
         public async Task<Result<Boolean>> CreateProject(ProjectRequestModel project)
         {
+                var validation = RequestValidator.ValidateProject(project);
+
+
+                if (!validation.IsSuccess)
+                        return Result<Boolean>.BadRequestError(validation.Message!);
 
                 return await _daProject.CreateProject(project);
         }
@@ -38,6 +41,11 @@ public class BL_Project
 
         public async Task<Result<Boolean>> UpdateProject(string code, ProjectRequestModel project)
         {
+                var validation = RequestValidator.ValidateProject(project);
+
+                if (!validation.IsSuccess)
+                        return Result<Boolean>.BadRequestError(validation.Message!);
+
                 return await _daProject.UpdateProject(code, project);
         }
 }

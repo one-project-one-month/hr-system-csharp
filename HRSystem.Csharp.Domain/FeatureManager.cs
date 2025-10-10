@@ -1,6 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Features;
 using HRSystem.Csharp.Domain.Features.Project;
 using HRSystem.Csharp.Domain.Helpers;
+using HRSystem.Csharp.Domain.Models.Project;
 
 namespace HRSystem.Csharp.Domain
 {
@@ -23,7 +24,7 @@ namespace HRSystem.Csharp.Domain
             #endregion
 
             builder.Services.AddScoped<Generator>();
-                }
+        }
 
         public static void AddDomain(this WebApplicationBuilder builder)
         {
