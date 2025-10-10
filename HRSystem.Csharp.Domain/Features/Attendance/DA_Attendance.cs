@@ -73,21 +73,21 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
 
                 var newAttendance = new TblAttendance()
                 {
-                    AttendanceId = Ulid.NewUlid().ToString(),
-                    AttendanceCode = Ulid.NewUlid().ToString(),
+                    AttendanceId = Guid.NewGuid(),
+                    AttendanceCode = Guid.NewGuid().ToString(),
                     EmployeeCode = requestModel.EmployeeCode,
                     AttendanceDate = requestModel.AttendanceDate,
                     CheckInTime = requestModel.CheckInTime,
                     CheckInLocation = requestModel.CheckInLocation,
                     CheckOutTime = requestModel.CheckOutTime,
                     CheckOutLocation = requestModel.CheckOutLocation,
-                    WorkingHour = 
-                    HourLateFlag =
-                    HalfDayFlag =
-                    FullDayFlag =
+                    WorkingHour = null,
+                    HourLateFlag = null,
+                    HalfDayFlag = null,
+                    FullDayFlag = null,
                     Remark = requestModel.Remark,
-                    IsSavedLocation =
-                    CreatedBy = 
+                    IsSavedLocation = null,
+                    CreatedBy = null,
                     CreatedAt = DateTime.Now,
                     DeleteFlag = false
                 };
