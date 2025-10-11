@@ -46,19 +46,19 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             }
         }
 
-        public Result<AttendanceCreateResponseModel> Create(AttendanceCreateRequestModel requestModel) 
+        public async Task<Result<AttendanceCreateResponseModel>> Create(AttendanceCreateRequestModel requestModel) 
         {
             if(requestModel.EmployeeCode.IsNullOrEmpty())
             {
                 return Result<AttendanceCreateResponseModel>.ValidationError("Employee Code is required!");
             }
 
-            if (requestModel.AttendanceDate.HasValue)
+            if (!requestModel.AttendanceDate.HasValue)
             {
                 return Result<AttendanceCreateResponseModel>.ValidationError("Attendance Date is required!");
             }
 
-            if (requestModel.CheckInTime.HasValue)
+            if (!requestModel.CheckInTime.HasValue)
             {
                 return Result<AttendanceCreateResponseModel>.ValidationError("CheckIn Time is required!");
             }
@@ -91,15 +91,56 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                     CreatedAt = DateTime.Now,
                     DeleteFlag = false
                 };
+                await _db.AddAsync(newAttendance);
+                await _db.SaveChangesAsync();
+
+                return Result<AttendanceCreateResponseModel>.Success(null,"Attendance is successfully created");
             }
             catch (Exception ex)
             {
-
-                throw;
+                return Result<AttendanceCreateResponseModel>.SystemError(ex.Message);
             }
         }
 
+        public async Task<Result<AttendanceUpdateResponseModel>> Update(AttendanceUpdateRequestModel requestModel)
+        {
+            try
+            {
+                var item = await _db.TblAttendances
+               .FirstOrDefaultAsync(
+               x => x.AttendanceCode == requestModel.AttendanceCode
+                && x.DeleteFlag == false);
 
+                if (item is null)
+                {
+                    return Result<AttendanceUpdateResponseModel>.NotFoundError("Attendance not found!");
+                }
+
+                item.EmployeeCode = requestModel.EmployeeCode;
+                item.AttendanceDate = requestModel.AttendanceDate;
+                item.CheckInTime = requestModel.CheckInTime;
+                item.CheckInLocation = requestModel.CheckInLocation;
+                item.CheckOutTime = requestModel.CheckOutTime;
+                item.CheckOutLocation = requestModel.CheckOutLocation;
+                item.WorkingHour = requestModel.WorkingHour;
+                item.HourLateFlag = requestModel.HourLateFlag;
+                item.HalfDayFlag = requestModel.HalfDayFlag;
+                item.FullDayFlag = requestModel.FullDayFlag;
+                item.Remark = requestModel.Remark;
+                _db.Entry(item).State = EntityState.Modified;
+                var res = await _db.SaveChangesAsync();
+                foreach (var entry in _db.ChangeTracker.Entries().ToArray())
+                {
+                    entry.State = EntityState.Detached;
+                }
+
+                return Result<AttendanceUpdateResponseModel>.Success(null, "Attendance updated successfully!");
+            }
+            catch (Exception ex)
+            {
+                return Result<AttendanceUpdateResponseModel>.SystemError(ex.Message);
+            }
+        }
 
 
     }

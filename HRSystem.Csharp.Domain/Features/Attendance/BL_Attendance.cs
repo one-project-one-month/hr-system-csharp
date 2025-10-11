@@ -22,5 +22,18 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             var data = await _attendance.List();
             return data;
         }
+
+        public async Task<Result<AttendanceCreateResponseModel>> Create(AttendanceCreateRequestModel requestModel)
+        {
+            var data = await _attendance.Create(requestModel);
+            return data;
+        }
+
+        public async Task<Result<AttendanceUpdateResponseModel>> Update(AttendanceUpdateRequestModel requestModel)
+        {
+            var data = await _attendance.Update(requestModel);
+            return data;
+        }
+
     }
 }
