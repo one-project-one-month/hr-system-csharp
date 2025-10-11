@@ -17,7 +17,7 @@ public partial class TblMenuGroup
 
     public int? SortOrder { get; set; }
 
-    public bool? HasMenuGroup { get; set; }
+    public bool? HasMenuItem { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
