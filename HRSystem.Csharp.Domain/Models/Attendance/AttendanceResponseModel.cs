@@ -10,3 +10,8 @@ public class AttendanceCreateResponseModel
 {
 
 }
+
+public class AttendanceUpdateResponseModel
+{
+
+}

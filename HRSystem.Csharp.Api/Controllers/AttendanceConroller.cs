@@ -29,5 +29,12 @@ namespace HRSystem.Csharp.Api.Controllers
             var data = await _bL_Attendance.Create(requestModel);
             return Ok(data);
         }
+
+        [HttpPost("AttendanceUpdate")]
+        public async Task<IActionResult> AttendanceUpdate(AttendanceUpdateRequestModel requestModel)
+        {
+            var data = await _bL_Attendance.Update(requestModel);
+            return Ok(data);
+        }
     }
 }
