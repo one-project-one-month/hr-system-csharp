@@ -1,7 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Helpers;
 using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared;
-using HRSystem.Csharp.Shared.Helpers;
 
 namespace HRSystem.Csharp.Domain.Features.Project;
 
