@@ -31,7 +31,13 @@ public class BL_Task
 
     public async Task<Result<TaskEditResponseModel>> EditAsync(string taskId)
     {
-        var result = await _daTask.EditAsync(taskId);
+        var result = await _daTask.Edit(taskId);
+        return result;
+    }
+
+    public async Task<Result<TaskUpdateResponseModel>> UpdateAsync(TaskUpdateRequestModel requestModel)
+    {
+        var result = await _daTask.Update(requestModel);
         return result;
     }
 
