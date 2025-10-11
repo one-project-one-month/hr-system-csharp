@@ -75,7 +75,7 @@ public class DA_Task
         }
     }
 
-    public async Task<Result<TaskEditResponseModel>> EditAsync(string taskId)
+    public async Task<Result<TaskEditResponseModel>> Edit(string taskId)
     {
         if (taskId.IsNullOrEmpty())
         {
@@ -100,6 +100,44 @@ public class DA_Task
         catch (Exception ex)
         {
             return Result<TaskEditResponseModel>.SystemError(ex.Message);
+        }
+    }
+
+    public async Task<Result<TaskUpdateResponseModel>> Update(TaskUpdateRequestModel requestModel)
+    {
+        if (requestModel.TaskCode.IsNullOrEmpty())
+        {
+            return Result<TaskUpdateResponseModel>.BadRequestError("Task Code is required.");
+        }
+
+        try
+        {
+            var task = await _db.TblTasks
+                .FirstOrDefaultAsync(t => t.DeleteFlag == false
+                && t.TaskCode == requestModel.TaskCode);
+
+            if (task is null)
+            {
+                return Result<TaskUpdateResponseModel>.NotFoundError("Task not found.");
+            }
+
+            task.EmployeeCode = requestModel.EmployeeCode;
+            task.ProjectCode = requestModel.ProjectCode;
+            task.TaskName = requestModel.TaskName;
+            task.TaskDescription = requestModel.TaskDescription;
+            task.StartDate = requestModel.StartDate;
+            task.EndDate = requestModel.EndDate;
+            task.TaskStatus = requestModel.TaskStatus;
+            task.WorkingHour = requestModel.WorkingHour;
+
+            _db.Entry(task).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+
+            return Result<TaskUpdateResponseModel>.Success(null, "Task is updated successfully.");
+        }
+        catch (Exception ex)
+        {
+            return Result<TaskUpdateResponseModel>.SystemError(ex.Message);
         }
     }
 
