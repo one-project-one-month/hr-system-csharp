@@ -1,12 +1,11 @@
 ﻿using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared.Enums;
 
-namespace HRSystem.Csharp.Shared.Helpers;
+namespace HRSystem.Csharp.Domain.Helpers;
 
-// To impelemnt map functions between classes and tbls
 public static class Mapper
 {
-        public static TblProject Map(this ProjectRequestModel project)
+      public static TblProject Map(this ProjectRequestModel project)
         {
                 return new TblProject
                 {
@@ -39,5 +38,37 @@ public static class Mapper
                         ModifiedBy = project.ModifiedBy,
                 };
         }
+    public static TblLocation Map(this LocationCreateRequestModel location)
+    {
+        return new TblLocation
+        {
+            LocationId = Ulid.NewUlid().ToString(),
+            LocationCode = location.LocationCode,
+            Name = location.Name,
+            Latitude = location.Latitude,
+            Longitude = location.Longitude,
+            Radius = location.Radius,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "system",
+            DeleteFlag = false
+        };
+    }
+
+    public static LocationResponseModel Map(this TblLocation location)
+    {
+        return new LocationResponseModel
+        {
+            LocationCode = location.LocationCode,
+            Name = location.Name,
+            Latitude = location.Latitude,
+            Longitude = location.Longitude,
+            Radius = location.Radius,
+            CreatedAt = location.CreatedAt,
+            CreatedBy = location.CreatedBy,
+            ModifiedAt = location.ModifiedAt,
+            ModifiedBy = location.ModifiedBy,
+            DeleteFlag = location.DeleteFlag
+        };
+    }        
 
 }

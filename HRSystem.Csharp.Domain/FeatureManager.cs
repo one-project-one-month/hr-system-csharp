@@ -1,4 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Features;
+using HRSystem.Csharp.Domain.Features.Location;
 using HRSystem.Csharp.Domain.Features.Project;
 using HRSystem.Csharp.Domain.Helpers;
 using HRSystem.Csharp.Domain.Models.Project;
@@ -14,6 +15,7 @@ namespace HRSystem.Csharp.Domain
             #region User Management BL
 
             builder.Services.AddScoped<BL_Role>();
+            builder.Services.AddScoped<BL_Location>();
             builder.Services.AddScoped<BL_Project>();
 
             #endregion
@@ -21,6 +23,7 @@ namespace HRSystem.Csharp.Domain
             #region User Management DA
 
             builder.Services.AddScoped<DA_Role>();
+            builder.Services.AddScoped<DA_Location>();
             builder.Services.AddScoped<DA_Project>();
             #endregion
 
