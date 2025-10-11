@@ -7,7 +7,7 @@ public partial class TblVerification
 {
     public string VerificationId { get; set; } = null!;
 
-    public string? VerificationCode { get; set; }
+    public string VerificationCode { get; set; } = null!;
 
     public string? Email { get; set; }
 
