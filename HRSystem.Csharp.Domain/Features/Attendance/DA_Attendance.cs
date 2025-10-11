@@ -46,19 +46,19 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             }
         }
 
-        public Result<AttendanceCreateResponseModel> Create(AttendanceCreateRequestModel requestModel) 
+        public async Task<Result<AttendanceCreateResponseModel>> Create(AttendanceCreateRequestModel requestModel) 
         {
             if(requestModel.EmployeeCode.IsNullOrEmpty())
             {
                 return Result<AttendanceCreateResponseModel>.ValidationError("Employee Code is required!");
             }
 
-            if (requestModel.AttendanceDate.HasValue)
+            if (!requestModel.AttendanceDate.HasValue)
             {
                 return Result<AttendanceCreateResponseModel>.ValidationError("Attendance Date is required!");
             }
 
-            if (requestModel.CheckInTime.HasValue)
+            if (!requestModel.CheckInTime.HasValue)
             {
                 return Result<AttendanceCreateResponseModel>.ValidationError("CheckIn Time is required!");
             }
@@ -91,11 +91,14 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                     CreatedAt = DateTime.Now,
                     DeleteFlag = false
                 };
+                await _db.AddAsync(newAttendance);
+                await _db.SaveChangesAsync();
+
+                return Result<AttendanceCreateResponseModel>.Success(null,"Attendance is successfully created");
             }
             catch (Exception ex)
             {
-
-                throw;
+                return Result<AttendanceCreateResponseModel>.SystemError(ex.Message);
             }
         }
 
