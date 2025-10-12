@@ -129,6 +129,7 @@ public class DA_Task
             task.EndDate = requestModel.EndDate;
             task.TaskStatus = requestModel.TaskStatus;
             task.WorkingHour = requestModel.WorkingHour;
+            task.ModifiedAt = DateTime.UtcNow;
 
             _db.Entry(task).State = EntityState.Modified;
             await _db.SaveChangesAsync();
