@@ -143,5 +143,33 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
         }
 
 
+        public async Task<Result<AttendanceEditResponseModel>> Edit(string attendanceCode)
+        {
+            if (attendanceCode.IsNullOrEmpty())
+            {
+                return Result<AttendanceEditResponseModel>.ValidationError("Attendance Code required.");
+            }
+            try
+            {
+               var item = await _db.TblAttendances
+               .FirstOrDefaultAsync(x => x.AttendanceCode == attendanceCode
+               && x.DeleteFlag == false);
+
+                if (item is null)
+                {
+                    return Result<AttendanceEditResponseModel>.NotFoundError("Attendance not found.");
+                }
+
+                //var attendanceModel = AttendanceEditModel(item);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+
+        }
+
     }
 }
