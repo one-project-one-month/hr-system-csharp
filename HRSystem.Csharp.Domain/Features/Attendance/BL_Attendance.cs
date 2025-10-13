@@ -35,5 +35,11 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             return data;
         }
 
+        public async Task<Result<AttendanceEditResponseModel>> Edit(string attendanceCode)
+        {
+            var data = await _attendance.Edit(attendanceCode);
+            return data;
+        }
+
     }
 }
