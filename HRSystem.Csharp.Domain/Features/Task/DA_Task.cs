@@ -48,10 +48,11 @@ public class DA_Task
     {
         try
         {
+            var taskCode = await GenerateSequenceCodeAsync("T");
             var task = new TblTask()
             {
                 TaskId = Guid.NewGuid(),
-                TaskCode = Guid.NewGuid().ToString(),
+                TaskCode = taskCode,
                 EmployeeCode = requestModel.EmployeeCode,
                 ProjectCode = requestModel.ProjectCode,
                 TaskName = requestModel.TaskName,
@@ -66,6 +67,8 @@ public class DA_Task
 
             await _db.TblTasks.AddAsync(task);
             await _db.SaveChangesAsync();
+
+            UpdateSequenceNoAsync("T", taskCode.Substring(1));
 
             return Result<TaskCreateResponseModel>.Success(null, "Task created successfully.");
         }
@@ -170,5 +173,37 @@ public class DA_Task
         {
             return Result<TaskDeleteResponseModel>.SystemError(ex.Message);
         }
+    }
+
+    public async Task<string> GenerateSequenceCodeAsync(string uniqueName)
+    {
+        var sequence = await _db.TblSequences
+            .FirstOrDefaultAsync(s => s.UniqueName == uniqueName);
+
+        if (sequence is null)
+        {
+            throw new Exception("Sequence not found.");
+        }
+
+        var sequenceNo = Int32.Parse(sequence.SequenceNo!) + 1;
+
+        var sequenceCode = uniqueName + sequenceNo.ToString("D6");
+        return sequenceCode;
+    }
+
+    public void UpdateSequenceNoAsync(string uniqueName, string sequenceNo)
+    {
+        var sequence = _db.TblSequences
+            .FirstOrDefault(s => s.UniqueName == uniqueName);
+
+        if (sequence is null)
+        {
+            throw new Exception("Sequence not found.");
+        }
+
+        sequence.SequenceNo = sequenceNo;
+
+        _db.Entry(sequence).State = EntityState.Modified;
+        _db.SaveChanges();
     }
 }
