@@ -1,9 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models;
-using HRSystem.Csharp.Shared;
-using NUlid;
-
-
-
+﻿
 namespace HRSystem.Csharp.Domain.Features
 {
     public class DA_MenuGroup
@@ -25,7 +20,7 @@ namespace HRSystem.Csharp.Domain.Features
                     Url = mg.Url,
                     Icon = mg.Icon,
                     SortOrder = mg.SortOrder,
-                    HasMenuGroup = mg.HasMenuGroup,
+                    HasMenuItem = mg.HasMenuItem,
                     CreatedAt = mg.CreatedAt,
                     CreatedBy = mg.CreatedBy,
                     ModifiedAt = mg.ModifiedAt,
@@ -46,7 +41,7 @@ namespace HRSystem.Csharp.Domain.Features
                     Url = mg.Url,
                     Icon = mg.Icon,
                     SortOrder = mg.SortOrder,
-                    HasMenuGroup = mg.HasMenuGroup,
+                    HasMenuItem = mg.HasMenuItem,
                     CreatedAt = mg.CreatedAt,
                     CreatedBy = mg.CreatedBy,
                     ModifiedAt = mg.ModifiedAt,
@@ -85,7 +80,7 @@ namespace HRSystem.Csharp.Domain.Features
                 existingMenuGroup.Url = menuGroup.Url;
                 existingMenuGroup.Icon = menuGroup.Icon;
                 existingMenuGroup.SortOrder = menuGroup.SortOrder;
-                existingMenuGroup.HasMenuGroup = menuGroup.HasMenuGroup;
+                existingMenuGroup.HasMenuItem = menuGroup.HasMenuItem;
                 existingMenuGroup.ModifiedAt = DateTime.UtcNow;
                 //existingMenuGroup.ModifiedBy = logginedUser;
                 _context.Update(existingMenuGroup);
@@ -122,7 +117,7 @@ namespace HRSystem.Csharp.Domain.Features
                     Url = requestMenuGroup.Url,
                     Icon = requestMenuGroup.Icon,
                     SortOrder = requestMenuGroup.SortOrder,
-                    HasMenuGroup = requestMenuGroup.HasMenuGroup,
+                    HasMenuItem = requestMenuGroup.HasMenuItem,
                     CreatedAt = DateTime.UtcNow,
                     //CreatedBy = loggedIn User,
                     DeleteFlag = false,

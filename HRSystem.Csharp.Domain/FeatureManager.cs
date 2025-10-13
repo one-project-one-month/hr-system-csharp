@@ -13,21 +13,17 @@ namespace HRSystem.Csharp.Domain
         private static void AddServices(this WebApplicationBuilder builder)
         {
             #region User Management BL
-
             builder.Services.AddScoped<BL_Role>();
             builder.Services.AddScoped<BL_Menu>();
             builder.Services.AddScoped<BL_MenuGroup>();
             builder.Services.AddScoped<BL_Location>();
             builder.Services.AddScoped<BL_Project>();
-
             #endregion
 
             #region User Management DA
-
             builder.Services.AddScoped<DA_Role>();
             builder.Services.AddScoped<DA_Menu>(); 
             builder.Services.AddScoped<DA_MenuGroup>();
-
             builder.Services.AddScoped<DA_Location>();
             builder.Services.AddScoped<DA_Project>();
             #endregion

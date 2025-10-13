@@ -1,7 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models;
-using HRSystem.Csharp.Shared;
-
-
+﻿
 namespace HRSystem.Csharp.Domain.Features
 {
     public class BL_MenuGroup
@@ -11,6 +8,7 @@ namespace HRSystem.Csharp.Domain.Features
         {
             _daMenuGroup = daMenuGroup;
         }
+
         public async Task<Result<List<MenuGroup>>> GetAllMenuGroups()
         {
             var response = await _daMenuGroup.GetAllMenuGroups();
@@ -30,7 +28,6 @@ namespace HRSystem.Csharp.Domain.Features
             }
             return Result<MenuGroup>.Success(menuGroup);
         }
-
 
         public async Task<Result<bool>> UpdateMenuGroup(string menuGroupCode, MenuGroupUpdateRequestModel menuGroup)
         {
@@ -53,7 +50,6 @@ namespace HRSystem.Csharp.Domain.Features
             var response = await _daMenuGroup.CreateMenuGroupAsync(requestMenuGroup);
             return response;
         }
-
 
         public async Task<Result<TblMenuGroup>> DeleteMenuGroupAsync(string menuGroupCode)
         {

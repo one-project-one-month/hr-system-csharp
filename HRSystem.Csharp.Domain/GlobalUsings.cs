@@ -13,3 +13,4 @@ global using HRSystem.Csharp.Shared;
 global using HRSystem.Csharp.Domain.Models.Location;
 global using HRSystem.Csharp.Domain.Features;
 global using HRSystem.Csharp.Domain.Features.Location;
+global using HRSystem.Csharp.Domain.Models;

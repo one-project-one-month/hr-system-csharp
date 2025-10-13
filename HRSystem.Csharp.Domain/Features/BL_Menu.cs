@@ -1,7 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models;
-using HRSystem.Csharp.Shared;
-
-
+﻿
 namespace HRSystem.Csharp.Domain.Features
 {
     public class BL_Menu
@@ -85,9 +82,7 @@ namespace HRSystem.Csharp.Domain.Features
 
             var response = await _daMenu.CreateMenuAsync(requestMenu);
             return response;
-        }
-
-        
+        }        
 
         public async Task<Result<TblMenu>> DeleteMenuAsync(string menuCode)
         {

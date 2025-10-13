@@ -8,7 +8,6 @@
 
   <ItemGroup>
 	<FrameworkReference Include="Microsoft.AspNetCore.App" />
-	<PackageReference Include="NUlid" Version="1.7.3" />
 	 <PackageReference Include="Ulid" Version="1.4.1" />
 	 <ProjectReference Include="..\HRSystem.Csharp.Database\HRSystem.Csharp.Database.csproj" />
 	 <ProjectReference Include="..\HRSystem.Csharp.Shared\HRSystem.Csharp.Shared.csproj" />

@@ -14,7 +14,7 @@ namespace HRSystem.Csharp.Domain.Models
 
         public string? MenuGroupName { get; set; }
 
-        public bool? HasMenuGroup { get; set; }
+        public bool? HasMenuItem { get; set; }
 
         public string? Url { get; set; }
 

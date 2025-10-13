@@ -1,9 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models;
-using HRSystem.Csharp.Shared;
-using NUlid;
-using System.Text.RegularExpressions;
-
-
+﻿
 namespace HRSystem.Csharp.Domain.Features
 {
     public class DA_Menu
@@ -144,7 +139,6 @@ namespace HRSystem.Csharp.Domain.Features
             }
 
         }
-
 
         public async Task<Result<TblMenu>> DeleteMenuAsync(string menuCode)
         {

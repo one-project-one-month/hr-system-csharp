@@ -18,7 +18,7 @@ namespace HRSystem.Csharp.Domain.Models
 
         public int? SortOrder { get; set; }
 
-        public bool? HasMenuGroup { get; set; }
+        public bool? HasMenuItem { get; set; }
     }
 }
 
