@@ -1,4 +1,9 @@
 ﻿using HRSystem.Csharp.Domain.Features;
+using HRSystem.Csharp.Domain.Features.Location;
+using HRSystem.Csharp.Domain.Features.Project;
+using HRSystem.Csharp.Domain.Helpers;
+using HRSystem.Csharp.Domain.Models.Project;
+﻿using HRSystem.Csharp.Domain.Features.Roles;
 
 namespace HRSystem.Csharp.Domain
 {
@@ -12,6 +17,8 @@ namespace HRSystem.Csharp.Domain
             builder.Services.AddScoped<BL_Role>();
             builder.Services.AddScoped<BL_Menu>();
             builder.Services.AddScoped<BL_MenuGroup>();
+            builder.Services.AddScoped<BL_Location>();
+            builder.Services.AddScoped<BL_Project>();
 
             #endregion
 
@@ -21,7 +28,11 @@ namespace HRSystem.Csharp.Domain
             builder.Services.AddScoped<DA_Menu>(); 
             builder.Services.AddScoped<DA_MenuGroup>();
 
+            builder.Services.AddScoped<DA_Location>();
+            builder.Services.AddScoped<DA_Project>();
             #endregion
+
+            builder.Services.AddScoped<Generator>();
         }
 
         public static void AddDomain(this WebApplicationBuilder builder)

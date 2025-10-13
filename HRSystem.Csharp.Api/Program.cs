@@ -2,6 +2,8 @@ using HRSystem.Csharp.Database.AppDbContextModels;
 using HRSystem.Csharp.Domain;
 using Microsoft.EntityFrameworkCore;
 using HRSystem.Csharp.Domain.Features;
+using HRSystem.Csharp.Domain.Features.Roles;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+builder.Services.AddDbContext<AppDbContext>(opt =>
+{
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
+});
+
+builder.Services.AddScoped<BL_Role>();
+builder.Services.AddScoped<DA_Role>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
