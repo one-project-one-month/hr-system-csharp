@@ -41,5 +41,11 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             return data;
         }
 
+        public async Task<Result<AttendanceDeleteResponseModel>> Delete(string attendanceCode)
+        {
+            var data = await _attendance.Delete(attendanceCode);
+            return data;
+        }
+
     }
 }

@@ -15,3 +15,8 @@ public class AttendanceUpdateResponseModel
 {
 
 }
+
+public class AttendanceDeleteResponseModel
+{
+
+}
