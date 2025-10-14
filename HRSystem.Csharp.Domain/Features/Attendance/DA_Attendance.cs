@@ -168,6 +168,43 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             {
                 return Result<AttendanceEditResponseModel>.SystemError(ex.Message);
             }
+        }
+
+        public async Task<Result<AttendanceDeleteResponseModel>> Delete(string attendanceCode)
+        {
+            var model = new AttendanceEditResponseModel();
+            if (attendanceCode.IsNullOrEmpty())
+            {
+                return Result<AttendanceDeleteResponseModel>.ValidationError("Attendance Code required.");
+            }
+            try
+            {
+                var item = await _db.TblAttendances
+                .FirstOrDefaultAsync(x => x.AttendanceCode == attendanceCode
+                && x.DeleteFlag == false);
+
+                if (item is null)
+                {
+                    return Result<AttendanceDeleteResponseModel>.NotFoundError("Attendance not found.");
+                }
+
+                item.DeleteFlag = true;
+                item.ModifiedAt = DateTime.Now;
+
+                _db.Entry(item).State = EntityState.Modified;
+                var res = await _db.SaveChangesAsync();
+                foreach (var entry in _db.ChangeTracker.Entries().ToArray())
+                {
+                    entry.State = EntityState.Detached;
+                }
+
+                return Result<AttendanceDeleteResponseModel>.Success(null,"Attendance successfully deleted!");
+
+            }
+            catch (Exception ex)
+            {
+                return Result<AttendanceDeleteResponseModel>.SystemError(ex.Message);
+            }
 
 
         }

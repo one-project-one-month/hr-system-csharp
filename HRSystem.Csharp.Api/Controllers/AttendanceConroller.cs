@@ -43,5 +43,12 @@ namespace HRSystem.Csharp.Api.Controllers
             var data = await _bL_Attendance.Edit(attendanceCode);
             return Ok(data);
         }
+
+        [HttpPost("AttendanceDelete")]
+        public async Task<IActionResult> AttendanceDelete(string attendanceCode)
+        {
+            var data = await _bL_Attendance.Delete(attendanceCode);
+            return Ok(data);
+        }
     }
 }
