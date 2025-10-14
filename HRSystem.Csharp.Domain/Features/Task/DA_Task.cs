@@ -108,16 +108,11 @@ public class DA_Task
 
     public async Task<Result<TaskUpdateResponseModel>> Update(TaskUpdateRequestModel requestModel)
     {
-        if (requestModel.TaskCode.IsNullOrEmpty())
-        {
-            return Result<TaskUpdateResponseModel>.BadRequestError("Task Code is required.");
-        }
-
         try
         {
             var task = await _db.TblTasks
                 .FirstOrDefaultAsync(t => t.DeleteFlag == false
-                && t.TaskCode == requestModel.TaskCode);
+                && t.TaskId == requestModel.TaskId);
 
             if (task is null)
             {

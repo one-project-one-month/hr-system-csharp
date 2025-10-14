@@ -35,6 +35,10 @@ public class TaskModel
 
     public string? CreatedBy { get; set; }
 
+    public DateTime? ModifiedAt { get; set; }
+
+    public string? ModifiedBy { get; set; }
+
     public static TaskModel FromTblTask(TblTask tblTask)
     {
         return new TaskModel()
@@ -49,7 +53,9 @@ public class TaskModel
             TaskStatus = tblTask.TaskStatus,
             WorkingHour = tblTask.WorkingHour,
             CreatedAt = tblTask.CreatedAt,
-            CreatedBy = tblTask.CreatedBy
+            CreatedBy = tblTask.CreatedBy,
+            ModifiedAt = tblTask.ModifiedAt,
+            ModifiedBy = tblTask.ModifiedBy
         };
     }
 }
