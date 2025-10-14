@@ -8,8 +8,6 @@ namespace HRSystem.Csharp.Domain.Models.Task;
 
 public class TaskCreateRequestModel
 {
-    public string? TaskCode { get; set; }
-
     public string? EmployeeCode { get; set; }
 
     public string? ProjectCode { get; set; }

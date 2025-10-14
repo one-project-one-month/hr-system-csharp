@@ -8,7 +8,7 @@ namespace HRSystem.Csharp.Domain.Models.Task;
 
 public class TaskUpdateRequestModel
 {
-    public string? TaskCode { get; set; }
+    public Guid TaskId { get; set; }
 
     public string? EmployeeCode { get; set; }
 
