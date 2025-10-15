@@ -21,7 +21,11 @@ public class TaskEditModel
 
     public string? EmployeeCode { get; set; }
 
+    public string? EmployeeName { get; set; }
+
     public string? ProjectCode { get; set; }
+
+    public string? ProjectName { get; set; }
 
     public DateTime? StartDate { get; set; }
 
