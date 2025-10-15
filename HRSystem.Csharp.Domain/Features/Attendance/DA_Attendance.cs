@@ -88,7 +88,7 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                     Remark = requestModel.Remark,
                     IsSavedLocation = null,
                     CreatedBy = null,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                     DeleteFlag = false
                 };
                 await _db.AddAsync(newAttendance);
@@ -189,7 +189,7 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                 }
 
                 item.DeleteFlag = true;
-                item.ModifiedAt = DateTime.Now;
+                item.ModifiedAt = DateTime.UtcNow;
 
                 _db.Entry(item).State = EntityState.Modified;
                 var res = await _db.SaveChangesAsync();
