@@ -105,12 +105,22 @@ public class DA_Task
                 return Result<TaskEditResponseModel>.NotFoundError("Task not found.");
             }
 
-            var model = new TaskEditResponseModel()
+            var model = TaskEditModel.FromTblTask(task);
+            model.EmployeeName = _db.TblEmployees
+                .Where(e => e.EmployeeCode == task.EmployeeCode && e.DeleteFlag == false)
+                .Select(e => e.Name)
+                .FirstOrDefault();
+            model.ProjectName = _db.TblProjects
+                .Where(p => p.ProjectCode == task.ProjectCode && p.DeleteFlag == false)
+                .Select(p => p.ProjectName)
+                .FirstOrDefault();
+
+            var result = new TaskEditResponseModel()
             {
-                Tasks = TaskEditModel.FromTblTask(task)                
+                Tasks = model
             };
 
-            return Result<TaskEditResponseModel>.Success(model);
+            return Result<TaskEditResponseModel>.Success(result);
         }
         catch (Exception ex)
         {
