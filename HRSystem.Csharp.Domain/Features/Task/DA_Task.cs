@@ -33,7 +33,19 @@ public class DA_Task
 
             var model = new TaskListResponseModel()
             {
-                Tasks = tasks.Select(t => TaskModel.FromTblTask(t)).ToList()
+                Tasks = tasks.Select(t =>
+                {
+                    var task = TaskModel.FromTblTask(t);
+                    task.EmployeeName = _db.TblEmployees
+                        .Where(e => e.EmployeeCode == t.EmployeeCode && e.DeleteFlag == false)
+                        .Select(e => e.Name)
+                        .FirstOrDefault();
+                    task.ProjectName = _db.TblProjects
+                        .Where(p => p.ProjectCode == t.ProjectCode && p.DeleteFlag == false)
+                        .Select(p => p.ProjectName)
+                        .FirstOrDefault();
+                    return task;
+                }).ToList()
             };
 
             return Result<TaskListResponseModel>.Success(model);
@@ -95,7 +107,7 @@ public class DA_Task
 
             var model = new TaskEditResponseModel()
             {
-                Tasks = TaskEditModel.FromTblTask(task)
+                Tasks = TaskEditModel.FromTblTask(task)                
             };
 
             return Result<TaskEditResponseModel>.Success(model);
