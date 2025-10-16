@@ -18,12 +18,14 @@ public class DA_Task
         _db = db;
     }
 
-    public async Task<Result<TaskListResponseModel>> List()
+    public async Task<Result<TaskListResponseModel>> List(int pageNo, int PageSize)
     {
         try
         {
             var tasks = await _db.TblTasks.Where(t => t.DeleteFlag == false)
                 .OrderByDescending(t => t.CreatedAt)
+                .Skip(pageNo * PageSize)
+                .Take(PageSize)
                 .ToListAsync();
 
             if (!tasks.Any() || tasks is null)
