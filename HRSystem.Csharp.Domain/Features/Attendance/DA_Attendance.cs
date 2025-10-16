@@ -70,11 +70,12 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
 
             try
             {
+                var attendanceCode = await GenerateSequenceCodeAsync("AT");
 
                 var newAttendance = new TblAttendance()
                 {
                     AttendanceId = Guid.NewGuid(),
-                    AttendanceCode = Guid.NewGuid().ToString(),
+                    AttendanceCode = attendanceCode,
                     EmployeeCode = requestModel.EmployeeCode,
                     AttendanceDate = requestModel.AttendanceDate,
                     CheckInTime = requestModel.CheckInTime,
@@ -93,6 +94,8 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                 };
                 await _db.AddAsync(newAttendance);
                 await _db.SaveChangesAsync();
+
+                UpdateSequenceNoAsync("AT", attendanceCode.Substring(2));
 
                 return Result<AttendanceCreateResponseModel>.Success(null,"Attendance is successfully created");
             }
@@ -127,6 +130,8 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                 item.HalfDayFlag = requestModel.HalfDayFlag;
                 item.FullDayFlag = requestModel.FullDayFlag;
                 item.Remark = requestModel.Remark;
+                item.ModifiedBy = "";
+                item.ModifiedAt = DateTime.UtcNow;
                 _db.Entry(item).State = EntityState.Modified;
                 var res = await _db.SaveChangesAsync();
                 foreach (var entry in _db.ChangeTracker.Entries().ToArray())
@@ -209,5 +214,36 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
 
         }
 
+        public async Task<string> GenerateSequenceCodeAsync(string uniqueName)
+        {
+            var sequence = await _db.TblSequences
+                .FirstOrDefaultAsync(s => s.UniqueName == uniqueName);
+
+            if (sequence is null)
+            {
+                throw new Exception("Sequence not found.");
+            }
+
+            var sequenceNo = Int32.Parse(sequence.SequenceNo!) + 1;
+
+            var sequenceCode = uniqueName + sequenceNo.ToString("D6");
+            return sequenceCode;
+        }
+
+        public void UpdateSequenceNoAsync(string uniqueName, string sequenceNo)
+        {
+            var sequence = _db.TblSequences
+                .FirstOrDefault(s => s.UniqueName == uniqueName);
+
+            if (sequence is null)
+            {
+                throw new Exception("Sequence not found.");
+            }
+
+            sequence.SequenceNo = sequenceNo;
+
+            _db.Entry(sequence).State = EntityState.Modified;
+            _db.SaveChanges();
+        }
     }
 }
