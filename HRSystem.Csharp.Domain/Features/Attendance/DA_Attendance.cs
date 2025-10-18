@@ -71,6 +71,10 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             try
             {
                 var attendanceCode = await GenerateSequenceCodeAsync("AT");
+                DateTime checkIn = (DateTime)requestModel.CheckInTime;
+                DateTime checkOut = (DateTime)requestModel.CheckOutTime;
+
+                TimeSpan workingHours = CalculateWorkingHours(checkIn, checkOut);
 
                 var newAttendance = new TblAttendance()
                 {
@@ -82,7 +86,7 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                     CheckInLocation = requestModel.CheckInLocation,
                     CheckOutTime = requestModel.CheckOutTime,
                     CheckOutLocation = requestModel.CheckOutLocation,
-                    WorkingHour = null,
+                    WorkingHour = (decimal)workingHours.TotalHours,
                     HourLateFlag = null,
                     HalfDayFlag = null,
                     FullDayFlag = null,
@@ -104,6 +108,26 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                 return Result<AttendanceCreateResponseModel>.SystemError(ex.Message);
             }
         }
+
+        public static TimeSpan CalculateWorkingHours(DateTime checkIn, DateTime checkOut)
+        {
+            // Define office hours (same day)
+            DateTime officeStart = checkIn.Date.AddHours(9);   // 9:00 AM
+            DateTime officeEnd = checkIn.Date.AddHours(17);  // 5:00 PM
+
+            // Clamp times to office hours
+            if (checkIn < officeStart)
+                checkIn = officeStart;
+            if (checkOut > officeEnd)
+                checkOut = officeEnd;
+
+            // If invalid (checked out before check-in or outside office time)
+            if (checkOut < checkIn)
+                return TimeSpan.Zero;
+
+            return checkOut - checkIn;
+        }
+
 
         public async Task<Result<AttendanceUpdateResponseModel>> Update(AttendanceUpdateRequestModel requestModel)
         {
