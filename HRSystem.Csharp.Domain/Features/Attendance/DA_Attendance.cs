@@ -71,10 +71,18 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             try
             {
                 var attendanceCode = await GenerateSequenceCodeAsync("AT");
+                
+                //Working Hour
                 DateTime checkIn = (DateTime)requestModel.CheckInTime;
                 DateTime checkOut = (DateTime)requestModel.CheckOutTime;
-
                 TimeSpan workingHours = CalculateWorkingHours(checkIn, checkOut);
+
+
+                //Hourly Late
+                int HourLateFlag = CalculateHourlyLate(checkIn, checkOut);
+
+                //Half Day late
+                int HalfDayFlag = CalculateHalfDayLate(checkIn, checkOut);
 
                 var newAttendance = new TblAttendance()
                 {
@@ -87,8 +95,8 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                     CheckOutTime = requestModel.CheckOutTime,
                     CheckOutLocation = requestModel.CheckOutLocation,
                     WorkingHour = (decimal)workingHours.TotalHours,
-                    HourLateFlag = null,
-                    HalfDayFlag = null,
+                    HourLateFlag = HourLateFlag,
+                    HalfDayFlag = HalfDayFlag,
                     FullDayFlag = null,
                     Remark = requestModel.Remark,
                     IsSavedLocation = null,
@@ -126,6 +134,47 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                 return TimeSpan.Zero;
 
             return checkOut - checkIn;
+        }
+
+        public static int CalculateHourlyLate(DateTime checkIn, DateTime checkOut)
+        {
+            DateTime officeStart = checkIn.Date.AddHours(9);  // 9:00 AM
+            DateTime MorningFirstLate = checkIn.Date.AddHours(9.5); // 9:30 AM
+            DateTime MorningSecondLate = checkIn.Date.AddHours(10);  // 10:00 AM
+
+            int hourLate = 0;
+
+            // If check-in between 9:30 and 10:00 -> 1 hour late
+            if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate)
+                hourLate = 1;
+
+
+            DateTime officeEnd = checkIn.Date.AddHours(17);  // 5:00 PM
+            DateTime eveningFirstLate = checkIn.Date.AddHours(16.5); // 4:30 PM
+            DateTime eveningSecondLate = checkIn.Date.AddHours(16);  // 4:00 PM
+
+            if (checkOut < eveningFirstLate && checkOut >= eveningSecondLate)
+                hourLate += 1;
+
+            return hourLate;
+        }
+
+        public static int CalculateHalfDayLate(DateTime checkIn, DateTime checkOut)
+        {
+            int halfDayLate = 0;
+
+            //For Morning Part
+            DateTime MorningLate = checkIn.Date.AddHours(10); // 10:00 AM
+            if (checkIn > MorningLate)
+                halfDayLate = 1;
+
+            //For Evening Part
+            DateTime eveningLate = checkIn.Date.AddHours(16);  // 4:00 PM
+
+            if (checkOut < eveningLate)
+                halfDayLate += 1;
+
+            return halfDayLate;
         }
 
 
