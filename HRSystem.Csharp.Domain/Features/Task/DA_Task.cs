@@ -24,7 +24,7 @@ public class DA_Task
         {
             var tasks = await _db.TblTasks.Where(t => t.DeleteFlag == false)
                 .OrderByDescending(t => t.CreatedAt)
-                .Skip(pageNo * PageSize)
+                .Skip((pageNo - 1) * PageSize)
                 .Take(PageSize)
                 .ToListAsync();
 
