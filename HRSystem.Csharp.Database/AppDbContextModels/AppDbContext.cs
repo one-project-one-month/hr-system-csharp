@@ -106,6 +106,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
             entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
+            entity.Property(e => e.Username).HasMaxLength(200);
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Password).HasMaxLength(200);
             entity.Property(e => e.PhoneNo).HasMaxLength(50);
@@ -113,6 +114,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ResignDate).HasColumnType("datetime");
             entity.Property(e => e.RoleCode).HasMaxLength(50);
             entity.Property(e => e.Salary).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.IsFirstTimeLogin).HasDefaultValue(true);
             entity.Property(e => e.StartDate).HasColumnType("datetime");
         });
 
