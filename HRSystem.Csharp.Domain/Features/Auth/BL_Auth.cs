@@ -36,4 +36,5 @@ public class BL_Auth
         var response = await _da_Auth.LogoutAsync(requestModel);
         return response;
     }
+
 }

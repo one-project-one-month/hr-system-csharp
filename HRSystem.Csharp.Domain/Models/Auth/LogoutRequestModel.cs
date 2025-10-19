@@ -8,7 +8,5 @@ namespace HRSystem.Csharp.Domain.Models.Auth;
 
 public class LogoutRequestModel
 {
-    public string EmployeeCode { get; set; }
-
     public string RefrehToken { get; set; }
 }

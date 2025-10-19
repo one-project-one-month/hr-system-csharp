@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Helpers;
 using HRSystem.Csharp.Domain.Models.Auth;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,15 +10,15 @@ using System.Threading.Tasks;
 
 namespace HRSystem.Csharp.Domain.Features.Auth;
 
-public class DA_Auth
+public class DA_Auth: AuthorizationService
 {
     private readonly AppDbContext _appDbContext;
     private readonly JwtService _jwtService;
 
-    public DA_Auth(AppDbContext appDbContext, JwtService jwtService)
+    public DA_Auth(IHttpContextAccessor contextAccessor, JwtService jwtService, AppDbContext appDbContext) : base(contextAccessor)
     {
-        _appDbContext = appDbContext;
         _jwtService = jwtService;
+        _appDbContext = appDbContext;
     }
 
     public async Task<Result<AuthResponseModel>> LoginAsync (LoginRequestModel requestModel)
@@ -164,12 +165,14 @@ public class DA_Auth
         try
         {
             var tokens = await _appDbContext.TblRefreshTokens
-                        .Where(x => x.EmployeeCode == requestModel.EmployeeCode && x.IsRevoked != true)
+                        .Where(x => x.EmployeeCode == UserCode && x.IsRevoked != true)
                         .ToListAsync();
 
             foreach (var token in tokens)
             {
                 token.IsRevoked = true;
+                token.ModifiedBy = UserCode;
+                token.ModifiedAt = DateTime.Now;
             }
 
             await _appDbContext.SaveChangesAsync();

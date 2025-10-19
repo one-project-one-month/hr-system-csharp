@@ -29,7 +29,8 @@ namespace HRSystem.Csharp.Domain.Helpers
             {
             new Claim(JwtRegisteredClaimNames.Sub, username),
             new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(JwtRegisteredClaimNames.Jti, jwtId)
+            new Claim(JwtRegisteredClaimNames.Jti, jwtId),
+            new Claim("UserCode", employeeCode)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["ApplicationSettings:JwtSecretKey"]!));
