@@ -29,6 +29,7 @@ namespace HRSystem.Csharp.Domain
             #endregion
 
             builder.Services.AddScoped<Generator>();
+            builder.Services.AddScoped<JwtService>();
         }
 
         public static void AddDomain(this WebApplicationBuilder builder)
