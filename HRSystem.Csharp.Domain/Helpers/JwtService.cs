@@ -22,7 +22,7 @@ namespace HRSystem.Csharp.Domain.Helpers
             _appDbContext = appDbContext;
         }
 
-        public string GenerateJwtTokenAsync(string username, string email, string employeeCode)
+        public string GenerateJwtToken(string username, string email, string employeeCode)
         {
             var jwtId = Ulid.NewUlid().ToString();
             var claims = new[]
