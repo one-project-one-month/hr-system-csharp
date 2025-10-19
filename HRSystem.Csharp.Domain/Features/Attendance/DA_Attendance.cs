@@ -84,6 +84,24 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                 //Half Day late
                 int HalfDayFlag = CalculateHalfDayLate(checkIn, checkOut);
 
+                //Full Day late
+                int FullDayFlag = 0;
+                if (HalfDayFlag == 2)
+                {
+                    FullDayFlag = 1;
+                }
+
+                //Check Location
+                bool IsSavedLocation = false;
+                var location = await _db.TblLocations
+                    .FirstOrDefaultAsync(x => x.LocationCode == requestModel.CheckInLocation
+                    && x.DeleteFlag == false);
+                
+                if(location != null)
+                {
+                    IsSavedLocation = true;
+                }
+
                 var newAttendance = new TblAttendance()
                 {
                     AttendanceId = Guid.NewGuid(),
@@ -97,9 +115,9 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                     WorkingHour = (decimal)workingHours.TotalHours,
                     HourLateFlag = HourLateFlag,
                     HalfDayFlag = HalfDayFlag,
-                    FullDayFlag = null,
+                    FullDayFlag = FullDayFlag,
                     Remark = requestModel.Remark,
-                    IsSavedLocation = null,
+                    IsSavedLocation = IsSavedLocation,
                     CreatedBy = null,
                     CreatedAt = DateTime.UtcNow,
                     DeleteFlag = false
