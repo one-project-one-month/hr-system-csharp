@@ -65,7 +65,7 @@ public class DA_Task
             var taskCode = await GenerateSequenceCodeAsync("T");
             var task = new TblTask()
             {
-                TaskId = Guid.NewGuid(),
+                TaskId = Ulid.NewUlid().ToString(),
                 TaskCode = taskCode,
                 EmployeeCode = requestModel.EmployeeCode,
                 ProjectCode = requestModel.ProjectCode,
