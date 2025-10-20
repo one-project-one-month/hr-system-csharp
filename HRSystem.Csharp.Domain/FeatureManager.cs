@@ -4,6 +4,7 @@ using HRSystem.Csharp.Domain.Features.Project;
 using HRSystem.Csharp.Domain.Helpers;
 using HRSystem.Csharp.Domain.Models.Project;
 ﻿using HRSystem.Csharp.Domain.Features.Roles;
+using HRSystem.Csharp.Domain.Features.Auth;
 using HRSystem.Csharp.Domain.Features.Employee;
 
 namespace HRSystem.Csharp.Domain
@@ -20,6 +21,7 @@ namespace HRSystem.Csharp.Domain
             builder.Services.AddScoped<BL_Location>();
             builder.Services.AddScoped<BL_Project>();
             builder.Services.AddScoped<BL_Employee>();
+            builder.Services.AddScoped<BL_Auth>();
             #endregion
 
             #region User Management DA
@@ -29,9 +31,14 @@ namespace HRSystem.Csharp.Domain
             builder.Services.AddScoped<DA_Location>();
             builder.Services.AddScoped<DA_Project>();
             builder.Services.AddScoped<DA_Employee>();
+            builder.Services.AddScoped<DA_Auth>();
             #endregion
 
             builder.Services.AddScoped<Generator>();
+            builder.Services.AddScoped<JwtService>();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<AuthorizationService>();
+
         }
 
         public static void AddDomain(this WebApplicationBuilder builder)
