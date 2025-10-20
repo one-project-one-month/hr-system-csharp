@@ -237,7 +237,6 @@ CREATE TABLE Tbl_RefreshToken (
     JwtId NVARCHAR(450) NOT NULL,
     ExpiryDate DATETIME2 NOT NULL,
     RevokedAt DATETIME2 NULL,
-    Invalidated BIT NOT NULL DEFAULT 0,
     IsRevoked BIT NOT NULL DEFAULT 0,
     -- need to changed to employee code
     EmployeeCode NVARCHAR(50) NOT NULL,

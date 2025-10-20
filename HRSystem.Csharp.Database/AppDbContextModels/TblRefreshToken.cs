@@ -13,8 +13,6 @@ public partial class TblRefreshToken
 
     public DateTime? RevokedAt { get; set; }
 
-    public bool Invalidated { get; set; }
-
     public bool IsRevoked { get; set; }
 
     public string EmployeeCode { get; set; } = null!;
