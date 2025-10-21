@@ -135,41 +135,124 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             }
         }
 
-        public static TimeSpan CalculateWorkingHours(DateTime checkIn, DateTime checkOut)
+        public TimeSpan CalculateWorkingHours(DateTime checkIn, DateTime checkOut)
         {
-            // Define office hours (same day)
-            DateTime officeStart = checkIn.Date.AddHours(9);   // 9:00 AM
-            DateTime officeEnd = checkIn.Date.AddHours(17);  // 5:00 PM
+            var StartTimeValue = "";
+            double StartTime = 0.0;
+            var OfficeEndValue = "";
+            double OfficeEnd = 0.0;
 
-            // Clamp times to office hours
+            #region
+            var ComRuleOfficeStart = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "OFFICE_START_TIME" && x.DeleteFlag == false);
+            if (ComRuleOfficeStart != null)
+            {
+                StartTimeValue = ComRuleOfficeStart.Value;
+                StartTime = Double.Parse(StartTimeValue);
+            }
+            #endregion
+            DateTime officeStart = checkIn.Date.AddHours(StartTime);
+
+            #region
+            var ComRuleOfficeEnd = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "OFFICE_END_TIME" && x.DeleteFlag == false);
+            if (ComRuleOfficeEnd != null)
+            {
+                OfficeEndValue = ComRuleOfficeEnd.Value;
+                OfficeEnd = Double.Parse(OfficeEndValue);
+            }
+            #endregion
+            DateTime officeEnd = checkIn.Date.AddHours(OfficeEnd);  
+
             if (checkIn < officeStart)
                 checkIn = officeStart;
             if (checkOut > officeEnd)
                 checkOut = officeEnd;
 
-            // If invalid (checked out before check-in or outside office time)
             if (checkOut < checkIn)
                 return TimeSpan.Zero;
 
             return checkOut - checkIn;
         }
 
-        public static int CalculateHourlyLate(DateTime checkIn, DateTime checkOut)
+        public int CalculateHourlyLate(DateTime checkIn, DateTime checkOut)
         {
-            DateTime officeStart = checkIn.Date.AddHours(9);  // 9:00 AM
-            DateTime MorningFirstLate = checkIn.Date.AddHours(9.5); // 9:30 AM
-            DateTime MorningSecondLate = checkIn.Date.AddHours(10);  // 10:00 AM
+            var StartTimeValue = "";
+            double StartTime = 0.0;
+            var CheckInAcceptValue = "";
+            double CheckInAccept = 0.0;
+            var CheckInLateValue = "";
+            double CheckInLate = 0.0;
+            var OfficeEndValue = "";
+            double OfficeEnd = 0.0; 
+            var CheckoutAcceptValue = "";
+            double CheckoutAccept = 0.0;
+            var CheckoutLateValue = "";
+            double CheckoutLate = 0.0;
+
+            #region
+            var ComRuleOfficeStart =  _db.TblCompanyRules.FirstOrDefault(x => x.Description == "OFFICE_START_TIME" && x.DeleteFlag == false);
+            if (ComRuleOfficeStart != null)
+            {
+                StartTimeValue = ComRuleOfficeStart.Value;
+                StartTime = Double.Parse(StartTimeValue);
+            }
+            #endregion
+            DateTime officeStart = checkIn.Date.AddHours(StartTime);
+
+            #region
+            var ComRuleCheckinAccept = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKIN_ACCEPTABLE" && x.DeleteFlag == false);
+            if (ComRuleCheckinAccept != null)
+            {
+                CheckInAcceptValue = ComRuleCheckinAccept.Value;
+                CheckInAccept = Double.Parse(CheckInAcceptValue);
+            }
+            #endregion
+            DateTime MorningFirstLate = checkIn.Date.AddHours(CheckInAccept); 
+
+            #region
+            var ComRuleCheckinLate = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
+            if (ComRuleCheckinLate != null)
+            {
+                CheckInLateValue = ComRuleCheckinLate.Value;
+                CheckInLate = Double.Parse(CheckInLateValue);
+            }
+            #endregion
+            DateTime MorningSecondLate = checkIn.Date.AddHours(CheckInLate);  
 
             int hourLate = 0;
-
-            // If check-in between 9:30 and 10:00 -> 1 hour late
             if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate)
                 hourLate = 1;
 
 
-            DateTime officeEnd = checkIn.Date.AddHours(17);  // 5:00 PM
-            DateTime eveningFirstLate = checkIn.Date.AddHours(16.5); // 4:30 PM
-            DateTime eveningSecondLate = checkIn.Date.AddHours(16);  // 4:00 PM
+            //For CheckOut Late
+            #region
+            var ComRuleOfficeEnd = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "OFFICE_END_TIME" && x.DeleteFlag == false);
+            if (ComRuleOfficeEnd != null)
+            {
+                OfficeEndValue = ComRuleOfficeEnd.Value;
+                OfficeEnd = Double.Parse(OfficeEndValue);
+            }
+            #endregion
+            DateTime officeEnd = checkIn.Date.AddHours(OfficeEnd);
+
+            #region
+            var ComRuleCheckoutAccept = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKOUT_ACCEPTABLE" && x.DeleteFlag == false);
+            if (ComRuleCheckoutAccept != null)
+            {
+                CheckoutAcceptValue = ComRuleCheckoutAccept.Value;
+                CheckoutAccept = Double.Parse(CheckoutAcceptValue);
+            }
+            #endregion
+            DateTime eveningFirstLate = checkIn.Date.AddHours(CheckoutAccept);
+
+            #region
+            var ComRuleCheckoutLate = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
+            if (ComRuleCheckoutLate != null)
+            {
+                CheckoutLateValue = ComRuleCheckoutLate.Value;
+                CheckoutLate = Double.Parse(CheckoutLateValue);
+            }
+            #endregion
+            DateTime eveningSecondLate = checkIn.Date.AddHours(CheckoutLate);  
 
             if (checkOut < eveningFirstLate && checkOut >= eveningSecondLate)
                 hourLate += 1;
@@ -177,17 +260,37 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             return hourLate;
         }
 
-        public static int CalculateHalfDayLate(DateTime checkIn, DateTime checkOut)
+        public int CalculateHalfDayLate(DateTime checkIn, DateTime checkOut)
         {
             int halfDayLate = 0;
+            var CheckInLateValue = "";
+            double CheckInLate = 0.0;
+            var CheckoutLateValue = "";
+            double CheckoutLate = 0.0;
 
             //For Morning Part
-            DateTime MorningLate = checkIn.Date.AddHours(10); // 10:00 AM
+            #region
+            var ComRuleCheckinLate = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
+            if (ComRuleCheckinLate != null)
+            {
+                CheckInLateValue = ComRuleCheckinLate.Value;
+                CheckInLate = Double.Parse(CheckInLateValue);
+            }
+            #endregion
+            DateTime MorningLate = checkIn.Date.AddHours(CheckInLate); 
             if (checkIn > MorningLate)
                 halfDayLate = 1;
 
             //For Evening Part
-            DateTime eveningLate = checkIn.Date.AddHours(16);  // 4:00 PM
+            #region
+            var ComRuleCheckoutLate = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
+            if (ComRuleCheckoutLate != null)
+            {
+                CheckoutLateValue = ComRuleCheckoutLate.Value;
+                CheckoutLate = Double.Parse(CheckoutLateValue);
+            }
+            #endregion
+            DateTime eveningLate = checkIn.Date.AddHours(CheckoutLate); 
 
             if (checkOut < eveningLate)
                 halfDayLate += 1;
