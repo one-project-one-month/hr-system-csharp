@@ -313,16 +313,46 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                     return Result<AttendanceUpdateResponseModel>.NotFoundError("Attendance not found!");
                 }
 
+                //Working Hour
+                DateTime checkIn = (DateTime)requestModel.CheckInTime;
+                DateTime checkOut = (DateTime)requestModel.CheckOutTime;
+                TimeSpan workingHours = CalculateWorkingHours(checkIn, checkOut);
+
+
+                //Hourly Late
+                int HourLateFlag = CalculateHourlyLate(checkIn, checkOut);
+
+                //Half Day late
+                int HalfDayFlag = CalculateHalfDayLate(checkIn, checkOut);
+
+                //Full Day late
+                int FullDayFlag = 0;
+                if (HalfDayFlag == 2)
+                {
+                    FullDayFlag = 1;
+                }
+
+                //Check Location
+                bool IsSavedLocation = false;
+                var location = await _db.TblLocations
+                    .FirstOrDefaultAsync(x => x.LocationCode == requestModel.CheckInLocation
+                    && x.DeleteFlag == false);
+
+                if (location != null)
+                {
+                    IsSavedLocation = true;
+                }
+
                 item.EmployeeCode = requestModel.EmployeeCode;
                 item.AttendanceDate = requestModel.AttendanceDate;
                 item.CheckInTime = requestModel.CheckInTime;
                 item.CheckInLocation = requestModel.CheckInLocation;
                 item.CheckOutTime = requestModel.CheckOutTime;
                 item.CheckOutLocation = requestModel.CheckOutLocation;
-                item.WorkingHour = requestModel.WorkingHour;
-                item.HourLateFlag = requestModel.HourLateFlag;
-                item.HalfDayFlag = requestModel.HalfDayFlag;
-                item.FullDayFlag = requestModel.FullDayFlag;
+                item.WorkingHour = (decimal)workingHours.TotalHours;
+                item.HourLateFlag = HourLateFlag;
+                item.HalfDayFlag = HalfDayFlag;
+                item.FullDayFlag = FullDayFlag;
                 item.Remark = requestModel.Remark;
                 item.ModifiedBy = "";
                 item.ModifiedAt = DateTime.UtcNow;
