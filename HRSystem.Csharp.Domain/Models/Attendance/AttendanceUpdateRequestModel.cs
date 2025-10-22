@@ -22,13 +22,5 @@ public class AttendanceUpdateRequestModel
 
     public string? CheckOutLocation { get; set; }
 
-    public decimal? WorkingHour { get; set; }
-
-    public int? HourLateFlag { get; set; }
-
-    public int? HalfDayFlag { get; set; }
-
-    public int? FullDayFlag { get; set; }
-
     public string? Remark { get; set; }
 }
