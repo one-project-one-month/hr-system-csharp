@@ -17,9 +17,9 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             _attendance = attendance;
         }
 
-        public async Task<Result<AttendanceListResponseModel>> List()
+        public async Task<Result<AttendanceListResponseModel>> List(int pageNo, int PageSize)
         {
-            var data = await _attendance.List();
+            var data = await _attendance.List(pageNo, PageSize);
             return data;
         }
 
