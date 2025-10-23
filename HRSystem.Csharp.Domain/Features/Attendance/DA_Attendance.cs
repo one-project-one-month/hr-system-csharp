@@ -355,6 +355,7 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
                 item.HourLateFlag = HourLateFlag;
                 item.HalfDayFlag = HalfDayFlag;
                 item.FullDayFlag = FullDayFlag;
+                item.IsSavedLocation = IsSavedLocation;
                 item.Remark = requestModel.Remark;
                 item.ModifiedBy = "";
                 item.ModifiedAt = DateTime.UtcNow;
