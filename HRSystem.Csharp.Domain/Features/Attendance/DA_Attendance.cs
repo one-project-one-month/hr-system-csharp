@@ -19,12 +19,14 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
             _db = appDbContext;
         }
 
-        public async Task<Result<AttendanceListResponseModel>> List()
+        public async Task<Result<AttendanceListResponseModel>> List(int pageNo, int PageSize)
         {
             try
             {
                 var attendanceList = await _db.TblAttendances.Where(x => x.DeleteFlag == false)
                 .OrderByDescending(x => x.AttendanceDate)
+                .Skip((pageNo - 1) * PageSize)
+                .Take(PageSize)
                 .ToListAsync();
 
                 if (!attendanceList.Any() || attendanceList is null)
