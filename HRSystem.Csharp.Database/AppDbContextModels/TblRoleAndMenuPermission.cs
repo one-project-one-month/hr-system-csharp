@@ -5,7 +5,7 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblRoleAndMenuPermission
 {
-    public Guid RoleAndMenuPermissionId { get; set; }
+    public string RoleAndMenuPermissionId { get; set; } = null!;
 
     public string? RoleAndMenuPermissionCode { get; set; }
 

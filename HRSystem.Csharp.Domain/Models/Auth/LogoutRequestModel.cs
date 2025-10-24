@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HRSystem.Csharp.Domain.Models
+namespace HRSystem.Csharp.Domain.Models.Auth;
+
+public class LogoutRequestModel
 {
-    public class Role
-    {
-        public string Name { get; set; }
-    }
+    public string RefrehToken { get; set; }
 }

@@ -1,5 +1,12 @@
 ﻿using HRSystem.Csharp.Domain.Features;
 using HRSystem.Csharp.Domain.Features.Attendance;
+using HRSystem.Csharp.Domain.Features.Location;
+using HRSystem.Csharp.Domain.Features.Project;
+using HRSystem.Csharp.Domain.Helpers;
+using HRSystem.Csharp.Domain.Models.Project;
+﻿using HRSystem.Csharp.Domain.Features.Roles;
+using HRSystem.Csharp.Domain.Features.Auth;
+using HRSystem.Csharp.Domain.Features.Employee;
 
 namespace HRSystem.Csharp.Domain
 {
@@ -9,20 +16,36 @@ namespace HRSystem.Csharp.Domain
         private static void AddServices(this WebApplicationBuilder builder)
         {
             #region User Management BL
-
             builder.Services.AddScoped<BL_Role>();
             builder.Services.AddScoped<BL_Attendance>();
 
+            builder.Services.AddScoped<BL_Menu>();
+            builder.Services.AddScoped<BL_MenuGroup>();
+            builder.Services.AddScoped<BL_Location>();
+            builder.Services.AddScoped<BL_Project>();
+            builder.Services.AddScoped<BL_Employee>();
+            builder.Services.AddScoped<BL_Auth>();
             #endregion
 
             #region User Management DA
-
             builder.Services.AddScoped<DA_Role>();
             builder.Services.AddScoped<DA_Attendance>();
 
+            builder.Services.AddScoped<DA_Menu>(); 
+            builder.Services.AddScoped<DA_MenuGroup>();
+            builder.Services.AddScoped<DA_Location>();
+            builder.Services.AddScoped<DA_Project>();
+            builder.Services.AddScoped<DA_Employee>();
+            builder.Services.AddScoped<DA_Auth>();
             #endregion
+
+            builder.Services.AddScoped<Generator>();
+            builder.Services.AddScoped<JwtService>();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<AuthorizationService>();
+
         }
-        
+
         public static void AddDomain(this WebApplicationBuilder builder)
         {
             builder.Services.AddDbContext<AppDbContext>(opt =>

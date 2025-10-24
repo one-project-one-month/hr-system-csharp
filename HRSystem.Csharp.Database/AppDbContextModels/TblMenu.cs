@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblMenu
 {
-    public Guid MenuId { get; set; }
+    public string MenuId { get; set; } = null!;
 
-    public string? MenuCode { get; set; }
+    public string MenuCode { get; set; } = null!;
 
     public string? MenuGroupCode { get; set; }
 
