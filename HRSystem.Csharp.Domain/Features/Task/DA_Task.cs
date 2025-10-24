@@ -98,9 +98,11 @@ public class DA_Task
         {
             return Result<TaskEditResponseModel>.BadRequestError("TaskId is required.");
         }
+
         try
         {
-            var task = await _db.TblTasks.FirstOrDefaultAsync(t => t.TaskId.ToString() == taskId && t.DeleteFlag == false);
+            var task = await _db.TblTasks.FirstOrDefaultAsync(t =>
+                t.TaskId.ToString() == taskId && t.DeleteFlag == false);
 
             if (task is null)
             {
@@ -136,7 +138,7 @@ public class DA_Task
         {
             var task = await _db.TblTasks
                 .FirstOrDefaultAsync(t => t.DeleteFlag == false
-                && t.TaskId == requestModel.TaskId);
+                                          && t.TaskId == requestModel.TaskId.ToString());
 
             if (task is null)
             {
@@ -173,7 +175,8 @@ public class DA_Task
 
         try
         {
-            var task = await _db.TblTasks.FirstOrDefaultAsync(t => t.TaskId.ToString() == taskId && t.DeleteFlag == false);
+            var task = await _db.TblTasks.FirstOrDefaultAsync(t =>
+                t.TaskId.ToString() == taskId && t.DeleteFlag == false);
 
             if (task is null)
             {

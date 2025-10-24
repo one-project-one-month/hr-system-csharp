@@ -13,7 +13,7 @@ public class TaskEditResponseModel
 
 public class TaskEditModel
 {
-    public Guid TaskId { get; set; }
+    public string TaskId { get; set; }
 
     public string? TaskCode { get; set; }
 

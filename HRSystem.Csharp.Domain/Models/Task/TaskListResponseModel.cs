@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ public class TaskListResponseModel
 
 public class TaskModel
 {
-    public Guid TaskId { get; set; }
+    public string TaskId { get; set; }
 
     public string? TaskCode { get; set; }
 
