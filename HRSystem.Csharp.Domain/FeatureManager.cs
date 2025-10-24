@@ -5,6 +5,7 @@ using HRSystem.Csharp.Domain.Helpers;
 using HRSystem.Csharp.Domain.Models.Project;
 ﻿using HRSystem.Csharp.Domain.Features.Roles;
 using HRSystem.Csharp.Domain.Features.Auth;
+using HRSystem.Csharp.Domain.Features.Employee;
 
 namespace HRSystem.Csharp.Domain
 {
@@ -19,6 +20,7 @@ namespace HRSystem.Csharp.Domain
             builder.Services.AddScoped<BL_MenuGroup>();
             builder.Services.AddScoped<BL_Location>();
             builder.Services.AddScoped<BL_Project>();
+            builder.Services.AddScoped<BL_Employee>();
             builder.Services.AddScoped<BL_Auth>();
             #endregion
 
@@ -28,6 +30,7 @@ namespace HRSystem.Csharp.Domain
             builder.Services.AddScoped<DA_MenuGroup>();
             builder.Services.AddScoped<DA_Location>();
             builder.Services.AddScoped<DA_Project>();
+            builder.Services.AddScoped<DA_Employee>();
             builder.Services.AddScoped<DA_Auth>();
             #endregion
 
