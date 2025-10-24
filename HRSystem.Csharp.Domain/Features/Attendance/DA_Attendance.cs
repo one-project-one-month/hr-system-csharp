@@ -1,12 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Models.Attendance;
-using HRSystem.Csharp.Shared;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRSystem.Csharp.Domain.Features.Attendance
 {
@@ -106,7 +99,7 @@ namespace HRSystem.Csharp.Domain.Features.Attendance
 
                 var newAttendance = new TblAttendance()
                 {
-                    AttendanceId = Guid.NewGuid(),
+                    AttendanceId = Guid.NewGuid().ToString(),
                     AttendanceCode = attendanceCode,
                     EmployeeCode = requestModel.EmployeeCode,
                     AttendanceDate = requestModel.AttendanceDate,

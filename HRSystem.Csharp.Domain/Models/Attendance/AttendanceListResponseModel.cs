@@ -13,7 +13,7 @@ namespace HRSystem.Csharp.Domain.Models.Attendance
 
     public class AttendanceListModel
     {
-        public Guid AttendanceId { get; set; }
+        public string AttendanceId { get; set; }
 
         public string? AttendanceCode { get; set; }
 
