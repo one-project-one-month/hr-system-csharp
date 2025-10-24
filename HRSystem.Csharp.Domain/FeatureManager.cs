@@ -1,4 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Features;
+using HRSystem.Csharp.Domain.Features.Task;
 using HRSystem.Csharp.Domain.Features.Attendance;
 using HRSystem.Csharp.Domain.Features.Location;
 using HRSystem.Csharp.Domain.Features.Project;
@@ -27,6 +28,12 @@ namespace HRSystem.Csharp.Domain
             builder.Services.AddScoped<BL_Auth>();
             #endregion
 
+            #region Main Nav Bar BL
+
+            builder.Services.AddScoped<BL_Task>();
+
+            #endregion
+
             #region User Management DA
             builder.Services.AddScoped<DA_Role>();
             builder.Services.AddScoped<DA_Attendance>();
@@ -39,6 +46,10 @@ namespace HRSystem.Csharp.Domain
             builder.Services.AddScoped<DA_Auth>();
             #endregion
 
+            #region Main Nav Bar DA
+
+            builder.Services.AddScoped<DA_Task>();
+            #endregion
             builder.Services.AddScoped<Generator>();
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddHttpContextAccessor();
