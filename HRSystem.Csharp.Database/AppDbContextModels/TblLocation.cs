@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblLocation
 {
-    public Guid LocationId { get; set; }
+    public string LocationId { get; set; } = null!;
 
-    public string? LocationCode { get; set; }
+    public string LocationCode { get; set; } = null!;
 
     public string? Name { get; set; }
 

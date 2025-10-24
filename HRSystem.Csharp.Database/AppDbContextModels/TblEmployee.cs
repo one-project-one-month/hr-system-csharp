@@ -5,11 +5,13 @@ namespace HRSystem.Csharp.Database.AppDbContextModels;
 
 public partial class TblEmployee
 {
-    public Guid EmployeeId { get; set; }
+    public string EmployeeId { get; set; } = null!;
 
-    public string? EmployeeCode { get; set; }
+    public string EmployeeCode { get; set; } = null!;
 
     public string? RoleCode { get; set; }
+
+    public string? Username { get; set; }
 
     public string? Name { get; set; }
 
