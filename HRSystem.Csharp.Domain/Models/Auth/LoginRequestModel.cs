@@ -1,4 +1,4 @@
-﻿namespace HRSystem.Csharp.Domain.Models.Auth;;
+﻿namespace HRSystem.Csharp.Domain.Models.Auth;
 
 public class LoginRequestModel
 {
