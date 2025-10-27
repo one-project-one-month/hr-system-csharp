@@ -1,4 +1,6 @@
-﻿namespace HRSystem.Csharp.Domain;
+﻿using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
+
+namespace HRSystem.Csharp.Domain;
 
 public static class FeatureManager
 {
@@ -39,6 +41,13 @@ public static class FeatureManager
         #region Main Nav Bar DA
 
         builder.Services.AddScoped<DA_Task>();
+
+        #endregion
+
+        #region Role Menu Permission
+
+        builder.Services.AddScoped<BL_RoleMenuPermission>();
+        builder.Services.AddScoped<DA_RoleMenuPermission>();
 
         #endregion
 
