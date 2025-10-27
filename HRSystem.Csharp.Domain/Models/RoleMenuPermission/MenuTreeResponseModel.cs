@@ -7,17 +7,24 @@ public class MenuTreeResponseModel
 
 public class MenuGroupResponseModel
 {
-    public string GroupCode { get; set; }
-    public string GroupName { get; set; }
-    public string GroupIcon { get; set; }
-    public string GroupUrl { get; set; }
-    public List<MenuItemResponseModel> Items { get; set; }
+    public string MenuGroupCode { get; set; }
+    public string MenuGroupName { get; set; }
+    public string MenuGroupIcon { get; set; }
+    public string MenuGroupUrl { get; set; }
+    public bool IsChecked { get; set; }
+    public List<MenuItemResponseModel> ChildMenus { get; set; }
 }
 
 public class MenuItemResponseModel
 {
-    public string MenuCode { get; set; }
-    public string MenuName { get; set; }
-    public string MenuIcon { get; set; }
-    public string MenuUrl { get; set; }
+    public string MenuItemCode { get; set; }
+    public string MenuItemName { get; set; }
+    public string MenuItemIcon { get; set; }
+    public string MenuItemUrl { get; set; }
+    public bool IsChecked { get; set; }
+}
+
+public class MenuTreeRequestModel
+{
+    public string? RoleCode { get; set; }
 }

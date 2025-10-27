@@ -1,4 +1,5 @@
 using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
+using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -15,13 +16,13 @@ public class RoleMenuPermissionController : ControllerBase
         _logger = logger;
         _blRoleMenuPermission = blRoleMenuPermission;
     }
-
-    [HttpGet("menu-tree")]
-    public async Task<IActionResult> GetMenuTree()
+    
+    [HttpPost("menu-tree-with-permission")]
+    public async Task<IActionResult> GetMenuTreeWithPermissions(MenuTreeRequestModel reqModel)
     {
         try
         {
-            var result = await _blRoleMenuPermission.GetMenuTreeAsync();
+            var result = await _blRoleMenuPermission.GetMenuTreeWithPermissionsAsync(reqModel);
             if (result.IsError)
                 return BadRequest(result);
 

@@ -28,7 +28,6 @@ public class DA_Role
                     ModifiedAt = r.ModifiedAt,
                     ModifiedBy = r.ModifiedBy,
                     DeleteFlag = r.DeleteFlag,
-
                 })
                 .ToList();
             return Result<List<RoleResponseModel>>.Success(roles);
@@ -43,7 +42,8 @@ public class DA_Role
     {
         try
         {
-            var existing = _appDbContext.TblRoles.FirstOrDefault(r => r.RoleCode == role.RoleCode && r.DeleteFlag != true);
+            var existing =
+                _appDbContext.TblRoles.FirstOrDefault(r => r.RoleCode == role.RoleCode && r.DeleteFlag != true);
             if (existing != null)
             {
                 return Result<bool>.InvalidDataError("A duplicate role has already been created!");
@@ -63,8 +63,9 @@ public class DA_Role
             };
             _appDbContext.TblRoles.Add(newRole);
             var result = _appDbContext.SaveChanges();
-            return result > 0 ? Result<bool>.Success(true)
-                    : Result<bool>.Error();
+            return result > 0
+                ? Result<bool>.Success(true)
+                : Result<bool>.Error();
         }
         catch (Exception ex)
         {
@@ -74,7 +75,6 @@ public class DA_Role
 
     public Result<RoleResponseModel> GetRoleByCode(string roleCode)
     {
-
         try
         {
             var role = _appDbContext.TblRoles.Where(r => r.DeleteFlag != true)
@@ -113,18 +113,21 @@ public class DA_Role
         existingRole.ModifiedBy = "admin";
 
         var result = _appDbContext.SaveChanges();
-        return result > 0 ? Result<bool>.Success(true)
-                : Result<bool>.Error();
+        return result > 0
+            ? Result<bool>.Success(true)
+            : Result<bool>.Error();
     }
 
     public Result<bool> DeleteRole(string roleCode)
     {
-        var roleToBeDeleted = _appDbContext.TblRoles.FirstOrDefault(r => r.RoleCode == roleCode && r.DeleteFlag != true);
+        var roleToBeDeleted =
+            _appDbContext.TblRoles.FirstOrDefault(r => r.RoleCode == roleCode && r.DeleteFlag != true);
         if (roleToBeDeleted is null) return Result<bool>.NotFoundError("Cannot find the role to be deleted");
 
         roleToBeDeleted.DeleteFlag = true;
         var result = _appDbContext.SaveChanges();
-        return result > 0 ? Result<bool>.Success(true)
-                : Result<bool>.Error();
+        return result > 0
+            ? Result<bool>.Success(true)
+            : Result<bool>.Error();
     }
 }

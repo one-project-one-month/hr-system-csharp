@@ -5,6 +5,7 @@ namespace HRSystem.Csharp.Domain.Features.MenuGroup;
 public class DA_MenuGroup
 {
     private readonly AppDbContext _context;
+
     public DA_MenuGroup(AppDbContext context)
     {
         _context = context;
@@ -31,7 +32,7 @@ public class DA_MenuGroup
             .ToListAsync();
     }
 
-    public async Task<MenuGroupModel?> GetMenuGroupById(string menuGroupCode)
+    public async Task<MenuGroupModel?> GetMenuGroupByCode(string menuGroupCode)
     {
         return await _context.TblMenuGroups
             .Where(mg => mg.MenuGroupCode.Equals(menuGroupCode) && mg.DeleteFlag == false)
@@ -50,7 +51,6 @@ public class DA_MenuGroup
                 ModifiedBy = mg.ModifiedBy,
             })
             .SingleOrDefaultAsync();
-
     }
 
     public async Task<Result<bool>> UpdateMenuGroup(string menuGroupCode, MenuGroupUpdateRequestModel menuGroup)
@@ -58,8 +58,8 @@ public class DA_MenuGroup
         try
         {
             var existingMenuGroup = await _context.TblMenuGroups
-            .Where(mg => mg.MenuGroupCode.Equals(menuGroupCode) && mg.DeleteFlag == false)
-            .SingleOrDefaultAsync();
+                .Where(mg => mg.MenuGroupCode.Equals(menuGroupCode) && mg.DeleteFlag == false)
+                .SingleOrDefaultAsync();
 
             if (existingMenuGroup == null)
             {
@@ -68,14 +68,15 @@ public class DA_MenuGroup
 
             var duplicate = await _context.TblMenuGroups
                 .AnyAsync(mg =>
-                mg.MenuGroupName == menuGroup.MenuGroupName
-                && menuGroupCode != mg.MenuGroupCode
-                && mg.DeleteFlag == false);
+                    mg.MenuGroupName == menuGroup.MenuGroupName
+                    && menuGroupCode != mg.MenuGroupCode
+                    && mg.DeleteFlag == false);
 
             if (duplicate)
             {
                 return Result<bool>.DuplicateRecordError("Menu Group Name already exists!");
             }
+
             existingMenuGroup.MenuGroupName = menuGroup.MenuGroupName;
             existingMenuGroup.Url = menuGroup.Url;
             existingMenuGroup.Icon = menuGroup.Icon;
@@ -85,13 +86,14 @@ public class DA_MenuGroup
             //existingMenuGroup.ModifiedBy = logginedUser;
             _context.Update(existingMenuGroup);
             var count = await _context.SaveChangesAsync();
-            return count > 0 ? Result<bool>.Success(true) : Result<bool>.Error("Error occurred while updating MenuGroup");
+            return count > 0
+                ? Result<bool>.Success(true)
+                : Result<bool>.Error("Error occurred while updating MenuGroup");
         }
         catch (Exception ex)
         {
             return Result<bool>.Error($"An error occured while updating MenuGroup: ${ex.Message}");
         }
-
     }
 
     public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
@@ -128,13 +130,13 @@ public class DA_MenuGroup
             {
                 return Result<TblMenuGroup>.Error($"Failed to create Menu Group");
             }
+
             return Result<TblMenuGroup>.Success(menuGroup);
         }
         catch (Exception ex)
         {
             return Result<TblMenuGroup>.Error($"An error occured while creating MenuGroup: ${ex.Message}");
         }
-
     }
 
     public async Task<Result<TblMenuGroup>> DeleteMenuGroup(string menuGroupCode)
@@ -143,7 +145,7 @@ public class DA_MenuGroup
         {
             var foundMenuGroup = await _context.TblMenuGroups.FirstOrDefaultAsync(
                 x => x.MenuGroupCode == menuGroupCode && x.DeleteFlag == false
-                );
+            );
             if (foundMenuGroup is null)
             {
                 return Result<TblMenuGroup>.NotFoundError();

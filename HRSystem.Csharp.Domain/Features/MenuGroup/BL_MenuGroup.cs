@@ -22,7 +22,7 @@ public class BL_MenuGroup
         {
             return Result<MenuGroupModel>.BadRequestError("MenuGroupId is required.");
         }
-        var menuGroup = await _daMenuGroup.GetMenuGroupById(menuGroupId);
+        var menuGroup = await _daMenuGroup.GetMenuGroupByCode(menuGroupId);
         if (menuGroup == null)
         {
             return Result<MenuGroupModel>.Error("Menu group not found.");
