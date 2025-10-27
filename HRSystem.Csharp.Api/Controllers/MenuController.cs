@@ -16,7 +16,6 @@ public class MenuController : ControllerBase
 
     [HttpGet("menus")]
     public async Task<IActionResult> Get()
-
     {
         var result = await _blMenu.GetAllMenus();
         if (result.IsSuccess)
@@ -28,16 +27,18 @@ public class MenuController : ControllerBase
 
     [HttpPost("menu")]
     public async Task<IActionResult> CreateMenu([FromBody] MenuRequestModel requestMenu)
-    {   
+    {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        var result =await _blMenu.CreateMenuAsync(requestMenu);
-        if(result.IsSuccess)
+
+        var result = await _blMenu.CreateMenuAsync(requestMenu);
+        if (result.IsSuccess)
         {
             return Ok(result);
         }
+
         return BadRequest(result);
     }
 
@@ -49,6 +50,7 @@ public class MenuController : ControllerBase
         {
             return Ok(result.Data);
         }
+
         return BadRequest(result);
     }
 
@@ -59,6 +61,7 @@ public class MenuController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
         var result = await _blMenu.UpdateMenu(menuCode, menu);
         return result.IsSuccess ? Ok(result.Data) : BadRequest(result);
     }
@@ -71,6 +74,7 @@ public class MenuController : ControllerBase
         {
             return Ok(result);
         }
+
         return BadRequest(result);
     }
 }
