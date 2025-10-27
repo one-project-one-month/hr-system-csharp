@@ -16,13 +16,31 @@ public class RoleMenuPermissionController : ControllerBase
         _logger = logger;
         _blRoleMenuPermission = blRoleMenuPermission;
     }
-    
+
     [HttpPost("menu-tree-with-permission")]
     public async Task<IActionResult> GetMenuTreeWithPermissions(MenuTreeRequestModel reqModel)
     {
         try
         {
             var result = await _blRoleMenuPermission.GetMenuTreeWithPermissionsAsync(reqModel);
+            if (result.IsError)
+                return BadRequest(result);
+
+            return Ok(result.Data);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString());
+            return StatusCode(500, "Unexpected error occurred.");
+        }
+    }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateRoleMenuPermission(CreateRoleMenuPermissionRequestModel reqModel)
+    {
+        try
+        {
+            var result = await _blRoleMenuPermission.CreateRoleMenuPermission(reqModel);
             if (result.IsError)
                 return BadRequest(result);
 
