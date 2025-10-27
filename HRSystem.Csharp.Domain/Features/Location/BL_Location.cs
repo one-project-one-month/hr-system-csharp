@@ -9,33 +9,33 @@ public class BL_Location
         _daProject = daProject;
     }
 
-    public Result<bool> CreateLocation(LocationCreateRequestModel location)
+    public async Task<Result<bool>> CreateLocation(LocationCreateRequestModel location)
     {
-        var result = _daProject.CreateLocation(location);
+        var result = await _daProject.CreateLocation(location);
         return result;
     }
 
-    public Result<List<LocationResponseModel>> GetAllLocations()
+    public async Task<Result<List<LocationResponseModel>>> GetAllLocations()
     {
-        var result = _daProject.GetAllLocations();
+        var result = await _daProject.GetAllLocations();
         return result;
     }
 
-    public Result<LocationResponseModel> GetLocationByCode(string locationCode)
+    public async Task<Result<LocationResponseModel>> GetLocationByCode(string locationCode)
     {
-        var result = _daProject.GetLocationByCode(locationCode);
+        var result = await _daProject.GetLocationByCode(locationCode);
         return result;
     }
 
-    public Result<bool> UpdateLocation(string locationCode, LocationUpdateRequestModel location)
+    public async Task<Result<bool>> UpdateLocation(string locationCode, LocationUpdateRequestModel location)
     {
-        var result = _daProject.UpdateLocation(locationCode, location);
+        var result = await _daProject.UpdateLocation(locationCode, location);
         return result;
     }
 
-    public Result<bool> DeleteLocation(string locationCode)
+    public async Task<Result<bool>> DeleteLocation(string locationCode)
     {
-        var result = _daProject.DeleteLocation(locationCode);
+        var result = await _daProject.DeleteLocation(locationCode);
         return result;
     }
 }
