@@ -29,6 +29,7 @@ public class DA_Location
     public async Task<Result<List<LocationResponseModel>>> GetAllLocations()
     {
         var locations = _appDbContext.TblLocations
+            .AsNoTracking()
             .Where(l => l.DeleteFlag == false)
             .Select(l => l.Map())
             .ToList();
@@ -43,6 +44,7 @@ public class DA_Location
     public async Task<Result<LocationResponseModel>> GetLocationByCode(string locationCode)
     {
         var location = _appDbContext.TblLocations
+            .AsNoTracking()
             .Where(l => l.DeleteFlag == false)
             .Select(l => l.Map())
             .FirstOrDefault(l => l.LocationCode == locationCode);
