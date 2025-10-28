@@ -49,7 +49,7 @@ public class BL_Menu
             Url = menu.Url,
             Icon = menu.Icon,
             SortOrder = menu.SortOrder,
-            ModifiedAt = DateTime.Now,
+            ModifiedAt = DateTime.UtcNow,
             //ModifiedBy = menu.ModifiedBy,
         };
 
@@ -57,39 +57,24 @@ public class BL_Menu
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<TblMenu>> CreateMenuAsync(MenuRequestModel requestMenu)
+    public async Task<Result<MenuModel>> CreateMenuAsync(MenuRequestModel requestMenu)
     {
-        if (requestMenu.MenuCode is null || string.IsNullOrWhiteSpace(requestMenu.MenuCode))
-        {
-            return Result<TblMenu>.BadRequestError("MenuCode cannot be empty.");
-        }
-
-        if (requestMenu.MenuGroupCode is null || string.IsNullOrWhiteSpace(requestMenu.MenuGroupCode))
-        {
-            return Result<TblMenu>.BadRequestError("MenuGroupCode cannot be empty.");
-        }
-
-        if (requestMenu is null)
-        {
-            return Result<TblMenu>.BadRequestError("Request Menu cannot be null.");
-        }
-
         var duplicateMenu = await _daMenu.MenuCodeExists(requestMenu);
 
         if (duplicateMenu)
         {
-            return Result<TblMenu>.DuplicateRecordError("Menu with that MenuCode or MenuName is existed");
+            return Result<MenuModel>.DuplicateRecordError("Menu with that MenuCode or MenuName is existed");
         }
 
         var response = await _daMenu.CreateMenuAsync(requestMenu);
         return response;
     }
 
-    public async Task<Result<TblMenu>> DeleteMenuAsync(string menuCode)
+    public async Task<Result<bool>> DeleteMenuAsync(string menuCode)
     {
         if (menuCode is null)
         {
-            return Result<TblMenu>.BadRequestError("MenuCode is required.");
+            return Result<bool>.BadRequestError("MenuCode is required.");
         }
 
         var response = await _daMenu.DeleteMenuAsync(menuCode);

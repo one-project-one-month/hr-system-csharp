@@ -1,4 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Models.Menu;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace HRSystem.Csharp.Domain.Features.Menu;
 
@@ -33,6 +34,7 @@ public class DA_Menu
                     ModifiedAt = m.menu.ModifiedAt,
                     SortOrder = m.menu.SortOrder,
                 })
+                .AsNoTracking()
                 .ToListAsync();
            
             return Result<List<MenuModel>>.Success(menus);
@@ -62,7 +64,9 @@ public class DA_Menu
                     CreatedAt = m.menu.CreatedAt,
                     ModifiedAt = m.menu.ModifiedAt,
 
-                }).SingleOrDefaultAsync();
+                })
+                .AsNoTracking()
+                .SingleOrDefaultAsync();
     }
 
     public async Task<bool> MenuExists(string menuCode, MenuRequestModel menu)
@@ -99,7 +103,7 @@ public class DA_Menu
         return rows > 0;
     }
 
-    public async Task<Result<TblMenu>> CreateMenuAsync(MenuRequestModel requestMenu)
+    public async Task<Result<MenuModel>> CreateMenuAsync(MenuRequestModel requestMenu)
     {
         try
         {
@@ -107,7 +111,7 @@ public class DA_Menu
                 x => x.MenuCode == requestMenu.MenuCode && x.MenuGroupCode == requestMenu.MenuGroupCode);
             if (foundMenu != null)
             {
-                return Result<TblMenu>.DuplicateRecordError("Menu with that MenuCode or MenuGroupCode is existed", foundMenu);
+                return Result<MenuModel>.DuplicateRecordError("Menu with that MenuCode or MenuGroupCode is existed");
             }
 
             // create new
@@ -125,28 +129,43 @@ public class DA_Menu
                 DeleteFlag = false,
             };
 
-            await _dbContext.TblMenus.AddAsync(menu);
+            await _dbContext.AddAsync(menu);
             var result = await _dbContext.SaveChangesAsync();
             if (result <= 0)
             {
-                return Result<TblMenu>.Error("Failed to create Menu.");
+                return Result<MenuModel>.Error("Failed to create Menu.");
             }
-            return Result<TblMenu>.Success(menu);
+
+            // map entity to DTO
+            var menuModel = new MenuModel
+            {
+                MenuId = menu.MenuId,
+                MenuCode = menu.MenuCode,
+                MenuName = menu.MenuName,
+                MenuGroupCode = menu.MenuGroupCode,
+                Url = menu.Url,
+                Icon = menu.Icon,
+                SortOrder = menu.SortOrder,
+                CreatedAt = menu.CreatedAt,
+                //CreatedBy =loggined User,
+                DeleteFlag = menu.DeleteFlag ?? false,
+            };
+            return Result<MenuModel>.Success(menuModel);
         }
         catch (Exception ex)
         {
-            return Result<TblMenu>.Error($"An error is occured while creating Menu: {ex.Message}");
+            return Result<MenuModel>.Error($"An error is occured while creating Menu: {ex.Message}");
         }
     }
 
-    public async Task<Result<TblMenu>> DeleteMenuAsync(string menuCode)
+    public async Task<Result<bool>> DeleteMenuAsync(string menuCode)
     {
         try
         {
             var foundMenu = _dbContext.TblMenus.FirstOrDefault(x => x.MenuCode == menuCode);
             if (foundMenu is null)
             {
-                return Result<TblMenu>.NotFoundError();
+                return Result<bool>.NotFoundError();
             }
 
             foundMenu.ModifiedAt = DateTime.UtcNow;
@@ -155,14 +174,14 @@ public class DA_Menu
             var result = await _dbContext.SaveChangesAsync();
             if (result <= 0)
             {
-                return Result<TblMenu>.Error("Failed to delete Menu");
+                return Result<bool>.Error("Failed to delete Menu");
             }
-            return Result<TblMenu>.Success(foundMenu);
+            return Result<bool>.Success(true);
 
         }
         catch (Exception ex)
         {
-            return Result<TblMenu>.Error($"An error is occured while deleting the menu: {ex.Message}");
+            return Result<bool>.Error($"An error is occured while deleting the menu: {ex.Message}");
         }
     }
 }
