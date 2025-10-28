@@ -1,226 +1,248 @@
 CREATE DATABASE [HRSystem];
 USE [HRSystem];
 
--- Table: Tbl_Role
+-- table name: Tbl_Role
 CREATE TABLE Tbl_Role (
-    RoleId VARCHAR(200) NOT NULL PRIMARY KEY,
-    RoleCode VARCHAR(50) NOT NULL UNIQUE,
-    RoleName VARCHAR(200),
-    UniqueName VARCHAR(50),
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
+    RoleId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    RoleCode NVARCHAR(50) NOT NULL UNIQUE,
+    RoleName NVARCHAR(200),
+    UniqueName NVARCHAR(50),
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_MenuGroup
+-- table name: Tbl_MenuGroup
 CREATE TABLE Tbl_MenuGroup (
-    MenuGroupId VARCHAR(200) NOT NULL PRIMARY KEY,
-    MenuGroupCode VARCHAR(50) NOT NULL UNIQUE,
-    MenuGroupName VARCHAR(200),
-    Url VARCHAR(200),
-    Icon VARCHAR(200),
-    SortOrder INT,
-    HasMenuGroup BIT,
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
+    MenuGroupId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    MenuGroupCode NVARCHAR(50) NOT NULL UNIQUE,
+    MenuGroupName NVARCHAR(200),
+    Url NVARCHAR(200),
+    Icon NVARCHAR(200),
+    SortOrder INT,
+    HasMenuItem BIT,
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_Menu
+-- table name: Tbl_Menu
 CREATE TABLE Tbl_Menu (
-    MenuId VARCHAR(200) NOT NULL PRIMARY KEY,
-    MenuCode VARCHAR(50) NOT NULL UNIQUE,
-    MenuGroupCode VARCHAR(50),
-    MenuName VARCHAR(200),
-    Url VARCHAR(200),
-    Icon VARCHAR(200),
-    SortOrder INT,
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
+    MenuId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    MenuCode NVARCHAR(50) NOT NULL UNIQUE,
+    MenuGroupCode NVARCHAR(50),
+    MenuName NVARCHAR(200),
+    Url NVARCHAR(200),
+    Icon NVARCHAR(200),
+    SortOrder INT,
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_RoleAndMenuPermission
+-- table name: Tbl_RoleAndMenuPermission
 CREATE TABLE Tbl_RoleAndMenuPermission (
-    RoleAndMenuPermissionId VARCHAR(200) NOT NULL PRIMARY KEY,
-    RoleAndMenuPermissionCode VARCHAR(50),
-    RoleCode VARCHAR(50),
-    MenuGroupCode VARCHAR(50),
-    MenuCode VARCHAR(50),
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
+    RoleAndMenuPermissionId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    RoleAndMenuPermissionCode NVARCHAR(50) UNIQUE,
+    RoleCode NVARCHAR(50),
+    MenuGroupCode NVARCHAR(50),
+    MenuCode NVARCHAR(50),
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_Sequence
+-- table name: Tbl_Sequence
 CREATE TABLE Tbl_Sequence (
-    SequenceId VARCHAR(200) NOT NULL PRIMARY KEY,
-    UniqueName VARCHAR(50) NOT NULL,
-    SequenceNo VARCHAR(50),
-    SequenceDate DATETIME,
-    SequenceType VARCHAR(50),
-    RoleCode VARCHAR(50),
-    DeleteFlag BIT
+    SequenceId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    UniqueName NVARCHAR(50),
+    SequenceNo NVARCHAR(50),
+    SequenceDate DATETIME,
+    SequenceType NVARCHAR(50),
+    RoleCode NVARCHAR(50),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_Project
+-- table name: Tbl_Project
 CREATE TABLE Tbl_Project (
-    ProjectId VARCHAR(200) NOT NULL PRIMARY KEY,
-    ProjectCode VARCHAR(50) NOT NULL UNIQUE,
-    ProjectName VARCHAR(200),
-    ProjectDescription VARCHAR(200),
-    StartDate DATETIME,
-    EndDate DATETIME,
-    ProjectStatus VARCHAR(50),
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
+    ProjectId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    ProjectCode NVARCHAR(50) NOT NULL UNIQUE,
+    ProjectName NVARCHAR(200),
+    ProjectDescription NVARCHAR(200),
+    StartDate DATETIME,
+    EndDate DATETIME,
+    ProjectStatus NVARCHAR(50),
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_Employee
-CREATE TABLE Tbl_Employee (
-    EmployeeId VARCHAR(200) NOT NULL PRIMARY KEY,
-    EmployeeCode VARCHAR(50) NOT NULL UNIQUE,
-    RoleCode VARCHAR(50),
-    Name VARCHAR(200),
-    Email VARCHAR(200),
-    Password VARCHAR(200),
-	WrongPasswordCount INT,
-	IsFirstTime BIT,
-	IsLocked BIT,
-    PhoneNo VARCHAR(50),
-    ProfileImage VARCHAR(200),
-    StartDate DATETIME,
-    ResignDate DATETIME,
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
-);
-
--- Table: Tbl_EmployeeProject
+-- table name: Tbl_EmployeeProject
 CREATE TABLE Tbl_EmployeeProject (
-    EmployeeProjectId VARCHAR(200) NOT NULL PRIMARY KEY,
-    EmployeeProjectCode VARCHAR(50) NOT NULL UNIQUE,
-    ProjectCode VARCHAR(50),
-    EmployeeCode VARCHAR(50),
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
+    EmployeeProjectId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    EmployeeProjectCode NVARCHAR(50) NOT NULL UNIQUE,
+    ProjectCode NVARCHAR(50),
+    EmployeeCode NVARCHAR(50),
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_Verification
+-- table name: Tbl_Verification
 CREATE TABLE Tbl_Verification (
-    VerificationId VARCHAR(200) NOT NULL PRIMARY KEY,
-    VerificationCode VARCHAR(50),
-    Email VARCHAR(200),
-    ExpiredTime DATETIME,
-    IsUsed BIT,
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
+    VerificationId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    VerificationCode NVARCHAR(50) NOT NULL UNIQUE,
+    Email NVARCHAR(200),
+    ExpiredTime DATETIME,
+    IsUsed BIT,
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_CompanyRule
+-- table name: Tbl_CompanyRule
 CREATE TABLE Tbl_CompanyRule (
-    CompanyRuleId VARCHAR(200) NOT NULL PRIMARY KEY,
-    CompanyRuleCode VARCHAR(50) NOT NULL UNIQUE,
-    Description VARCHAR(200),
-    Value VARCHAR(50),
-    IsActive BIT,
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
+    CompanyRuleId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    CompanyRuleCode NVARCHAR(50) NOT NULL UNIQUE,
+    Description NVARCHAR(200),
+    Value NVARCHAR(50),
+    IsActive BIT,
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_Location
+-- table name: Tbl_Employee
+CREATE TABLE Tbl_Employee (
+    EmployeeId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    EmployeeCode NVARCHAR(50) NOT NULL UNIQUE,
+    RoleCode NVARCHAR(50),
+    Username Nvarchar(200),
+    Name NVARCHAR(200),
+    Email NVARCHAR(200),
+    Password NVARCHAR(200),
+    PhoneNo NVARCHAR(50),
+    ProfileImage NVARCHAR(200),
+    StartDate DATETIME,
+    ResignDate DATETIME,
+    Salary DECIMAL(18,2),
+    IsFirstTimeLogin BIT,
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
+);
+
+-- table name: Tbl_Location
 CREATE TABLE Tbl_Location (
-    LocationId VARCHAR(200) NOT NULL PRIMARY KEY,
-    LocationCode VARCHAR(50) NOT NULL UNIQUE,
-    Name VARCHAR(50),
-    Latitude VARCHAR(50),
-    Longitude VARCHAR(50),
-    Radius VARCHAR(50),
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(50),
-    ModifiedBy VARCHAR(50),
-    ModifiedAt DATETIME,
-    DeleteFlag BIT
+    LocationId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    LocationCode NVARCHAR(50) NOT NULL UNIQUE,
+    Name NVARCHAR(50),
+    Latitude NVARCHAR(50),
+    Longitude NVARCHAR(50),
+    Radius NVARCHAR(50),
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(50),
+    ModifiedBy NVARCHAR(50),
+    ModifiedAt DATETIME,
+    DeleteFlag BIT
 );
 
--- Table: Tbl_Task
+-- table name: Tbl_Task
 CREATE TABLE Tbl_Task (
-    TaskId VARCHAR(200) NOT NULL PRIMARY KEY,
-    TaskCode VARCHAR(50) NOT NULL UNIQUE,
-    EmployeeCode VARCHAR(50),
-    ProjectCode VARCHAR(50),
-    TaskName VARCHAR(50),
-    TaskDescription VARCHAR(200),
-    StartDate DATETIME,
-    EndDate DATETIME,
-    TaskStatus VARCHAR(50),
-    WorkingHour DECIMAL(4, 2),
-    CreatedAt DATETIME,
-    CreatedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    DeleteFlag BIT
+    TaskId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    TaskCode NVARCHAR(50) NOT NULL UNIQUE,
+    EmployeeCode NVARCHAR(50),
+    ProjectCode NVARCHAR(50),
+    TaskName NVARCHAR(50),
+    TaskDescription NVARCHAR(200),
+    StartDate DATETIME,
+    EndDate DATETIME,
+    TaskStatus NVARCHAR(50),
+    WorkingHour DECIMAL(4,2),
+    CreatedAt DATETIME,
+    CreatedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    DeleteFlag BIT
 );
 
--- Table: Tbl_Attendance
+-- table name: Tbl_Attendance
 CREATE TABLE Tbl_Attendance (
-    AttendanceId VARCHAR(200) NOT NULL PRIMARY KEY,
-    AttendanceCode VARCHAR(50) NOT NULL UNIQUE,
-    AttendanceDate DATETIME,
-    CheckInTime DATETIME,
-    CheckInLocation VARCHAR(50),
-    CheckOutTime DATETIME,
-    CheckOutLocation VARCHAR(50),
-    WorkingHour DECIMAL(4, 2),
-    HourLateFlag INT,
-    HalfDayFlag INT,
-    FullDayFlag INT,
-    Remark VARCHAR(200),
-    IsSavedLocation BIT,
-    CreatedBy VARCHAR(200),
-    CreatedAt DATETIME,
-    ModifiedBy VARCHAR(200),
-    ModifiedAt DATETIME,
-    DeleteFlag BIT
+    AttendanceId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    AttendanceCode NVARCHAR(50) NOT NULL UNIQUE,
+    EmployeeCode NVARCHAR(50),
+    AttendanceDate DATETIME,
+    CheckInTime DATETIME,
+    CheckInLocation NVARCHAR(50),
+    CheckOutTime DATETIME,
+    CheckOutLocation NVARCHAR(50),
+    WorkingHour DECIMAL(4,2),
+    HourLateFlag INT,
+    HalfDayFlag INT,
+    FullDayFlag INT,
+    Remark NVARCHAR(200),
+    IsSavedLocation BIT,
+    CreatedBy NVARCHAR(200),
+    CreatedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    DeleteFlag BIT
 );
 
--- Table: Tbl_Payroll
+-- table name: Tbl_Payroll
 CREATE TABLE Tbl_Payroll (
-    PayrollId VARCHAR(200) NOT NULL PRIMARY KEY,
-    PayrollCode VARCHAR(50) NOT NULL UNIQUE,
-    EmployeeCode VARCHAR(50),
-    PayrollDate DATETIME,
-    PayrollStatus VARCHAR(50),
-    BaseSalary DECIMAL(18, 2),
-    Allowance DECIMAL(18, 2),
-    TotalWorkingHour INT,
-    LeaveHour DECIMAL(8, 2),
-    ActualWorkingHour DECIMAL(8, 2),
-    Deduction DECIMAL(18, 2),
-    TotalPayroll DECIMAL(18, 2),
-    Tax DECIMAL(18, 2),
-    Bonus DECIMAL(18, 2),
-    GrandTotalPayroll DECIMAL(18, 2)
+    PayrollId NVARCHAR(200) NOT NULL PRIMARY KEY, 
+    PayrollCode NVARCHAR(50) NOT NULL UNIQUE,
+    EmployeeCode NVARCHAR(50),
+    PayrollDate DATETIME,
+    Status NVARCHAR(50),
+    TotalWorkingHour INT,
+    LeaveHour DECIMAL(8,2),
+    ActualWorkingHour DECIMAL(8,2),
+    BaseSalary DECIMAL(18,2),
+    Allowance DECIMAL(18,2),
+    GrossPay DECIMAL(18,2),
+    Deduction DECIMAL(18,2),
+    Tax DECIMAL(18,2),
+    Bonus DECIMAL(18,2),
+    NetPay DECIMAL(18,2),
+    CreatedBy NVARCHAR(200),
+    CreatedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    DeleteFlag BIT
+);
+
+-- table name: Tbl_RefreshToken
+CREATE TABLE Tbl_RefreshToken (
+    Token NVARCHAR(200) NOT NULL PRIMARY KEY,
+    JwtId NVARCHAR(450) NOT NULL,
+    ExpiryDate DATETIME2 NOT NULL,
+    RevokedAt DATETIME2 NULL,
+    IsRevoked BIT NOT NULL DEFAULT 0,
+    -- need to changed to employee code
+    EmployeeCode NVARCHAR(50) NOT NULL,
+    CreatedBy NVARCHAR(200),
+    CreatedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    DeleteFlag BIT
 );
