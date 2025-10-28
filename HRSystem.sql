@@ -133,6 +133,7 @@ CREATE TABLE Tbl_Employee (
     EmployeeId NVARCHAR(200) NOT NULL PRIMARY KEY, 
     EmployeeCode NVARCHAR(50) NOT NULL UNIQUE,
     RoleCode NVARCHAR(50),
+    Username Nvarchar(200),
     Name NVARCHAR(200),
     Email NVARCHAR(200),
     Password NVARCHAR(200),
@@ -228,4 +229,20 @@ CREATE TABLE Tbl_Payroll (
     ModifiedBy NVARCHAR(200),
     ModifiedAt DATETIME,
     DeleteFlag BIT
+);
+
+-- table name: Tbl_RefreshToken
+CREATE TABLE Tbl_RefreshToken (
+    Token NVARCHAR(200) NOT NULL PRIMARY KEY,
+    JwtId NVARCHAR(450) NOT NULL,
+    ExpiryDate DATETIME2 NOT NULL,
+    RevokedAt DATETIME2 NULL,
+    IsRevoked BIT NOT NULL DEFAULT 0,
+    -- need to changed to employee code
+    EmployeeCode NVARCHAR(50) NOT NULL,
+    CreatedBy NVARCHAR(200),
+    CreatedAt DATETIME,
+    ModifiedBy NVARCHAR(200),
+    ModifiedAt DATETIME,
+    DeleteFlag BIT
 );
