@@ -9,6 +9,8 @@ public partial class TblAttendance
 
     public string AttendanceCode { get; set; } = null!;
 
+    public string? EmployeeCode { get; set; }
+
     public DateTime? AttendanceDate { get; set; }
 
     public DateTime? CheckInTime { get; set; }
