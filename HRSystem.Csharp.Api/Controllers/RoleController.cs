@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.Roles;
 using HRSystem.Csharp.Domain.Models.Roles;
+using System.Threading.Tasks;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -15,9 +16,9 @@ public class RoleController : ControllerBase
     }
 
     [HttpPost("CreateRole")]
-    public IActionResult CreateRole([FromBody] RoleRequestModel role)
+    public async Task<IActionResult> CreateRole([FromBody] RoleRequestModel role)
     {
-        var result = _blRole.CreateRole(role);
+        var result = await _blRole.CreateRole(role);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
@@ -26,9 +27,9 @@ public class RoleController : ControllerBase
     }
 
     [HttpGet("GetAllRoles")]
-    public IActionResult GetAllRoles()
+    public async Task<IActionResult> GetAllRoles()
     {
-        var result = _blRole.GetAllRoles();
+        var result = await _blRole.GetAllRoles();
         if (result.IsSuccess)
         {
             return Ok(result.Data);
@@ -37,9 +38,9 @@ public class RoleController : ControllerBase
     }
 
     [HttpGet("GetRole/{roleCode}")]
-    public IActionResult GetRoleByCode(string roleCode)
+    public async Task<IActionResult> GetRoleByCode(string roleCode)
     {
-        var result = _blRole.GetRoleByCode(roleCode);
+        var result = await _blRole.GetRoleByCode(roleCode);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
@@ -48,9 +49,9 @@ public class RoleController : ControllerBase
     }
 
     [HttpPatch("UpdateRole/{roleCode}")]
-    public IActionResult UpdateRole(string roleCode, [FromBody] RoleUpdateRequestModel role)
+    public async Task<IActionResult> UpdateRole(string roleCode, [FromBody] RoleUpdateRequestModel role)
     {
-        var result = _blRole.UpdateRole(role, roleCode);
+        var result = await _blRole.UpdateRole(role, roleCode);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
@@ -59,9 +60,9 @@ public class RoleController : ControllerBase
     }
 
     [HttpDelete("DeleteRole/{roleCode}")]
-    public IActionResult DeleteRole(string roleCode)
+    public async Task<IActionResult> DeleteRole(string roleCode)
     {
-        var result = _blRole.DeleteRole(roleCode);
+        var result = await _blRole.DeleteRole(roleCode);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
