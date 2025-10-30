@@ -20,6 +20,7 @@ public class DA_Task
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((pageNo - 1) * PageSize)
                 .Take(PageSize)
+                .AsNoTracking()
                 .ToListAsync();
 
             if (!tasks.Any() || tasks is null)
