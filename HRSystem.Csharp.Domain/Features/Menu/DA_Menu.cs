@@ -47,52 +47,60 @@ public class DA_Menu
 
     public async Task<MenuModel?> GetMenuByCode(string menuCode)
     {
-        return await _dbContext.TblMenus
-                .Join(_dbContext.TblMenuGroups,
-                menu => menu.MenuGroupCode, 
-                menuGroup => menuGroup.MenuGroupCode,
-                (menu, menuGroup) => new { menu, menuGroup })
-                .Where(m => m.menu.MenuCode.Equals(menuCode) && m.menu.DeleteFlag == false && m.menuGroup.DeleteFlag == false)
-                .Select(m => new MenuModel
-                {
-                    MenuId = m.menu.MenuId,
-                    MenuName = m.menu.MenuName,
-                    MenuCode = m.menu.MenuCode,
-                    MenuGroupCode = m.menu.MenuGroupCode,
-                    Url = m.menu.Url,
-                    Icon = m.menu.Icon,
-                    CreatedAt = m.menu.CreatedAt,
-                    ModifiedAt = m.menu.ModifiedAt,
-
-                })
-                .AsNoTracking()
-                .SingleOrDefaultAsync();
+        return  await _dbContext.TblMenus
+    .Where(m => m.DeleteFlag == false && m.MenuCode == menuCode)
+    .Select(m => new MenuModel
+    {
+        MenuId = m.MenuId,
+        MenuName = m.MenuName,
+        MenuCode = m.MenuCode,
+        MenuGroupCode = m.MenuGroupCode,
+        Url = m.Url,
+        Icon = m.Icon,
+        CreatedAt = m.CreatedAt,
+        ModifiedAt = m.ModifiedAt,
+    })
+    .SingleOrDefaultAsync();
     }
 
-    public async Task<bool> MenuExists(string menuCode, MenuRequestModel menu)
+    public async Task<bool> MenuExists(TblMenu menu)
     {
-        return await (
-            from m in _dbContext.TblMenus
-            join g in _dbContext.TblMenuGroups on m.MenuGroupCode equals g.MenuGroupCode
-            where
-            m.MenuCode != menuCode && 
-            (m.MenuCode == menu.MenuCode || m.MenuName == menu.MenuName) &&
-            m.DeleteFlag == false && g.DeleteFlag == false &&
-            m.MenuGroupCode == menu.MenuGroupCode
-            select m).AnyAsync();
+        return await (from m in _dbContext.TblMenus
+                      join g in _dbContext.TblMenuGroups on m.MenuGroupCode equals g.MenuGroupCode
+                      where
+                        g.DeleteFlag == false &&
+                        m.MenuGroupCode == menu.MenuGroupCode &&
+                        m.MenuCode != menu.MenuCode &&
+                        m.MenuName == menu.MenuName &&
+                        m.DeleteFlag == false
+                      select m)
+                      .AnyAsync();
 
+    }
+
+    public async Task<bool> MenuGroupExists(string menuGroupCode)
+    {
+        var groupExists = await _dbContext.TblMenuGroups
+            .AnyAsync(mg => mg.MenuGroupCode == menuGroupCode && (mg.DeleteFlag == null || mg.DeleteFlag == false));
+        if (groupExists)
+            return true;
+
+        else return false;
     }
 
     public async Task<bool> MenuCodeExists(MenuRequestModel menu)
     {
-        return await (
-            from m in _dbContext.TblMenus
-            join g in _dbContext.TblMenuGroups on m.MenuGroupCode equals g.MenuGroupCode
-            where
-            (m.MenuCode == menu.MenuCode || m.MenuName == menu.MenuName) &&
-            m.DeleteFlag == false && g.DeleteFlag == false &&
-            m.MenuGroupCode == menu.MenuGroupCode
-            select m).AnyAsync();
+
+        return await _dbContext.TblMenus
+       .Where(m => !(m.DeleteFlag == false && m.MenuGroupCode != menu.MenuGroupCode))
+       .Join(
+           _dbContext.TblMenuGroups.Where(g => g.DeleteFlag == false),
+           m => m.MenuGroupCode,
+           g => g.MenuGroupCode,
+           (m, g) => m
+       )
+       .AnyAsync(m => m.MenuCode == menu.MenuCode || m.MenuName == menu.MenuName);
+
     }
 
     public async Task<bool> UpdateMenu(TblMenu menu)
@@ -103,7 +111,7 @@ public class DA_Menu
         return rows > 0;
     }
 
-    public async Task<Result<MenuModel>> CreateMenuAsync(MenuRequestModel requestMenu)
+    public async Task<Result<MenuModel>> CreateMenuAsync(string userId, MenuRequestModel requestMenu)
     {
         try
         {
@@ -125,7 +133,7 @@ public class DA_Menu
                 Icon = requestMenu.Icon,
                 SortOrder = requestMenu.SortOrder,
                 CreatedAt = DateTime.UtcNow,
-                //CreatedBy =loggined User,
+                CreatedBy = userId,
                 DeleteFlag = false,
             };
 
@@ -158,7 +166,7 @@ public class DA_Menu
         }
     }
 
-    public async Task<Result<bool>> DeleteMenuAsync(string menuCode)
+    public async Task<Result<bool>> DeleteMenuAsync(string userId,string menuCode)
     {
         try
         {
@@ -170,6 +178,7 @@ public class DA_Menu
 
             foundMenu.ModifiedAt = DateTime.UtcNow;
             foundMenu.DeleteFlag = true;
+            foundMenu.ModifiedBy = userId;
 
             var result = await _dbContext.SaveChangesAsync();
             if (result <= 0)
