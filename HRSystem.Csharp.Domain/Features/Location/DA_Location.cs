@@ -9,26 +9,27 @@ public class DA_Location
         _appDbContext = appDbContext;
     }
 
-    public Result<Boolean> CreateLocation(LocationCreateRequestModel location)
+    public async Task<Result<bool>> CreateLocation(LocationCreateRequestModel location)
     {
         var existingLocation = _appDbContext.TblLocations
             .FirstOrDefault(l => l.LocationCode == location.LocationCode && l.DeleteFlag == false);
 
         if (existingLocation != null)
-            return Result<Boolean>.DuplicateRecordError("Location with the same code already exists");
+            return Result<bool>.DuplicateRecordError("Location with the same code already exists");
 
         var newLocation = location.Map();
 
         _appDbContext.TblLocations.Add(newLocation);
         var result = _appDbContext.SaveChanges();
 
-        return result > 0 ? Result<Boolean>.Success(true)
-            : Result<Boolean>.Error("Failed to create location");
+        return result > 0 ? Result<bool>.Success(true, "Successfully added new location.")
+            : Result<bool>.Error("Failed to add new location");
     }
 
-    public Result<List<LocationResponseModel>> GetAllLocations()
+    public async Task<Result<List<LocationResponseModel>>> GetAllLocations()
     {
         var locations = _appDbContext.TblLocations
+            .AsNoTracking()
             .Where(l => l.DeleteFlag == false)
             .Select(l => l.Map())
             .ToList();
@@ -40,9 +41,10 @@ public class DA_Location
         return Result<List<LocationResponseModel>>.Success(locations);
     }
 
-    public Result<LocationResponseModel> GetLocationByCode(string locationCode)
+    public async Task<Result<LocationResponseModel>> GetLocationByCode(string locationCode)
     {
         var location = _appDbContext.TblLocations
+            .AsNoTracking()
             .Where(l => l.DeleteFlag == false)
             .Select(l => l.Map())
             .FirstOrDefault(l => l.LocationCode == locationCode);
@@ -54,14 +56,14 @@ public class DA_Location
         return Result<LocationResponseModel>.Success(location);
     }
 
-    public Result<Boolean> UpdateLocation(string locationCode, LocationUpdateRequestModel location)
+    public async Task<Result<bool>> UpdateLocation(string locationCode, LocationUpdateRequestModel location)
     {
         var existingLocation = _appDbContext.TblLocations
             .FirstOrDefault(l => l.LocationCode == locationCode && l.DeleteFlag == false);
 
         if (existingLocation == null)
         {
-            return Result<Boolean>.NotFoundError("Location not found");
+            return Result<bool>.NotFoundError("Location not found");
         }
 
         existingLocation.Name = location.Name ?? existingLocation.Name;
@@ -73,18 +75,18 @@ public class DA_Location
 
         _appDbContext.TblLocations.Update(existingLocation);
         var result = _appDbContext.SaveChanges();
-        return result > 0 ? Result<Boolean>.Success(true)
-            : Result<Boolean>.Error("Failed to update location");
+        return result > 0 ? Result<bool>.Success(true, "Successfully updated location.")
+            : Result<bool>.Error("Failed to update location");
     }
 
-    public Result<Boolean> DeleteLocation(string locationCode)
+    public async Task<Result<bool>> DeleteLocation(string locationCode)
     {
         var existingLocation = _appDbContext.TblLocations
             .FirstOrDefault(l => l.LocationCode == locationCode && l.DeleteFlag == false);
 
         if (existingLocation == null)
         {
-            return Result<Boolean>.NotFoundError("Location not found");
+            return Result<bool>.NotFoundError("Location not found");
         }
 
         existingLocation.DeleteFlag = true;
@@ -93,7 +95,7 @@ public class DA_Location
 
         _appDbContext.TblLocations.Update(existingLocation);
         var result = _appDbContext.SaveChanges();
-        return result > 0 ? Result<Boolean>.Success(true)
-            : Result<Boolean>.Error("Failed to delete location");
+        return result > 0 ? Result<bool>.Success(true, "Successfully deleted location.")
+            : Result<bool>.Error("Failed to delete location");
     }
 }
