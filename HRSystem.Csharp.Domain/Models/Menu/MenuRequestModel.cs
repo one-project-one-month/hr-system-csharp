@@ -3,13 +3,13 @@
 public class MenuRequestModel
 {
     [Required(ErrorMessage = "Menu-group code is required")]
-    public string MenuGroupCode { get; set; } = "";
+    public string MenuGroupCode { get; set; } = null!;
 
     [Required(ErrorMessage = "Menu code is required")]
-    public string MenuCode { get; set; } = "";
+    public string MenuCode { get; set; } = null!;
 
     [Required(ErrorMessage = "Menu name is required")]
-    public string MenuName { get; set; } = "";
+    public string MenuName { get; set; } = null!;
 
     public string? Url { get; set; }
 

@@ -18,6 +18,7 @@ public class DA_Project
         try
         {
             var lastProjectCode = await _appDbContext.TblProjects
+                    .AsNoTracking()
                     .OrderByDescending(p => p.CreatedAt)
                     .Select(p => p.ProjectCode)
                     .FirstOrDefaultAsync();
@@ -31,7 +32,7 @@ public class DA_Project
                 return Result<Boolean>.DuplicateRecordError($"A project with code '{newProject.ProjectCode}' already exists!");
 
             _appDbContext.TblProjects.Add(newProject);
-            var result = _appDbContext.SaveChanges();
+            var result = await _appDbContext.SaveChangesAsync();
 
             return result > 0 ? Result<Boolean>.Success(true, "project created success")
                     : Result<Boolean>.Error("fail to create project!");
@@ -48,6 +49,7 @@ public class DA_Project
         try
         {
             var projects = await _appDbContext.TblProjects
+                    .AsNoTracking()
                     .Where(p => p.DeleteFlag == false)
                     .Select(p => p.Map())
                     .ToListAsync();
@@ -70,6 +72,7 @@ public class DA_Project
         try
         {
             var project = await _appDbContext.TblProjects
+                    .AsNoTracking() 
                     .Where(p => p.DeleteFlag == false && p.ProjectCode == code)
                     .Select(p => p.Map())
                     .FirstOrDefaultAsync();
@@ -90,6 +93,7 @@ public class DA_Project
         try
         {
             var existingProject = await _appDbContext.TblProjects
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(p => p.ProjectCode == code && p.DeleteFlag == false);
 
             if (existingProject is null)
@@ -100,11 +104,11 @@ public class DA_Project
             existingProject.StartDate = project.StartDate;
             existingProject.EndDate = project.EndDate;
             existingProject.ProjectStatus = project.ProjectStatus.ToString();
-            existingProject.ModifiedAt = DateTime.Now;
+            existingProject.ModifiedAt = DateTime.UtcNow;
             existingProject.ModifiedBy = "TestingUser";
 
             _appDbContext.TblProjects.Update(existingProject);
-            var result = _appDbContext.SaveChanges();
+            var result = await _appDbContext.SaveChangesAsync();
 
             return result > 0 ? Result<Boolean>.Success(true, "project updated success")
                     : Result<Boolean>.Error("fail to update project!");
@@ -112,7 +116,7 @@ public class DA_Project
         catch (Exception ex)
         {
 
-            return Result<Boolean>.Error($"Error occured while updating project: {ex.Message}\"");
+            return Result<Boolean>.Error($"Error occured while updating project: {ex.Message}");
         }
     }
 
@@ -121,6 +125,7 @@ public class DA_Project
         try
         {
             var project = await _appDbContext.TblProjects
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(p => p.ProjectCode == code && p.DeleteFlag == false);
 
             if (project is null) return Result<Boolean>.NotFoundError("no project found to delete!");
@@ -128,7 +133,7 @@ public class DA_Project
             project.DeleteFlag = true;
 
             _appDbContext.TblProjects.Update(project);
-            var result = _appDbContext.SaveChanges();
+            var result = await _appDbContext.SaveChangesAsync();
 
             return result > 0 ? Result<Boolean>.Success(true, "project deleted success.")
                     : Result<Boolean>.Error("fail to delete project!");

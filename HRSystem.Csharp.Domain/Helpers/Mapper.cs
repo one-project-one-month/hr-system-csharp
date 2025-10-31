@@ -10,13 +10,12 @@ public static class Mapper
         return new TblProject
         {
             ProjectId = Ulid.NewUlid().ToString(),
-            // ProjectCode = project.ProjectCode,
             ProjectName = project.ProjectName,
             ProjectDescription = project.ProjectDescription,
             StartDate = project.StartDate,
             EndDate = project.EndDate,
             ProjectStatus = project.ProjectStatus.ToString(),
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             CreatedBy = "TestingUser",
             DeleteFlag = false
         };
