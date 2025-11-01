@@ -1,6 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.Project;
 using HRSystem.Csharp.Domain.Models.Project;
-using Microsoft.AspNetCore.Mvc;
+using HRSystem.Csharp.Shared;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -8,74 +8,80 @@ namespace HRSystem.Csharp.Api.Controllers;
 [ApiController]
 public class ProjectController : ControllerBase
 {
-        private readonly BL_Project _blProject;
+    private readonly BL_Project _blProject;
 
-        public ProjectController(BL_Project blProject)
+    public ProjectController(BL_Project blProject)
+    {
+        _blProject = blProject;
+    }
+
+    [HttpGet("list")]
+    public async Task<IActionResult> GetALlProjects()
+    {
+        var result = await _blProject.GetAllProjects();
+
+        if (result.IsSuccess) return Ok(result);
+
+        if (result.IsNotFound) return NotFound(result);
+
+        return StatusCode(500, result);
+    }
+
+    [HttpGet("edit")]
+    public async Task<IActionResult> GetProject(ProjectEditRequestModel reqModel)
+    {
+        var result = await _blProject.GetProject(reqModel.ProjectCode);
+
+        if (result.IsSuccess) return Ok(result);
+
+        if (result.IsNotFound) return NotFound(result);
+
+        return StatusCode(500, result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateProject(ProjectRequestModel project)
+    {
+        var result = await _blProject.CreateProject(project);
+
+        if (result.IsSuccess) return Ok(result);
+
+        if (result.IsDuplicateRecord) return BadRequest(result);
+
+        if (result.IsInvalidData) return BadRequest(result);
+
+        return StatusCode(500, result);
+    }
+
+    [HttpPut("{code}")]
+    public async Task<IActionResult> UpdateProject(string code, ProjectRequestModel project)
+    {
+        var result = await _blProject.UpdateProject(code, project);
+
+        if (result.IsSuccess) return Ok(result);
+
+        if (result.IsNotFound) return NotFound(result);
+
+        if (result.IsValidationError) return BadRequest(result);
+
+        return StatusCode(500, result);
+    }
+
+    [HttpDelete("{code}")]
+    public async Task<IActionResult> DeleteProject(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
         {
-                _blProject = blProject;
+            var error = Result<bool>.ValidationError("Project code is required!");
+            return BadRequest(error);
         }
+        
+        var result = await _blProject.DeleteProject(code);
 
-        [HttpGet]
-        public async Task<IActionResult> GetALlProjects()
-        {
-                var result = await _blProject.GetAllProjects();
+        if (result.IsSuccess) return Ok(result);
 
-                if (result.IsSuccess) return Ok(result);
+        if (result.IsNotFound) return NotFound(result);
 
-                if (result.IsNotFound) return NotFound(result);
-
-                return StatusCode(500, result);
-        }
-
-        [HttpGet("{code}")]
-        public async Task<IActionResult> GetProject(string code)
-        {
-                var result = await _blProject.GetProject(code);
-
-                if (result.IsSuccess) return Ok(result);
-
-                if (result.IsNotFound) return NotFound(result);
-
-                return StatusCode(500, result);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateProject(ProjectRequestModel project)
-        {
-                var result = await _blProject.CreateProject(project);
-
-                if (result.IsSuccess) return Ok(result);
-
-                if (result.IsDuplicateRecord) return BadRequest(result);
-
-                if (result.IsInvalidData) return BadRequest(result);
-
-                return StatusCode(500, result);
-        }
-
-        [HttpPut("{code}")]
-        public async Task<IActionResult> UpdateProject(string code, ProjectRequestModel project)
-        {
-                var result = await _blProject.UpdateProject(code, project);
-
-                if (result.IsSuccess) return Ok(result);
-
-                if (result.IsNotFound) return NotFound(result);
-
-                if (result.IsValidationError) return BadRequest(result);
-
-                return StatusCode(500, result);
-        }
-
-        [HttpDelete("{code}")]
-        public async Task<IActionResult> DeleteProject(string code)
-        {
-                var result = await _blProject.DeleteProject(code);
-
-                if (result.IsSuccess) return Ok(result);
-
-                if (result.IsNotFound) return NotFound(result);
-
-                return StatusCode(500, result);
-        }
+        return StatusCode(500, result);
+    }
 }

@@ -1,26 +1,15 @@
 ﻿using HRSystem.Csharp.Domain.Models.Employee;
-using HRSystem.Csharp.Domain.Models.Roles;
-using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
-namespace HRSystem.Csharp.Domain.Features.Employee
+namespace HRSystem.Csharp.Domain.Features.Employee;
+
+public class DA_Employee
 {
-    public class DA_Employee
-    {
-        string currentUser = "Admin"; //for testing only
+    string currentUser = "Admin"; //for testing only
 
-        public readonly AppDbContext _appDbContext;
-        public DA_Employee(AppDbContext appDbContext)
-        {
-            _appDbContext = appDbContext;
-        }
+    private readonly AppDbContext _appDbContext;
+    private readonly ILogger<DA_Employee> _logger;
 
     public async Task<Result<List<EmployeeResponseModel>>> GetAllEmployee()
     {
@@ -71,12 +60,11 @@ namespace HRSystem.Csharp.Domain.Features.Employee
             }
             return Result<List<EmployeeEditResponseModel>>.Success(result);
 
-            }
-            catch (Exception ex)
+            if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
             {
-                return Result<List<EmployeeEditResponseModel>>.Error($"An error occurred while retrieving employees: {ex.Message}");
+                query = query.Where(r => r.Name != null
+                                         && r.Name.ToLower() == reqModel.EmployeeName.ToLower());
             }
-        }
 
     public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(EmployeeCreateRequestModel req)
     {
@@ -127,9 +115,21 @@ namespace HRSystem.Csharp.Domain.Features.Employee
             }
             catch (Exception ex)
             {
-                return Result<EmployeeCreateResponseModel>.Error($"An error occurred while creating employee: {ex.Message}");
-            }
+                Items = pagedResult.Items,
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<EmployeeListResponseModel>.Success(result);
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching employees");
+            return Result<EmployeeListResponseModel>.SystemError("An error occurred while retrieving employees.");
+        }
+    }
+
 
     public async Task<Result<EmployeeUpdateResponseModel>> UpdateEmployee(string empCode, EmployeeUpdateRequestModel emp)
     {
@@ -204,45 +204,42 @@ namespace HRSystem.Csharp.Domain.Features.Employee
         return true;
     }
 
-        public bool duplicatePhoneNo(string phoneNo)
+        return null;
+    }*/
+
+    /*private Result<EmployeeUpdateResponseModel> UpdateValidation(EmployeeUpdateRequestModel req, string empCode)
+    {
+        if (req.Name == null || req.Name.Trim() == "")
         {
-            var isDuplicated = _appDbContext.TblEmployees.FirstOrDefault(x => x.PhoneNo == phoneNo);
-            if (isDuplicated is null) return false;
-            return true;
+            return Result<EmployeeUpdateResponseModel>.ValidationError("Name is required");
         }
 
-
-        public bool duplicateUpdateEmail(string email, string employeeCode)
+        if (req.Email == null || req.Email.Trim() == "")
         {
-            var isDuplicated = _appDbContext.TblEmployees.FirstOrDefault(x => x.Email == email);
-            if (isDuplicated is null)
-            {
-                return false;
-            }
-            else
-            {
-                if (isDuplicated.EmployeeCode == employeeCode) return false;
-            }
-          
-            return true;
+            return Result<EmployeeUpdateResponseModel>.ValidationError("Email is required");
         }
 
-        public bool duplicateUpdatePhoneNo(string phoneNo, string employeeCode)
+        if (!checkEmail(req.Email))
         {
-            var isDuplicated = _appDbContext.TblEmployees.FirstOrDefault(x => x.PhoneNo == phoneNo);
-            if (isDuplicated is null)
-            {
-                return false;
-            }
-            else
-            {
-                if (isDuplicated.EmployeeCode == employeeCode) return false;
-            }
-
-            return true;
+            return Result<EmployeeUpdateResponseModel>.ValidationError("Email format is not valid");
         }
-        #endregion
 
-      
-    }
+        if (duplicateUpdateEmail(req.Email, empCode))
+        {
+            return Result<EmployeeUpdateResponseModel>.ValidationError("Email is duplicate");
+        }
+
+        if (req.PhoneNo == null || req.PhoneNo.Trim() == "" || req.PhoneNo!.Length < 9)
+        {
+            return Result<EmployeeUpdateResponseModel>.ValidationError(
+                "Phone number cannot be empty or less than 9 numbers!");
+        }
+
+        if (duplicateUpdatePhoneNo(req.PhoneNo, empCode))
+        {
+            return Result<EmployeeUpdateResponseModel>.ValidationError("Phone number already exist");
+        }
+
+        return null;
+    }*/
 }

@@ -1,72 +1,77 @@
 ﻿using HRSystem.Csharp.Domain.Features.Roles;
 using HRSystem.Csharp.Domain.Models.Roles;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Data;
+using System.Threading.Tasks;
 
-namespace HRSystem.Csharp.Api.Controllers
+namespace HRSystem.Csharp.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class RoleController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class RoleController : ControllerBase
+    private readonly BL_Role _blRole;
+
+    public RoleController(BL_Role blRole)
     {
-        private readonly BL_Role _blRole;
-        public RoleController(BL_Role blRole)
+        _blRole = blRole;
+    }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateRole([FromBody] RoleRequestModel role)
+    {
+        var result = await _blRole.CreateRole(role);
+        if (result.IsSuccess)
         {
-            _blRole = blRole;
+            return Ok(result.Data);
         }
 
-        [HttpPost("CreateRole")]
-        public IActionResult CreateRole([FromBody] RoleRequestModel role)
+        return BadRequest(result);
+    }
+
+    [HttpPost("list")]
+    public async Task<IActionResult> GetAllRoles([FromBody] RoleListRequestModel reqModel)
+    {
+        var result = await _blRole.GetAllRoles(reqModel);
+        if (result.IsSuccess)
         {
-            var result = _blRole.CreateRole(role);
-            if (result.IsSuccess)
-            {
-                return Ok(result.Data);
-            }
-            return BadRequest(result);
+            return Ok(result.Data);
         }
 
-        [HttpGet("GetAllRoles")]
-        public IActionResult GetAllRoles()
+        return BadRequest(result);
+    }
+
+    [HttpPost("edit")]
+    public async Task<IActionResult> GetRoleByCode(RoleEditRequestModel reqModel)
+    {
+        var result = await _blRole.GetRoleByCode(reqModel);
+        if (result.IsSuccess)
         {
-            var result = _blRole.GetAllRoles();
-            if (result.IsSuccess)
-            {
-                return Ok(result.Data);
-            }
-            return BadRequest(result);
+            return Ok(result.Data);
         }
 
-        [HttpGet("GetRole/{roleCode}")]
-        public IActionResult GetRoleByCode(string roleCode)
+        return BadRequest(result);
+    }
+
+    [HttpPatch("update")]
+    public async Task<IActionResult> UpdateRole([FromBody] RoleUpdateRequestModel reqModel)
+    {
+        var result = await _blRole.UpdateRole(reqModel);
+        if (result.IsSuccess)
         {
-            var result = _blRole.GetRoleByCode(roleCode);
-            if (result.IsSuccess) {
-                return Ok(result.Data);
-            }
-            return BadRequest(result);
+            return Ok(result.Data);
         }
 
-        [HttpPatch("UpdateRole/{roleCode}")]
-        public IActionResult UpdateRole(string roleCode, [FromBody] RoleUpdateRequestModel role)
+        return BadRequest(result);
+    }
+
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteRole([FromBody] RoleDeleteRequestModel reqModel)
+    {
+        var result = await _blRole.DeleteRole(reqModel);
+        if (result.IsSuccess)
         {
-            var result = _blRole.UpdateRole(role, roleCode);
-            if (result.IsSuccess)
-            {
-                return Ok(result.Data);
-            }
-            return BadRequest(result);
+            return Ok(result.Data);
         }
-        [HttpDelete("DeleteRole/{roleCode}")]
-        public IActionResult DeleteRole(string roleCode)
-        {
-            var result = _blRole.DeleteRole(roleCode);
-            if (result.IsSuccess)
-            {
-                return Ok(result.Data);
-            }
-            return BadRequest(result);
-        }
+
+        return BadRequest(result);
     }
 }

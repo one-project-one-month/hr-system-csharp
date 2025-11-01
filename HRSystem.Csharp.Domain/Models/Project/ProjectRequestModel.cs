@@ -4,15 +4,20 @@ namespace HRSystem.Csharp.Domain.Models.Project;
 
 public class ProjectRequestModel
 {
-        public string ProjectName { get; set; }
+    public string ProjectName { get; set; }
 
-        public string ProjectDescription { get; set; }
+    public string ProjectDescription { get; set; }
 
-        public DateTime? StartDate { get; set; }
+    public DateTime? StartDate { get; set; }
 
-        public DateTime? EndDate { get; set; }
+    public DateTime? EndDate { get; set; }
 
-        public EnumProjectStatus ProjectStatus { get; set; }
+    public EnumProjectStatus ProjectStatus { get; set; }
+}
+
+public class ProjectEditRequestModel
+{
+    public string ProjectCode { get; set; }
 }
 
 //public class ProjectUpdateRequestModel

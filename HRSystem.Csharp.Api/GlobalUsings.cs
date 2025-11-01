@@ -3,3 +3,8 @@ global using HRSystem.Csharp.Domain.Models.Location;
 global using Microsoft.AspNetCore.Mvc;
 global using HRSystem.Csharp.Domain.Models.Auth;
 global using HRSystem.Csharp.Domain.Helpers;
+global using HRSystem.Csharp.Domain;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.IdentityModel.Tokens;
+global using Microsoft.OpenApi.Models;
+global using System.Text;

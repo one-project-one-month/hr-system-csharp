@@ -1,16 +1,10 @@
-﻿using HRSystem.Csharp.Domain.Helpers;
-using HRSystem.Csharp.Domain.Models.Auth;
+﻿using HRSystem.Csharp.Domain.Models.Auth;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HRSystem.Csharp.Domain.Features.Auth;
 
-public class DA_Auth: AuthorizationService
+public class DA_Auth : AuthorizationService
 {
     private readonly AppDbContext _appDbContext;
     private readonly JwtService _jwtService;
@@ -21,7 +15,7 @@ public class DA_Auth: AuthorizationService
         _appDbContext = appDbContext;
     }
 
-    public async Task<Result<AuthResponseModel>> LoginAsync (LoginRequestModel requestModel)
+    public async Task<Result<AuthResponseModel>> LoginAsync(LoginRequestModel requestModel)
     {
         try
         {
@@ -74,14 +68,14 @@ public class DA_Auth: AuthorizationService
             };
 
             return Result<AuthResponseModel>.Success(response);
-        } 
+        }
         catch (Exception ex)
         {
             return Result<AuthResponseModel>.SystemError(ex.Message);
         }
     }
 
-    public async Task<Result<AuthResponseModel>> RefreshTokenAsync (RefreshTokenRequestModel requestModel)
+    public async Task<Result<AuthResponseModel>> RefreshTokenAsync(RefreshTokenRequestModel requestModel)
     {
         try
         {
@@ -151,7 +145,7 @@ public class DA_Auth: AuthorizationService
             };
 
             return Result<AuthResponseModel>.Success(response);
-        } 
+        }
         catch (Exception ex)
         {
             return Result<AuthResponseModel>.SystemError(ex.Message);

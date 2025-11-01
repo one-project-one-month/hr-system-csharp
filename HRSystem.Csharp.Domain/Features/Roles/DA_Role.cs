@@ -1,144 +1,159 @@
-﻿using HRSystem.Csharp.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HRSystem.Csharp.Domain.Models;
-using HRSystem.Csharp.Domain.Models.Roles;
+﻿using HRSystem.Csharp.Domain.Models.Roles;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-namespace HRSystem.Csharp.Domain.Features.Roles
+namespace HRSystem.Csharp.Domain.Features.Roles;
+
+public class DA_Role
 {
-    public class DA_Role
+    private readonly AppDbContext _appDbContext;
+    private readonly ILogger<DA_Role> _logger;
+
+    public DA_Role(AppDbContext appDbContext, ILogger<DA_Role> logger)
     {
-        private readonly AppDbContext _appDbContext;
+        _appDbContext = appDbContext;
+        _logger = logger;
+    }
 
-        public DA_Role(AppDbContext appDbContext)
+    public async Task<Result<RoleListResponseModel>> GetRoles(RoleListRequestModel reqModel)
+    {
+        try
         {
-            _appDbContext = appDbContext;
-        }
+            var query = _appDbContext.TblRoles
+                .AsNoTracking()
+                .Where(r => !r.DeleteFlag);
 
-        public Result<List<RoleResponseModel>> GetAllRoles()
-        {
-            try
+            if (!string.IsNullOrWhiteSpace(reqModel.RoleName))
             {
-                var roles = _appDbContext.TblRoles
-                    .Where(r=> r.DeleteFlag != true)
-                    .Select(r => new RoleResponseModel
-                    {
-                        RoleName = r.RoleName,
-                        RoleCode = r.RoleCode,
-                        RoleId = r.RoleId,
-                        UniqueName = r.UniqueName,
-                        CreatedAt = r.CreatedAt,
-                        CreatedBy = r.CreatedBy,
-                        ModifiedAt = r.ModifiedAt,
-                        ModifiedBy = r.ModifiedBy,
-                        DeleteFlag = r.DeleteFlag,
-
-                    })
-                    .ToList();
-                return Result<List<RoleResponseModel>>.Success(roles);
-            }
-            catch (Exception ex)
-            {
-                return Result<List<RoleResponseModel>>.Error($"An error occurred while retrieving roles: {ex.Message}");
-            }
-        }
-
-        public Result<bool> CreateRole(RoleRequestModel role)
-        {
-            try
-            {
-                var existing = _appDbContext.TblRoles.FirstOrDefault(r => r.RoleCode == role.RoleCode && r.DeleteFlag != true);
-                if (existing != null)
-                {
-                    return Result<bool>.InvalidDataError("A duplicate role has already been created!");
-                }
-
-                TblRole newRole = new TblRole()
-                {
-                    RoleId = Ulid.NewUlid().ToString(),
-                    RoleName = role.RoleName,
-                    RoleCode = role.RoleCode,
-                    UniqueName = role.UniqueName,
-                    CreatedAt = DateTime.Now,
-                    CreatedBy = "admin",
-                    ModifiedAt = null,
-                    ModifiedBy = null,
-                    DeleteFlag = false
-                };
-                _appDbContext.TblRoles.Add(newRole);
-                var result = _appDbContext.SaveChanges();
-                return result > 0 ? Result<bool>.Success(true)
-                        : Result<bool>.Error();
-
-            }
-            catch (Exception ex)
-            {
-                return Result<bool>.Error($"An error occurred while creating role: {ex.Message}");
-            }
-        }
-
-        public Result<RoleResponseModel> GetRoleByCode(string roleCode)
-        {
-
-            try
-            {
-                var role = _appDbContext.TblRoles.Where(r => r.DeleteFlag != true)
-                    .Select(r => new RoleResponseModel()
-                    {
-                        RoleName = r.RoleName,
-                        RoleCode = r.RoleCode,
-                        RoleId = r.RoleId,
-                        UniqueName = r.UniqueName,
-                        CreatedAt = r.CreatedAt,
-                        CreatedBy = r.CreatedBy,
-                        ModifiedAt = r.ModifiedAt,
-                        ModifiedBy = r.ModifiedBy,
-                        DeleteFlag = r.DeleteFlag
-                    }).FirstOrDefault(r => r.RoleCode == roleCode);
-
-                if(role == null) return Result<RoleResponseModel>.NotFoundError("Cannot find role with given code");
-
-                return Result<RoleResponseModel>.Success(role);
-
-            } catch(Exception ex)
-            {
-                return Result<RoleResponseModel>.Error($"An error occurred while retrieving roles: {ex.Message}");
-
+                query = query.Where(r => r.RoleName.ToLower() == reqModel.RoleName.ToLower());
             }
 
-        }
+            query = query.OrderByDescending(r => r.CreatedAt);
 
-        public Result<bool> UpdateRole(RoleUpdateRequestModel role, string roleCode)
+            var roles = query.Select(r => new RoleResponseModel
+            {
+                RoleName = r.RoleName,
+                RoleCode = r.RoleCode,
+                RoleId = r.RoleId,
+                CreatedAt = r.CreatedAt,
+                CreatedBy = r.CreatedBy,
+                ModifiedAt = r.ModifiedAt,
+                ModifiedBy = r.ModifiedBy,
+                DeleteFlag = r.DeleteFlag
+            });
+
+            var pagedResult = await roles.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new RoleListResponseModel
+            {
+                Items = pagedResult.Items,
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<RoleListResponseModel>.Success(result);
+        }
+        catch (Exception ex)
         {
-            var existingRole = _appDbContext.TblRoles.FirstOrDefault(r => r.RoleCode == roleCode && r.DeleteFlag != true);
-            if (existingRole is null) return Result<bool>.NotFoundError("Cannot find the role to be updated");
-            if (role is null) return Result<bool>.InvalidDataError("Data to update role cannot be empty");
-
-            existingRole.RoleName = role.RoleName;
-            existingRole.UniqueName = role.UniqueName;
-            existingRole.ModifiedAt = DateTime.Now;
-            existingRole.ModifiedBy = "admin";
-
-            var result = _appDbContext.SaveChanges();
-            return result > 0 ? Result<bool>.Success(true)
-                    : Result<bool>.Error();
-
+            _logger.LogError(ex, "Error fetching roles");
+            return Result<RoleListResponseModel>.SystemError("An error occurred while retrieving roles.");
         }
+    }
 
-        public Result<bool> DeleteRole(string roleCode)
+    public async Task<Result<TblRole>> GetByRoleCode(string roleCode)
+    {
+        try
         {
-            var roleToBeDeleted = _appDbContext.TblRoles.FirstOrDefault(r => r.RoleCode == roleCode && r.DeleteFlag != true);
-            if (roleToBeDeleted is null) return Result<bool>.NotFoundError("Cannot find the role to be deleted");
+            var role = await _appDbContext.TblRoles
+                .FirstOrDefaultAsync(r => r.RoleCode == roleCode && !r.DeleteFlag);
 
-            roleToBeDeleted.DeleteFlag = true;
-            var result = _appDbContext.SaveChanges();
-            return result > 0 ? Result<bool>.Success(true)
-                    : Result<bool>.Error();
-
+            return role != null
+                ? Result<TblRole>.Success(role)
+                : Result<TblRole>.NotFoundError("Role not found.");
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching role by code");
+            return Result<TblRole>.SystemError("An error occurred while retrieving the role.");
+        }
+    }
 
+    public async Task<Result<TblRole>> GetByRoleName(string roleName)
+    {
+        try
+        {
+            var role = await _appDbContext.TblRoles
+                .FirstOrDefaultAsync(r => r.RoleName == roleName && !r.DeleteFlag);
+
+            return role != null
+                ? Result<TblRole>.Success(role)
+                : Result<TblRole>.NotFoundError("Role not found.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching role by name");
+            return Result<TblRole>.SystemError("An error occurred while retrieving the role.");
+        }
+    }
+
+    public async Task<Result<bool>> CreateRole(RoleCreateRequestModel reqModel)
+    {
+        try
+        {
+            var role = new TblRole
+            {
+                RoleId = reqModel.RoleId,
+                RoleName = reqModel.RoleName,
+                CreatedAt = reqModel.CreatedAt,
+                CreatedBy = reqModel.CreatedBy,
+                DeleteFlag = false
+            };
+
+            await _appDbContext.TblRoles.AddAsync(role);
+            var saved = await _appDbContext.SaveChangesAsync() > 0;
+
+            return saved
+                ? Result<bool>.Success(true)
+                : Result<bool>.Error("Failed to save role.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating role");
+            return Result<bool>.SystemError("An error occurred while creating the role.");
+        }
+    }
+
+    public async Task<Result<bool>> UpdateRole(TblRole role)
+    {
+        try
+        {
+            var updated = await _appDbContext.SaveChangesAsync() > 0;
+            return updated
+                ? Result<bool>.Success(true)
+                : Result<bool>.Error("Failed to update role.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating role");
+            return Result<bool>.SystemError("An error occurred while updating the role.");
+        }
+    }
+
+    public async Task<Result<bool>> DeleteRole(TblRole role)
+    {
+        try
+        {
+            role.DeleteFlag = true;
+            var deleted = await _appDbContext.SaveChangesAsync() > 0;
+            return deleted
+                ? Result<bool>.Success(true)
+                : Result<bool>.Error("Failed to delete role.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting role");
+            return Result<bool>.SystemError("An error occurred while deleting the role.");
+        }
     }
 }
