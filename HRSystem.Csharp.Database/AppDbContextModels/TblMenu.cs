@@ -11,7 +11,7 @@ public partial class TblMenu
 
     public string? MenuGroupCode { get; set; }
 
-    public string? MenuName { get; set; }
+    public string MenuName { get; set; } = null!;
 
     public string? Url { get; set; }
 

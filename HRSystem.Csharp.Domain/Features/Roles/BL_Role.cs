@@ -34,12 +34,7 @@ public class BL_Role
 
         var existing = await _daRole.GetByRoleName(role.RoleName);
 
-        if (existing.IsNotFound)
-        {
-            return Result<bool>.Error(existing.Message);
-        }
-
-        if (existing.IsSuccess)
+        if (existing is { IsSuccess: true, Data: not null })
         {
             return Result<bool>.DuplicateRecordError("Role name already exists!");
         }
@@ -63,7 +58,7 @@ public class BL_Role
         }
 
         var roleResult = await _daRole.GetByRoleCode(reqModel.RoleCode);
-        if (roleResult.IsError)
+        if (!roleResult.IsSuccess)
         {
             return Result<RoleResponseModel>.Error(roleResult.Message);
         }

@@ -11,7 +11,7 @@ public class LocationController : ControllerBase
         _blLocation = blLocation;
     }
 
-    [HttpGet]
+    [HttpGet("list")]
     public async Task<IActionResult> GetAllLocations()
     {
         var result = await _blLocation.GetAllLocations();
@@ -21,7 +21,7 @@ public class LocationController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpGet("{locationCode}")]
+    [HttpGet("edit/{locationCode}")]
     public async Task<IActionResult> GetLocationByCode(string locationCode)
     {
         var result = await _blLocation.GetLocationByCode(locationCode);
@@ -31,7 +31,7 @@ public class LocationController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpPost]
+    [HttpPost("create")]
     public async Task<IActionResult> CreateLocation([FromBody] LocationCreateRequestModel location)
     {
         var result = await _blLocation.CreateLocation(location);
@@ -42,7 +42,7 @@ public class LocationController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpPut("{locationCode}")]
+    [HttpPut("update/{locationCode}")]
     public async Task<IActionResult> UpdateLocation(string locationCode, [FromBody] LocationUpdateRequestModel location)
     {
         var result = await _blLocation.UpdateLocation(locationCode, location);
@@ -53,7 +53,7 @@ public class LocationController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpDelete("{locationCode}")]
+    [HttpDelete("delete/{locationCode}")]
     public async Task<IActionResult> DeleteLocation(string locationCode)
     {
         var result = await _blLocation.DeleteLocation(locationCode);

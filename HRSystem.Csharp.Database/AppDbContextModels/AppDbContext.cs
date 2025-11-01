@@ -46,9 +46,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<TblVerification> TblVerifications { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https: //go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer(
-            "Server=.;Database=HRSystem;User ID=sa;Password=sasa@123;TrustServerCertificate=True;");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=.;Database=HRSystem;User ID=sa;Password=sasa@123;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -107,10 +106,11 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
+            entity.Property(e => e.IsFirstTimeLogin).HasDefaultValue(true);
             entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.Name).HasMaxLength(200);
-            entity.Property(e => e.Password).HasMaxLength(200);
+            entity.Property(e => e.Password).IsUnicode(false);
             entity.Property(e => e.PhoneNo).HasMaxLength(50);
             entity.Property(e => e.ProfileImage).HasMaxLength(200);
             entity.Property(e => e.ResignDate).HasColumnType("datetime");

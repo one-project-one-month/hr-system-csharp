@@ -63,7 +63,7 @@ namespace HRSystem.Csharp.Domain.Features
                 existingRule.Description = companyRule.Description;
                 existingRule.Value = companyRule.Value;
                 existingRule.IsActive = companyRule.IsActive;
-                existingRule.ModifiedAt = DateTime.Now;
+                existingRule.ModifiedAt = DateTime.UtcNow;
                 existingRule.ModifiedBy = companyRule.ModifiedBy;
                 existingRule.DeleteFlag = companyRule.DeleteFlag;
 
