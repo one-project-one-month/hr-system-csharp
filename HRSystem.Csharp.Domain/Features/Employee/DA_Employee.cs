@@ -61,11 +61,10 @@ public class DA_Employee
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching employees");
-            return Result<EmployeeListResponseModel>.SystemError("An error occurred while retrieving employees.");
+            return Result<EmployeeListResponseModel>.Error(
+                $"An error occurred while retrieving employees: {ex.Message}");
         }
     }
-
 
     public async Task<Result<EmployeeEditResponseModel>> GetEmployeeByCode(string employeeCode)
     {
@@ -91,7 +90,6 @@ public class DA_Employee
                 StartDate = employee.StartDate,
                 ResignDate = employee.ResignDate
             };
-
             return Result<EmployeeEditResponseModel>.Success(result);
         }
         catch (Exception ex)
@@ -108,22 +106,16 @@ public class DA_Employee
         {
             var newEmployee = new TblEmployee
             {
-                EmployeeId = Ulid.NewUlid().ToString(),
-                EmployeeCode = "EMP" + new Random().Next(1000, 9999).ToString(), //testing only
                 RoleCode = reqModel.RoleCode,
                 Username = reqModel.Username,
                 Name = reqModel.Name,
                 Email = reqModel.Email,
                 PhoneNo = reqModel.PhoneNo,
                 Password = reqModel.Password,
-                IsFirstTimeLogin = true,
-                ProfileImage = null,
                 Salary = reqModel.Salary,
                 StartDate = reqModel.StartDate,
                 ResignDate = reqModel.ResignDate,
-                CreatedAt = DateTime.UtcNow,
                 CreatedBy = currentUser,
-                DeleteFlag = false
             };
 
             _appDbContext.TblEmployees.Add(newEmployee);
@@ -169,7 +161,10 @@ public class DA_Employee
         var model = await _appDbContext.TblEmployees
             .FirstOrDefaultAsync(e => e.EmployeeCode == employeeCode && !e.DeleteFlag);
 
-        if (model == null) return Result<EmployeeDeleteResponseModel>.NotFoundError("Cannot find the employee code");
+        if (model == null)
+        {
+            return Result<EmployeeDeleteResponseModel>.NotFoundError("Cannot find the employee code");
+        }
 
         model.DeleteFlag = true;
         model.ModifiedAt = DateTime.UtcNow;
@@ -181,15 +176,12 @@ public class DA_Employee
             "Employee Deleted Successfully");
     }
 
-    #region Helper function
-
     public async Task<Result<TblEmployee>> GetEmployeeByUserName(string username)
     {
         try
         {
             var employee = await _appDbContext.TblEmployees
                 .FirstOrDefaultAsync(x => x.Username == username && !x.DeleteFlag);
-
             return employee != null
                 ? Result<TblEmployee>.Success(employee)
                 : Result<TblEmployee>.NotFoundError("Employee not found.");
@@ -225,7 +217,6 @@ public class DA_Employee
         {
             var emailExist = await _appDbContext.TblEmployees
                 .FirstOrDefaultAsync(x => x.Email == email && !x.DeleteFlag);
-
             return emailExist != null
                 ? Result<bool>.Success()
                 : Result<bool>.NotFoundError("Email not found.");
@@ -317,95 +308,4 @@ public class DA_Employee
             return Result<bool>.SystemError("An error occurred while checking phone no duplication.");
         }
     }
-
-    #endregion
-
-
-    /*private Result<EmployeeCreateResponseModel> CreateValidation(EmployeeCreateRequestModel req)
-    {
-        if (req.Username == null || req.Username.Trim() == "")
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Username is required");
-        }
-
-        if (GetEmployeeByUserName(req.Username))
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Username already exist");
-        }
-
-        if (req.Name == null || req.Name.Trim() == "")
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Name is required");
-        }
-
-        if (req.Password == null || req.Password.Trim() == "" || req.Password!.Length < 8)
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError(
-                "Password is required and more than 8 charactar");
-        }
-
-        if (req.Email == null || req.Email.Trim() == "")
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Email is required");
-        }
-
-        if (!checkEmail(req.Email))
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Email format is not valid");
-        }
-
-        if (DuplicateEmail(req.Email))
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Email is duplicate");
-        }
-
-        if (req.PhoneNo == null || req.PhoneNo.Trim() == "" || req.PhoneNo!.Length < 9)
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError(
-                "Phone number cannot be empty or less than 9 numbers!");
-        }
-
-        if (DuplicatePhoneNo(req.PhoneNo))
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Phone number already exist");
-        }
-
-        return null;
-    }*/
-
-    /*private Result<EmployeeUpdateResponseModel> UpdateValidation(EmployeeUpdateRequestModel req, string empCode)
-    {
-        if (req.Name == null || req.Name.Trim() == "")
-        {
-            return Result<EmployeeUpdateResponseModel>.ValidationError("Name is required");
-        }
-
-        if (req.Email == null || req.Email.Trim() == "")
-        {
-            return Result<EmployeeUpdateResponseModel>.ValidationError("Email is required");
-        }
-
-        if (!checkEmail(req.Email))
-        {
-            return Result<EmployeeUpdateResponseModel>.ValidationError("Email format is not valid");
-        }
-
-        if (duplicateUpdateEmail(req.Email, empCode))
-        {
-            return Result<EmployeeUpdateResponseModel>.ValidationError("Email is duplicate");
-        }
-
-        if (req.PhoneNo == null || req.PhoneNo.Trim() == "" || req.PhoneNo!.Length < 9)
-        {
-            return Result<EmployeeUpdateResponseModel>.ValidationError(
-                "Phone number cannot be empty or less than 9 numbers!");
-        }
-
-        if (duplicateUpdatePhoneNo(req.PhoneNo, empCode))
-        {
-            return Result<EmployeeUpdateResponseModel>.ValidationError("Phone number already exist");
-        }
-
-        return null;
-    }*/
 }
