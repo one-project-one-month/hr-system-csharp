@@ -29,8 +29,8 @@ public class BL_RoleMenuPermission
     public async Task<Result<CreateRoleMenuPermissionResponseModel>> CreateRoleMenuPermission
         (CreateRoleMenuPermissionRequestModel reqModel)
     {
-        var roleResult = _daRole.GetRoleByCode(reqModel.RoleCode);
-        if (roleResult.IsError)
+        var roleResult = await _daRole.GetByRoleCode(reqModel.RoleCode);
+        if (!roleResult.IsSuccess)
         {
             return Result<CreateRoleMenuPermissionResponseModel>.NotFoundError("Role doesn't exist!");
         }
