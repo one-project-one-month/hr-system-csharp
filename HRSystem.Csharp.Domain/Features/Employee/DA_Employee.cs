@@ -11,33 +11,54 @@ public class DA_Employee
     private readonly AppDbContext _appDbContext;
     private readonly ILogger<DA_Employee> _logger;
 
-    public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger)
-    {
-        _appDbContext = appDbContext;
-        _logger = logger;
-    }
-
-    public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
+    public async Task<Result<List<EmployeeResponseModel>>> GetAllEmployee()
     {
         try
         {
-            var query = _appDbContext.TblEmployees
-                .AsNoTracking()
-                .Where(e => !e.DeleteFlag)
-                .Join(_appDbContext.TblRoles,
-                    e => e.RoleCode,
-                    r => r.RoleCode,
-                    (e, r) => new EmployeeResponseModel
-                    {
-                        EmployeeCode = e.EmployeeCode,
-                        ProfileImage = e.ProfileImage,
-                        Username = e.Username,
-                        Name = e.Name,
-                        RoleName = r.RoleName,
-                        Email = e.Email,
-                        PhoneNo = e.PhoneNo,
-                        CreatedAt = e.CreatedAt
-                    });
+            var result = await
+                (from e in _appDbContext.TblEmployees
+                          join r in _appDbContext.TblRoles on e.RoleCode equals r.RoleCode
+                          where e.DeleteFlag != true
+                          select new EmployeeResponseModel
+                          {
+                              EmployeeCode = e.EmployeeCode,
+                              ProfileImage = e.ProfileImage,
+                              Username = e.Username,
+                              Name = e.Name,
+                              RoleName = r.RoleName,
+                              Email = e.Email,
+                              PhoneNo = e.PhoneNo
+                          }).AsNoTracking().ToListAsync();
+            return Result<List<EmployeeResponseModel>>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result<List<EmployeeResponseModel>>.Error($"An error occurred while retrieving employees: {ex.Message}");
+        }
+
+    }
+    public async Task<Result<List<EmployeeEditResponseModel>>> EditEmployee(string employeeCode)
+    {
+        try
+        {
+            var result = await _appDbContext.TblEmployees.Where(e => e.EmployeeCode == employeeCode && e.DeleteFlag != true)
+                .Select(e => new EmployeeEditResponseModel
+                {
+                    EmployeeCode = e.EmployeeCode,
+                    Username = e.Username,
+                    Name = e.Name,
+                    RoleCode = e.RoleCode,
+                    Email = e.Email,
+                    PhoneNo = e.PhoneNo,
+                    Salary = e.Salary,
+                    StartDate = e.StartDate,
+                    ResignDate = e.ResignDate
+                }).AsNoTracking().ToListAsync();
+            if (result == null)
+            {
+                return Result<List<EmployeeEditResponseModel>>.ValidationError("EmployeeCode Not Found");
+            }
+            return Result<List<EmployeeEditResponseModel>>.Success(result);
 
             if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
             {
@@ -45,11 +66,54 @@ public class DA_Employee
                                          && r.Name.ToLower() == reqModel.EmployeeName.ToLower());
             }
 
-            query = query.OrderByDescending(r => r.CreatedAt);
+    public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(EmployeeCreateRequestModel req)
+    {
+        if (duplicateUsername(req.Username))
+        {
+            return Result<EmployeeCreateResponseModel>.ValidationError("Username already exist");
+        }
+        if (duplicateEmail(req.Email))
+        {
+            return Result<EmployeeCreateResponseModel>.ValidationError("Email is duplicate");
+        }
+        if (duplicatePhoneNo(req.PhoneNo))
+        {
+            return Result<EmployeeCreateResponseModel>.ValidationError("Phone number already exist");
+        }
+        try
+        {
+                var existingRole = await _appDbContext.TblRoles.AsNoTracking().FirstOrDefaultAsync(r => r.RoleCode == req.RoleCode);
+                if (existingRole == null)
+                {
+                    return Result<EmployeeCreateResponseModel>.ValidationError("RoleCode does not exist");
+                }
+                var newEmployee = new TblEmployee
+            {
+                EmployeeId = Ulid.NewUlid().ToString(),
+                EmployeeCode = "EMP" + new Random().Next(1000, 9999).ToString(), //testing only
+                RoleCode = req.RoleCode,
+                Username = req.Username,
+                Name = req.Name,
+                Email = req.Email,
+                PhoneNo = req.PhoneNo,
+                Password = req.Password,
+                IsFirstTimeLogin = true,
+                ProfileImage = null,
+                Salary = req.Salary,
+                StartDate = req.StartDate,
+                ResignDate = req.ResignDate,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = currentUser, //testing only
+                DeleteFlag = false
 
-            var pagedResult = await query.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+                };
 
-            var result = new EmployeeListResponseModel
+            await _appDbContext.TblEmployees.AddAsync(newEmployee);
+            await _appDbContext.SaveChangesAsync();
+
+                return Result<EmployeeCreateResponseModel>.Success(new EmployeeCreateResponseModel(), "Employee Created Successfully");
+            }
+            catch (Exception ex)
             {
                 Items = pagedResult.Items,
                 TotalCount = pagedResult.TotalCount,
@@ -67,308 +131,78 @@ public class DA_Employee
     }
 
 
-    public async Task<Result<EmployeeEditResponseModel>> GetEmployeeByCode(string employeeCode)
+    public async Task<Result<EmployeeUpdateResponseModel>> UpdateEmployee(string empCode, EmployeeUpdateRequestModel emp)
     {
         try
         {
-            var employee = await _appDbContext.TblEmployees
-                .FirstOrDefaultAsync(e => e.EmployeeCode == employeeCode && e.DeleteFlag == false);
-
-            if (employee == null)
+            var existingEmp = await _appDbContext.TblEmployees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeCode == empCode && e.DeleteFlag != true);
+            if (existingEmp == null) return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the employee to be updated");
+                var existingRole = await _appDbContext.TblRoles.AsNoTracking().FirstOrDefaultAsync(r => r.RoleCode == emp.RoleCode);
+                if (existingRole == null)
+                {
+                    return Result<EmployeeUpdateResponseModel>.ValidationError("RoleCode does not exist");
+                }
+                if (duplicateUpdateEmail(emp.Email, empCode))
             {
-                return Result<EmployeeEditResponseModel>.ValidationError("Employee doesn't exist!");
+                return Result<EmployeeUpdateResponseModel>.ValidationError("Email is duplicate");
+            }
+            if (duplicateUpdatePhoneNo(emp.PhoneNo, empCode))
+            {
+                return Result<EmployeeUpdateResponseModel>.ValidationError("Phone number already exist");
             }
 
-            var result = new EmployeeEditResponseModel()
-            {
-                EmployeeCode = employee.EmployeeCode,
-                Username = employee.Username,
-                Name = employee.Name,
-                RoleCode = employee.RoleCode,
-                Email = employee.Email,
-                PhoneNo = employee.PhoneNo,
-                Salary = employee.Salary,
-                StartDate = employee.StartDate,
-                ResignDate = employee.ResignDate
-            };
-
-            return Result<EmployeeEditResponseModel>.Success(result);
+            existingEmp.Name = emp.Name;
+            existingEmp.RoleCode = emp.RoleCode;
+            existingEmp.Email = emp.Email;
+            existingEmp.PhoneNo = emp.PhoneNo;
+            existingEmp.Salary = emp.Salary;
+            existingEmp.StartDate = emp.Startdate;
+            existingEmp.ResignDate = emp.Resigndate;
+            existingEmp.ModifiedAt = DateTime.UtcNow;
+            existingEmp.ModifiedBy = currentUser;
+            _appDbContext.SaveChangesAsync();
+            return Result<EmployeeUpdateResponseModel>.Success(new EmployeeUpdateResponseModel(), "Employee Updated Successfully");
         }
-        catch (Exception ex)
-        {
-            return Result<EmployeeEditResponseModel>.Error(
-                $"An error occurred while retrieving employees: {ex.Message}");
+        catch (Exception ex) {
+            return Result<EmployeeUpdateResponseModel>.SystemError(ex.Message);
         }
-    }
-
-    public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(
-        EmployeeCreateRequestModel reqModel)
-    {
-        try
-        {
-            var newEmployee = new TblEmployee
-            {
-                EmployeeId = Ulid.NewUlid().ToString(),
-                EmployeeCode = "EMP" + new Random().Next(1000, 9999).ToString(), //testing only
-                RoleCode = reqModel.RoleCode,
-                Username = reqModel.Username,
-                Name = reqModel.Name,
-                Email = reqModel.Email,
-                PhoneNo = reqModel.PhoneNo,
-                Password = reqModel.Password,
-                IsFirstTimeLogin = true,
-                ProfileImage = null,
-                Salary = reqModel.Salary,
-                StartDate = reqModel.StartDate,
-                ResignDate = reqModel.ResignDate,
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = currentUser,
-                DeleteFlag = false
-            };
-
-            _appDbContext.TblEmployees.Add(newEmployee);
-            await _appDbContext.SaveChangesAsync();
-
-            return Result<EmployeeCreateResponseModel>.Success(new EmployeeCreateResponseModel(),
-                "Employee Created Successfully");
-        }
-        catch (Exception ex)
-        {
-            return Result<EmployeeCreateResponseModel>.Error(
-                $"An error occurred while creating employee: {ex.Message}");
-        }
-    }
-
-    public async Task<Result<EmployeeUpdateResponseModel>> UpdateEmployee(string empCode,
-        EmployeeUpdateRequestModel emp)
-    {
-        var existingEmp = await _appDbContext.TblEmployees
-            .FirstOrDefaultAsync(e => e.EmployeeCode == empCode && e.DeleteFlag != true);
-
-        if (existingEmp == null)
-            return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the role to be updated");
-
-        existingEmp.Name = emp.Name;
-        existingEmp.RoleCode = emp.RoleCode;
-        existingEmp.Email = emp.Email;
-        existingEmp.PhoneNo = emp.PhoneNo;
-        existingEmp.Salary = emp.Salary;
-        existingEmp.StartDate = emp.StartDate;
-        existingEmp.ResignDate = emp.ResignDate;
-        existingEmp.ModifiedAt = DateTime.UtcNow;
-        existingEmp.ModifiedBy = currentUser;
-
-        await _appDbContext.SaveChangesAsync();
-
-        return Result<EmployeeUpdateResponseModel>.Success(new EmployeeUpdateResponseModel(),
-            "Employee Updated Successfully");
     }
 
     public async Task<Result<EmployeeDeleteResponseModel>> DeleteEmployee(string employeeCode)
     {
-        var model = await _appDbContext.TblEmployees
-            .FirstOrDefaultAsync(e => e.EmployeeCode == employeeCode && !e.DeleteFlag);
+        try
+        {
+            var model = await _appDbContext.TblEmployees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeCode == employeeCode &&
+                       e.DeleteFlag == false);
+            if (model == null) return Result<EmployeeDeleteResponseModel>.NotFoundError("Cannot find the employee code");
 
-        if (model == null) return Result<EmployeeDeleteResponseModel>.NotFoundError("Cannot find the employee code");
+            model.DeleteFlag = true;
+            model.ModifiedAt = DateTime.UtcNow;
+            model.ModifiedBy = currentUser;
+            _appDbContext.SaveChangesAsync();
+            return Result<EmployeeDeleteResponseModel>.Success(new EmployeeDeleteResponseModel(), "Employee Deleted Successfully");
 
-        model.DeleteFlag = true;
-        model.ModifiedAt = DateTime.UtcNow;
-        model.ModifiedBy = currentUser;
-
-        await _appDbContext.SaveChangesAsync();
-
-        return Result<EmployeeDeleteResponseModel>.Success(new EmployeeDeleteResponseModel(),
-            "Employee Deleted Successfully");
+        }
+        catch (Exception ex)
+        {
+            return Result<EmployeeDeleteResponseModel>.SystemError($"An error occurred while deleting employee: {ex.Message}");
+        }
     }
 
     #region Helper function
 
-    public async Task<Result<TblEmployee>> GetEmployeeByUserName(string username)
+    public bool duplicateUsername(string username)
     {
-        try
-        {
-            var employee = await _appDbContext.TblEmployees
-                .FirstOrDefaultAsync(x => x.Username == username && !x.DeleteFlag);
-
-            return employee != null
-                ? Result<TblEmployee>.Success(employee)
-                : Result<TblEmployee>.NotFoundError("Employee not found.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching employee by name");
-            return Result<TblEmployee>.SystemError("An error occurred while retrieving the employee.");
-        }
+        var isDuplicated = _appDbContext.TblEmployees.FirstOrDefault(x => x.Username == username);
+        if (isDuplicated is null) return false;
+        return true;
     }
-
-    public async Task<Result<bool>> GetEmployeeByName(string fullName)
+    public bool duplicateEmail(string email)
     {
-        try
-        {
-            var employee = await _appDbContext.TblEmployees
-                .FirstOrDefaultAsync(x => x.Name == fullName && !x.DeleteFlag);
-
-            return employee != null
-                ? Result<bool>.Success()
-                : Result<bool>.NotFoundError("Employee not found.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching employee by name");
-            return Result<bool>.SystemError("An error occurred while retrieving the employee.");
-        }
+        var isDuplicated = _appDbContext.TblEmployees.FirstOrDefault(x => x.Email == email);
+        if (isDuplicated is null) return false;
+        return true;
     }
-
-    public async Task<Result<bool>> DuplicateEmail(string email)
-    {
-        try
-        {
-            var emailExist = await _appDbContext.TblEmployees
-                .FirstOrDefaultAsync(x => x.Email == email && !x.DeleteFlag);
-
-            return emailExist != null
-                ? Result<bool>.Success()
-                : Result<bool>.NotFoundError("Email not found.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching employee by email");
-            return Result<bool>.SystemError("An error occurred while retrieving the employee.");
-        }
-    }
-
-    public async Task<Result<bool>> DuplicatePhoneNo(string phoneNo)
-    {
-        try
-        {
-            var phoneExist = await _appDbContext.TblEmployees
-                .FirstOrDefaultAsync(x => x.PhoneNo == phoneNo && !x.DeleteFlag);
-
-            return phoneExist != null
-                ? Result<bool>.Success()
-                : Result<bool>.NotFoundError("Phone No not found.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching employee by phone no");
-            return Result<bool>.SystemError("An error occurred while retrieving the employee.");
-        }
-    }
-
-    public async Task<Result<bool>> DuplicateUpdateEmail(string employeeCode, string email)
-    {
-        try
-        {
-            var emailExists = await _appDbContext.TblEmployees
-                .AnyAsync(x =>
-                    x.EmployeeCode != employeeCode &&
-                    x.Email == email &&
-                    !x.DeleteFlag);
-
-            return emailExists
-                ? Result<bool>.Success(true, "Email already exists for another employee.")
-                : Result<bool>.NotFoundError("No duplicate email found.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking duplicate email");
-            return Result<bool>.SystemError("An error occurred while checking email duplication.");
-        }
-    }
-
-    public async Task<Result<bool>> DuplicateUpdateUserName(string employeeCode, string userName)
-    {
-        try
-        {
-            var userNameExists = await _appDbContext.TblEmployees
-                .AnyAsync(x =>
-                    x.EmployeeCode != employeeCode &&
-                    x.Username == userName &&
-                    !x.DeleteFlag);
-
-            return userNameExists
-                ? Result<bool>.Success(true, "UserName already exists for another employee.")
-                : Result<bool>.NotFoundError("No duplicate username found.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking duplicate email");
-            return Result<bool>.SystemError("An error occurred while checking email duplication.");
-        }
-    }
-
-    public async Task<Result<bool>> DuplicateUpdatePhoneNo(string employeeCode, string phoneNo)
-    {
-        try
-        {
-            var phoneNoExist = await _appDbContext.TblEmployees
-                .AnyAsync(x =>
-                    x.EmployeeCode != employeeCode
-                    && x.PhoneNo == phoneNo
-                    && !x.DeleteFlag);
-
-            return phoneNoExist
-                ? Result<bool>.Success(true, "Phone No already exists for another employee.")
-                : Result<bool>.NotFoundError("No duplicate Phone No found.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking duplicate phone no");
-            return Result<bool>.SystemError("An error occurred while checking phone no duplication.");
-        }
-    }
-
-    #endregion
-
-
-    /*private Result<EmployeeCreateResponseModel> CreateValidation(EmployeeCreateRequestModel req)
-    {
-        if (req.Username == null || req.Username.Trim() == "")
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Username is required");
-        }
-
-        if (GetEmployeeByUserName(req.Username))
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Username already exist");
-        }
-
-        if (req.Name == null || req.Name.Trim() == "")
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Name is required");
-        }
-
-        if (req.Password == null || req.Password.Trim() == "" || req.Password!.Length < 8)
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError(
-                "Password is required and more than 8 charactar");
-        }
-
-        if (req.Email == null || req.Email.Trim() == "")
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Email is required");
-        }
-
-        if (!checkEmail(req.Email))
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Email format is not valid");
-        }
-
-        if (DuplicateEmail(req.Email))
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Email is duplicate");
-        }
-
-        if (req.PhoneNo == null || req.PhoneNo.Trim() == "" || req.PhoneNo!.Length < 9)
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError(
-                "Phone number cannot be empty or less than 9 numbers!");
-        }
-
-        if (DuplicatePhoneNo(req.PhoneNo))
-        {
-            return Result<EmployeeCreateResponseModel>.ValidationError("Phone number already exist");
-        }
 
         return null;
     }*/

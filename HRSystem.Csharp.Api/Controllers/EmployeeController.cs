@@ -14,63 +14,34 @@ public class EmployeeController : ControllerBase
         _blEmployee = blEmployee;
     }
 
-    [HttpPost("list")]
-    public async Task<IActionResult> GetAllEmployee(EmployeeListRequestModel reqModel)
+    [HttpGet("GetAllEmployee")]
+    public async Task<IActionResult> GetAllEmployee()
     {
-        var result = await _blEmployee.GetAllEmployee(reqModel);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Data);
-        }
-
-        return BadRequest(result);
+        return Ok(await _blEmployee.GetAllEmployee());
     }
 
-    [HttpGet("edit/{employeeCode}")]
+    [HttpGet("EditEmployee/{employeeCode}")]
     public async Task<IActionResult> EditEmployee(string employeeCode)
     {
-        var result = await _blEmployee.EditEmployee(employeeCode);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Data);
-        }
-
-        return BadRequest(result);
+       return Ok(await _blEmployee.EditEmployee(employeeCode));
     }
 
-    [HttpPost("create")]
+    [HttpPost("CreateEmployee")]
     public async Task<IActionResult> CreateEmployee([FromBody] EmployeeCreateRequestModel req)
     {
-        var result = await _blEmployee.CreateEmployee(req);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Message);
-        }
-
-        return BadRequest(result);
+     
+        return Ok(await _blEmployee.CreateEmployee(req));
     }
 
-    [HttpPost("update/{employeeCode}")]
+    [HttpPost("UpdateEmployee/{employeeCode}")]
     public async Task<IActionResult> UpdateEmployee(string employeeCode, [FromBody] EmployeeUpdateRequestModel req)
     {
-        var result = await _blEmployee.UpdateEmployee(employeeCode, req);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Message);
-        }
-
-        return BadRequest(result);
+       return Ok(await _blEmployee.UpdateEmployee(employeeCode, req));
     }
 
-    [HttpPost("delete/{employeeCode}")]
+    [HttpPost("DeleteEmployee/{employeeCode}")]
     public async Task<IActionResult> DeleteEmployee(string employeeCode)
     {
-        var result = await _blEmployee.DeleteEmployee(employeeCode);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Message);
-        }
-
-        return BadRequest(result);
+       return Ok(await _blEmployee.DeleteEmployee(employeeCode));
     }
 }

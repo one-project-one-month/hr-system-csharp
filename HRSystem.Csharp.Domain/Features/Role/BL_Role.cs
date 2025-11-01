@@ -1,7 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Models.Roles;
 using Microsoft.Extensions.Logging;
 
-namespace HRSystem.Csharp.Domain.Features.Roles;
+namespace HRSystem.Csharp.Domain.Features.Role;
 
 public class BL_Role
 {
@@ -47,7 +47,8 @@ public class BL_Role
             CreatedBy = "admin"
         };
 
-        return await _daRole.CreateRole(newRole);
+        var response = await _daRole.CreateRole(newRole);
+        return response;
     }
 
     public async Task<Result<RoleResponseModel>> GetRoleByCode(RoleEditRequestModel reqModel)

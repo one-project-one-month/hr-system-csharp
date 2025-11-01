@@ -1,4 +1,7 @@
-﻿using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+﻿using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+using HRSystem.Csharp.Shared.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace HRSystem.Csharp.Domain.Features.RoleMenuPermission;
@@ -8,14 +11,16 @@ public class DA_RoleMenuPermission
     private readonly AppDbContext _dbContext;
     private readonly ILogger<DA_RoleMenuPermission> _logger;
     private readonly DA_Role _daRole;
+    private readonly DA_Sequence _daSequence;
 
     public DA_RoleMenuPermission(AppDbContext dbContext,
         ILogger<DA_RoleMenuPermission> logger,
-        DA_Role daRole)
+        DA_Role daRole, DA_Sequence daSequence)
     {
         _dbContext = dbContext;
         _logger = logger;
         _daRole = daRole;
+        _daSequence = daSequence;
     }
 
     public async Task<Result<MenuTreeResponseModel>> GetMenuTreeWithPermissionsAsync(
@@ -82,6 +87,7 @@ public class DA_RoleMenuPermission
         await using var transaction = await _dbContext.Database.BeginTransactionAsync();
         try
         {
+            var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.RL.ToString());
             var existing = await _dbContext.TblRoleAndMenuPermissions
                 .Where(p => p.RoleCode == reqModel.RoleCode && !p.DeleteFlag)
                 .ToListAsync();
@@ -98,7 +104,7 @@ public class DA_RoleMenuPermission
                 .Select(p => new TblRoleAndMenuPermission
                 {
                     RoleAndMenuPermissionId = Guid.NewGuid().ToString(),
-                    RoleAndMenuPermissionCode = "PermissionCode",
+                    RoleAndMenuPermissionCode = generatedCode,
                     RoleCode = reqModel.RoleCode,
                     MenuGroupCode = p.MenuGroupCode,
                     MenuCode = p.MenuItemCode,

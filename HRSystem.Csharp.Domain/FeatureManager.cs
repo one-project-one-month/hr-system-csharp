@@ -1,6 +1,10 @@
 ﻿using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 ﻿using System.Data;
 using HRSystem.Csharp.Domain.Features.Roles;
+using System.Data;
+using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Shared.Services;
 using Microsoft.Data.SqlClient;
 
 namespace HRSystem.Csharp.Domain;
