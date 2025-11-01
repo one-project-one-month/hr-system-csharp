@@ -33,7 +33,7 @@ public class DA_MenuGroup
             .ToListAsync();
     }
 
-    public async Task<MenuGroupModel?> GetMenuGroupById(string menuGroupCode)
+    public async Task<MenuGroupModel?> GetMenuGroupByCode(string menuGroupCode)
     {
         return await _context.TblMenuGroups
             .Where(mg => mg.MenuGroupCode.Equals(menuGroupCode) && mg.DeleteFlag == false)
@@ -132,7 +132,7 @@ public class DA_MenuGroup
             {
                 return Result<MenuGroupModel>.Error("Failed to create Menu Group");
             }
-
+          
             // Map entity to DTO
             var menuGroupModel = new MenuGroupModel
             {
@@ -144,7 +144,7 @@ public class DA_MenuGroup
                 SortOrder = menuGroup.SortOrder,
                 HasMenuItem = menuGroup.HasMenuItem,
                 CreatedAt = menuGroup.CreatedAt,
-                DeleteFlag = menuGroup.DeleteFlag ?? false
+                DeleteFlag = menuGroup.DeleteFlag
             };
 
             return Result<MenuGroupModel>.Success(menuGroupModel);

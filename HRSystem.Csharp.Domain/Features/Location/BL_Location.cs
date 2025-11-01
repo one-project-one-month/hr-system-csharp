@@ -13,8 +13,14 @@ public class BL_Location
     {
         var validationResult = RequestValidator.ValidateCreateLocation(location);
 
-        if(!validationResult.IsSuccess)
+        if (!validationResult.IsSuccess)
             return Result<bool>.BadRequestError(validationResult.Message!);
+
+        var existing = await _daLocation.GetLocationByName(location.Name);
+        if (existing is { IsSuccess: true, Data: not null })
+        {
+            return Result<bool>.DuplicateRecordError("Location name already exists!");
+        }
 
         var result = await _daLocation.CreateLocation(location);
         return result;
@@ -36,7 +42,7 @@ public class BL_Location
     {
         var validationResult = RequestValidator.ValidateUpdateLocation(locationCode, location);
 
-        if(!validationResult.IsSuccess)
+        if (!validationResult.IsSuccess)
             return Result<bool>.BadRequestError(validationResult.Message!);
 
         var result = await _daLocation.UpdateLocation(locationCode, location);

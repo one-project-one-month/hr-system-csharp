@@ -35,21 +35,11 @@ namespace HRSystem.Csharp.Domain.Features
                         ModifiedBy = cr.ModifiedBy,
                         DeleteFlag = cr.DeleteFlag == null ? false : cr.DeleteFlag
                     })
-                    .ToList();
+                    .AsNoTracking().ToList();
 
                 if (companyRules == null || companyRules.Count == 0)
                 {
                     return Result<List<CompanyRules>>.NotFoundError("No company rules found.");
-                }
-
-                if (companyRules.All(cr => cr.IsActive == false))
-                {
-                    return Result<List<CompanyRules>>.ValidationError("All company rules are inactive.");
-                }
-
-                if (companyRules.All(cr => cr.DeleteFlag == true))
-                {
-                    return Result<List<CompanyRules>>.ValidationError("All company ruls are deleted.");
                 }
                 
                 return Result<List<CompanyRules>>.Success(companyRules);
@@ -73,7 +63,7 @@ namespace HRSystem.Csharp.Domain.Features
                 existingRule.Description = companyRule.Description;
                 existingRule.Value = companyRule.Value;
                 existingRule.IsActive = companyRule.IsActive;
-                existingRule.ModifiedAt = DateTime.Now;
+                existingRule.ModifiedAt = DateTime.UtcNow;
                 existingRule.ModifiedBy = companyRule.ModifiedBy;
                 existingRule.DeleteFlag = companyRule.DeleteFlag;
 

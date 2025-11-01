@@ -15,7 +15,7 @@ public class RoleController : ControllerBase
         _blRole = blRole;
     }
 
-    [HttpPost("CreateRole")]
+    [HttpPost("create")]
     public async Task<IActionResult> CreateRole([FromBody] RoleRequestModel role)
     {
         var result = await _blRole.CreateRole(role);
@@ -23,50 +23,55 @@ public class RoleController : ControllerBase
         {
             return Ok(result.Data);
         }
+
         return BadRequest(result);
     }
 
-    [HttpGet("GetAllRoles")]
-    public async Task<IActionResult> GetAllRoles()
+    [HttpPost("list")]
+    public async Task<IActionResult> GetAllRoles([FromBody] RoleListRequestModel reqModel)
     {
-        var result = await _blRole.GetAllRoles();
+        var result = await _blRole.GetAllRoles(reqModel);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
         }
+
         return BadRequest(result);
     }
 
-    [HttpGet("GetRole/{roleCode}")]
-    public async Task<IActionResult> GetRoleByCode(string roleCode)
+    [HttpPost("edit")]
+    public async Task<IActionResult> GetRoleByCode(RoleEditRequestModel reqModel)
     {
-        var result = await _blRole.GetRoleByCode(roleCode);
+        var result = await _blRole.GetRoleByCode(reqModel);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
         }
+
         return BadRequest(result);
     }
 
-    [HttpPatch("UpdateRole/{roleCode}")]
-    public async Task<IActionResult> UpdateRole(string roleCode, [FromBody] RoleUpdateRequestModel role)
+    [HttpPatch("update")]
+    public async Task<IActionResult> UpdateRole([FromBody] RoleUpdateRequestModel reqModel)
     {
-        var result = await _blRole.UpdateRole(role, roleCode);
+        var result = await _blRole.UpdateRole(reqModel);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
         }
+
         return BadRequest(result);
     }
 
-    [HttpDelete("DeleteRole/{roleCode}")]
-    public async Task<IActionResult> DeleteRole(string roleCode)
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteRole([FromBody] RoleDeleteRequestModel reqModel)
     {
-        var result = await _blRole.DeleteRole(roleCode);
+        var result = await _blRole.DeleteRole(reqModel);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
         }
+
         return BadRequest(result);
     }
 }

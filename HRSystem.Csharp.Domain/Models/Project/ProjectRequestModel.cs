@@ -15,6 +15,11 @@ public class ProjectRequestModel
     public EnumProjectStatus ProjectStatus { get; set; }
 }
 
+public class ProjectEditRequestModel
+{
+    public string ProjectCode { get; set; }
+}
+
 //public class ProjectUpdateRequestModel
 //{
 //        [Required(ErrorMessage = "Project code is required.")]

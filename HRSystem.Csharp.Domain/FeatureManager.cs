@@ -1,4 +1,8 @@
-﻿namespace HRSystem.Csharp.Domain;
+﻿using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
+﻿using System.Data;
+using Microsoft.Data.SqlClient;
+
+namespace HRSystem.Csharp.Domain;
 
 public static class FeatureManager
 {
@@ -42,6 +46,13 @@ public static class FeatureManager
 
         #endregion
 
+        #region Role Menu Permission
+
+        builder.Services.AddScoped<BL_RoleMenuPermission>();
+        builder.Services.AddScoped<DA_RoleMenuPermission>();
+
+        #endregion
+
         builder.Services.AddScoped<Generator>();
         builder.Services.AddScoped<JwtService>();
         builder.Services.AddHttpContextAccessor();
@@ -50,10 +61,13 @@ public static class FeatureManager
 
     public static void AddDomain(this WebApplicationBuilder builder)
     {
-        builder.Services.AddDbContext<AppDbContext>(opt =>
-        {
-            opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
-        }, ServiceLifetime.Transient, ServiceLifetime.Transient);
+        var mssqlConnection = builder.Configuration.GetConnectionString("DbConnection");
+
+        builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection); },
+            ServiceLifetime.Transient, ServiceLifetime.Transient);
+
+        builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
+            new SqlConnection(mssqlConnection));
 
         builder.AddServices();
     }

@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.Project;
 using HRSystem.Csharp.Domain.Models.Project;
+using HRSystem.Csharp.Shared;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -14,7 +15,7 @@ public class ProjectController : ControllerBase
         _blProject = blProject;
     }
 
-    [HttpGet]
+    [HttpGet("list")]
     public async Task<IActionResult> GetALlProjects()
     {
         var result = await _blProject.GetAllProjects();
@@ -26,10 +27,10 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpGet("{code}")]
-    public async Task<IActionResult> GetProject(string code)
+    [HttpGet("edit")]
+    public async Task<IActionResult> GetProject(ProjectEditRequestModel reqModel)
     {
-        var result = await _blProject.GetProject(code);
+        var result = await _blProject.GetProject(reqModel.ProjectCode);
 
         if (result.IsSuccess) return Ok(result);
 
@@ -69,6 +70,12 @@ public class ProjectController : ControllerBase
     [HttpDelete("{code}")]
     public async Task<IActionResult> DeleteProject(string code)
     {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            var error = Result<bool>.ValidationError("Project code is required!");
+            return BadRequest(error);
+        }
+        
         var result = await _blProject.DeleteProject(code);
 
         if (result.IsSuccess) return Ok(result);
