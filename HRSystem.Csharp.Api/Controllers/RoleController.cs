@@ -1,6 +1,6 @@
-﻿using HRSystem.Csharp.Domain.Features.Roles;
-using HRSystem.Csharp.Domain.Models.Roles;
+﻿using HRSystem.Csharp.Domain.Models.Roles;
 using System.Threading.Tasks;
+using HRSystem.Csharp.Domain.Features.Role;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -21,7 +21,7 @@ public class RoleController : ControllerBase
         var result = await _blRole.CreateRole(role);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);
@@ -33,7 +33,7 @@ public class RoleController : ControllerBase
         var result = await _blRole.GetAllRoles(reqModel);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);
@@ -45,7 +45,7 @@ public class RoleController : ControllerBase
         var result = await _blRole.GetRoleByCode(reqModel);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);
@@ -57,7 +57,7 @@ public class RoleController : ControllerBase
         var result = await _blRole.UpdateRole(reqModel);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);
@@ -69,7 +69,7 @@ public class RoleController : ControllerBase
         var result = await _blRole.DeleteRole(reqModel);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);

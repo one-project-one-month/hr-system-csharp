@@ -1,5 +1,8 @@
 ﻿using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
-﻿using System.Data;
+using System.Data;
+using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Shared.Services;
 using Microsoft.Data.SqlClient;
 
 namespace HRSystem.Csharp.Domain;
@@ -53,10 +56,18 @@ public static class FeatureManager
 
         #endregion
 
+        #region Sequence
+
+        builder.Services.AddScoped<BL_Sequence>();
+        builder.Services.AddScoped<DA_Sequence>();
+
+        #endregion
+
         builder.Services.AddScoped<Generator>();
         builder.Services.AddScoped<JwtService>();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<AuthorizationService>();
+        builder.Services.AddScoped<DapperService>();
     }
 
     public static void AddDomain(this WebApplicationBuilder builder)
