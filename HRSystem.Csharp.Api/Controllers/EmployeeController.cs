@@ -1,4 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features.Employee;
+﻿/*using HRSystem.Csharp.Domain.Features.Employee;
 using HRSystem.Csharp.Domain.Models.Employee;
 
 namespace HRSystem.Csharp.Api.Controllers;
@@ -44,4 +44,4 @@ public class EmployeeController : ControllerBase
     {
        return Ok(await _blEmployee.DeleteEmployee(employeeCode));
     }
-}
+}*/

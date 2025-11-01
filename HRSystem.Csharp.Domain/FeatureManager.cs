@@ -1,10 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
-﻿using System.Data;
-using HRSystem.Csharp.Domain.Features.Roles;
 using System.Data;
 using HRSystem.Csharp.Domain.Features.Role;
-using HRSystem.Csharp.Domain.Features.Sequence;
-using HRSystem.Csharp.Shared.Services;
 using Microsoft.Data.SqlClient;
 
 namespace HRSystem.Csharp.Domain;
@@ -21,7 +17,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_MenuGroup>();
         builder.Services.AddScoped<BL_Location>();
         builder.Services.AddScoped<BL_Project>();
-        builder.Services.AddScoped<BL_Employee>();
+        // builder.Services.AddScoped<BL_Employee>();
         builder.Services.AddScoped<BL_Auth>();
 
         #endregion
