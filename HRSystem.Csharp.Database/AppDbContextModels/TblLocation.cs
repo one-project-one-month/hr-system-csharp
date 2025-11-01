@@ -9,21 +9,21 @@ public partial class TblLocation
 
     public string LocationCode { get; set; } = null!;
 
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 
-    public string? Latitude { get; set; }
+    public string Latitude { get; set; } = null!;
 
-    public string? Longitude { get; set; }
+    public string Longitude { get; set; } = null!;
 
-    public string? Radius { get; set; }
+    public string Radius { get; set; } = null!;
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public string? CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = null!;
 
     public string? ModifiedBy { get; set; }
 
     public DateTime? ModifiedAt { get; set; }
 
-    public bool? DeleteFlag { get; set; }
+    public bool DeleteFlag { get; set; }
 }

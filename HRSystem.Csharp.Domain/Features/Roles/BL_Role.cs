@@ -1,65 +1,119 @@
 ﻿using HRSystem.Csharp.Domain.Models.Roles;
+using Microsoft.Extensions.Logging;
 
 namespace HRSystem.Csharp.Domain.Features.Roles;
 
 public class BL_Role
 {
     private readonly DA_Role _daRole;
+    private readonly ILogger<BL_Role> _logger;
 
-    public BL_Role(DA_Role daRole)
+    public BL_Role(DA_Role daRole, ILogger<BL_Role> logger)
     {
         _daRole = daRole;
+        _logger = logger;
     }
 
-    public Result<List<RoleResponseModel>> GetAllRoles()
+    public async Task<Result<RoleListResponseModel>> GetAllRoles(RoleListRequestModel reqModel)
     {
-        var roles = _daRole.GetAllRoles();
-        var response = Result<List<RoleResponseModel>>.Success(roles.Data);
-        return response;
+        if (reqModel == null)
+        {
+            _logger.LogWarning("Role list request is null");
+            return Result<RoleListResponseModel>.BadRequestError("Request cannot be null");
+        }
+
+        return await _daRole.GetRoles(reqModel);
     }
 
-    public Result<bool> CreateRole(RoleRequestModel role)
+    public async Task<Result<bool>> CreateRole(RoleRequestModel role)
     {
-        if (role == null)
+        if (role == null || string.IsNullOrWhiteSpace(role.RoleName))
         {
-            return Result<bool>.InvalidDataError("New role cannot be empty");
+            return Result<bool>.InvalidDataError("Role name is required!");
         }
-        var response = _daRole.CreateRole(role);
-        return response;
+
+        var existing = await _daRole.GetByRoleName(role.RoleName);
+
+        if (existing is { IsSuccess: true, Data: not null })
+        {
+            return Result<bool>.DuplicateRecordError("Role name already exists!");
+        }
+
+        var newRole = new RoleCreateRequestModel
+        {
+            RoleId = Ulid.NewUlid().ToString(),
+            RoleName = role.RoleName,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "admin"
+        };
+
+        return await _daRole.CreateRole(newRole);
     }
 
-    public Result<RoleResponseModel> GetRoleByCode(string roleCode)
+    public async Task<Result<RoleResponseModel>> GetRoleByCode(RoleEditRequestModel reqModel)
     {
-        if (string.IsNullOrEmpty(roleCode))
+        if (string.IsNullOrWhiteSpace(reqModel.RoleCode))
         {
-            return Result<RoleResponseModel>.InvalidDataError("Role code cannot be empty");
+            return Result<RoleResponseModel>.BadRequestError("Role code cannot be empty");
         }
-        var response = _daRole.GetRoleByCode(roleCode);
-        return response;
+
+        var roleResult = await _daRole.GetByRoleCode(reqModel.RoleCode);
+        if (!roleResult.IsSuccess)
+        {
+            return Result<RoleResponseModel>.Error(roleResult.Message);
+        }
+
+        var role = roleResult.Data!;
+        var response = new RoleResponseModel
+        {
+            RoleName = role.RoleName,
+            RoleCode = role.RoleCode,
+            RoleId = role.RoleId,
+            CreatedAt = role.CreatedAt,
+            CreatedBy = role.CreatedBy,
+            ModifiedAt = role.ModifiedAt,
+            ModifiedBy = role.ModifiedBy,
+            DeleteFlag = role.DeleteFlag
+        };
+
+        return Result<RoleResponseModel>.Success(response);
     }
 
-    public Result<bool> UpdateRole(RoleUpdateRequestModel role, string roleCode)
+    public async Task<Result<bool>> UpdateRole(RoleUpdateRequestModel reqModel)
     {
-        if (string.IsNullOrEmpty(roleCode))
+        if (reqModel == null || string.IsNullOrWhiteSpace(reqModel.RoleCode) ||
+            string.IsNullOrWhiteSpace(reqModel.RoleName))
         {
-            return Result<bool>.InvalidDataError("Role code cannot be empty");
+            return Result<bool>.InvalidDataError("Role code and name are required");
         }
-        else if (role == null)
+
+        var existing = await _daRole.GetByRoleCode(reqModel.RoleCode);
+        if (!existing.IsSuccess)
         {
-            return Result<bool>.InvalidDataError("Updated role cannot be empty");
+            return Result<bool>.Error(existing.Message);
         }
-        var response = _daRole.UpdateRole(role, roleCode);
-        return response;
+
+        var role = existing.Data!;
+        role.RoleName = reqModel.RoleName;
+        role.ModifiedAt = DateTime.UtcNow;
+        role.ModifiedBy = "admin";
+
+        return await _daRole.UpdateRole(role);
     }
 
-    public Result<bool> DeleteRole(string roleCode)
+    public async Task<Result<bool>> DeleteRole(RoleDeleteRequestModel reqModel)
     {
-        if (string.IsNullOrEmpty(roleCode))
+        if (string.IsNullOrWhiteSpace(reqModel.RoleCode))
         {
-            return Result<bool>.InvalidDataError("Role code cannot be empty");
-
+            return Result<bool>.BadRequestError("Role code cannot be empty");
         }
-        var response = _daRole.DeleteRole(roleCode);
-        return response;
+
+        var roleResult = await _daRole.GetByRoleCode(reqModel.RoleCode);
+        if (!roleResult.IsSuccess)
+        {
+            return Result<bool>.Error(roleResult.Message);
+        }
+
+        return await _daRole.DeleteRole(roleResult.Data!);
     }
 }

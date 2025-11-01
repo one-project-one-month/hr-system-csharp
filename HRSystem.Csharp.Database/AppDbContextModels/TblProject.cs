@@ -9,7 +9,7 @@ public partial class TblProject
 
     public string ProjectCode { get; set; } = null!;
 
-    public string? ProjectName { get; set; }
+    public string ProjectName { get; set; } = null!;
 
     public string? ProjectDescription { get; set; }
 
@@ -17,15 +17,15 @@ public partial class TblProject
 
     public DateTime? EndDate { get; set; }
 
-    public string? ProjectStatus { get; set; }
+    public string ProjectStatus { get; set; } = null!;
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public string? CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = null!;
 
     public DateTime? ModifiedAt { get; set; }
 
     public string? ModifiedBy { get; set; }
 
-    public bool? DeleteFlag { get; set; }
+    public bool DeleteFlag { get; set; }
 }

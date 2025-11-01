@@ -14,58 +14,63 @@ public class EmployeeController : ControllerBase
         _blEmployee = blEmployee;
     }
 
-    [HttpGet("GetAllEmployee")]
-    public IActionResult GetAllEmployee()
+    [HttpPost("list")]
+    public async Task<IActionResult> GetAllEmployee(EmployeeListRequestModel reqModel)
     {
-        var result = _blEmployee.GetAllEmployee();
+        var result = await _blEmployee.GetAllEmployee(reqModel);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
         }
+
         return BadRequest(result);
     }
 
-    [HttpGet("EditEmployee/{employeeCode}")]
-    public IActionResult EditEmployee(string employeeCode)
+    [HttpGet("edit/{employeeCode}")]
+    public async Task<IActionResult> EditEmployee(string employeeCode)
     {
-        var result = _blEmployee.EditEmployee(employeeCode);
+        var result = await _blEmployee.EditEmployee(employeeCode);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
         }
+
         return BadRequest(result);
     }
 
-    [HttpPost("CreateEmployee")]
-    public IActionResult CreateEmployee([FromBody] EmployeeCreateRequestModel req)
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateEmployee([FromBody] EmployeeCreateRequestModel req)
     {
-        var result = _blEmployee.CreateEmployee(req);
+        var result = await _blEmployee.CreateEmployee(req);
         if (result.IsSuccess)
         {
             return Ok(result.Message);
         }
+
         return BadRequest(result);
     }
 
-    [HttpPost("UpdateEmployee/{employeeCode}")]
-    public IActionResult UpdateEmployee(string employeeCode, [FromBody] EmployeeUpdateRequestModel req)
+    [HttpPost("update/{employeeCode}")]
+    public async Task<IActionResult> UpdateEmployee(string employeeCode, [FromBody] EmployeeUpdateRequestModel req)
     {
-        var result = _blEmployee.UpdateEmployee(employeeCode, req);
+        var result = await _blEmployee.UpdateEmployee(employeeCode, req);
         if (result.IsSuccess)
         {
             return Ok(result.Message);
         }
+
         return BadRequest(result);
     }
 
-    [HttpPost("DeleteEmployee/{employeeCode}")]
-    public IActionResult DeleteEmployee(string employeeCode)
+    [HttpPost("delete/{employeeCode}")]
+    public async Task<IActionResult> DeleteEmployee(string employeeCode)
     {
-        var result = _blEmployee.DeleteEmployee(employeeCode);
+        var result = await _blEmployee.DeleteEmployee(employeeCode);
         if (result.IsSuccess)
         {
             return Ok(result.Message);
         }
+
         return BadRequest(result);
     }
 }

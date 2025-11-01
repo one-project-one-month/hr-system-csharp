@@ -9,7 +9,7 @@ public partial class TblMenuGroup
 
     public string MenuGroupCode { get; set; } = null!;
 
-    public string? MenuGroupName { get; set; }
+    public string MenuGroupName { get; set; } = null!;
 
     public string? Url { get; set; }
 
