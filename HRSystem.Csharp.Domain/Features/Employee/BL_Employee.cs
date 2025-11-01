@@ -1,8 +1,9 @@
-﻿/*using HRSystem.Csharp.Domain.Models.Employee;
-using Microsoft.IdentityModel.Tokens;
-using System.Threading.Tasks;
+﻿using System.Net.Mail;
+using HRSystem.Csharp.Domain.Models.Employee;
 
-namespace HRSystem.Csharp.Domain.Features.Employee
+namespace HRSystem.Csharp.Domain.Features.Employee;
+
+public class BL_Employee
 {
     private readonly DA_Employee _daEmployee;
 
@@ -107,116 +108,67 @@ namespace HRSystem.Csharp.Domain.Features.Employee
             return Result<EmployeeUpdateResponseModel>.ValidationError("Name is required!");
         }
 
-        public async Task<Result<List<EmployeeResponseModel>>> GetAllEmployee()
+        if (string.IsNullOrWhiteSpace(reqModel.Email))
         {
-            return await _daEmployee.GetAllEmployee();
+            return Result<EmployeeUpdateResponseModel>.ValidationError("Email is required!");
         }
 
-        public async Task<Result<List<EmployeeEditResponseModel>>> EditEmployee(string employeeCode)
+        if (string.IsNullOrWhiteSpace(reqModel.PhoneNo))
         {
-            return await _daEmployee.EditEmployee(employeeCode);
+            return Result<EmployeeUpdateResponseModel>.ValidationError("PhoneNo is required!");
         }
 
-        public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(EmployeeCreateRequestModel req)
+        if (reqModel.Salary <= 0)
         {
-            var validationResult = CreateValiadation(req);
-            if (validationResult != null)
-            {
-                return validationResult;
-            }
-            return await _daEmployee.CreateEmployee(req);
+            return Result<EmployeeUpdateResponseModel>.ValidationError("Salary is required!");
         }
 
-        public async Task<Result<EmployeeUpdateResponseModel>> UpdateEmployee(string employeeCode, EmployeeUpdateRequestModel req)
+        if (string.IsNullOrWhiteSpace(reqModel.RoleCode))
         {
-            var validationResult = UpdateValiadation(req);
-            if (validationResult != null)
-            {
-                return validationResult;
-            }
-
-            return await _daEmployee.UpdateEmployee(employeeCode, req);
+            return Result<EmployeeUpdateResponseModel>.ValidationError("Role is required!");
         }
 
-        public async Task<Result<EmployeeDeleteResponseModel>> DeleteEmployee(string employeeCode)
+        #endregion
+
+        #region Check Employee Exists
+
+        var employee = await _daEmployee.GetEmployeeByCode(employeeCode);
+        if (employee?.Data != null)
         {
-            return await _daEmployee.DeleteEmployee(employeeCode);
+            return Result<EmployeeUpdateResponseModel>.NotFoundError("Employee doesn't exist!");
         }
 
-        private Result<EmployeeCreateResponseModel> CreateValiadation(EmployeeCreateRequestModel req)
+        #endregion
+
+        #region Duplicate Data Validation
+
+        var emailExist = await _daEmployee.DuplicateUpdateEmail(employeeCode, reqModel.Email);
+        if (emailExist.IsSuccess)
         {
-            if (req.Username.IsNullOrEmpty())
-            {
-                return Result<EmployeeCreateResponseModel>.ValidationError("Username is required");
-            }
-
-            if (req.Name.IsNullOrEmpty())
-            {
-                return Result<EmployeeCreateResponseModel>.ValidationError("Name is required");
-            }
-            if (req.Password.IsNullOrEmpty())
-            {
-                return Result<EmployeeCreateResponseModel>.ValidationError("Password is required and more than 8 charactar");
-            }
-            if (req.Email.IsNullOrEmpty())
-            {
-                return Result<EmployeeCreateResponseModel>.ValidationError("Email is required");
-            }
-
-            if (!checkEmail(req.Email))
-            {
-                return Result<EmployeeCreateResponseModel>.ValidationError("Email format is not valid");
-            }
-
-            if (req.PhoneNo == null || req.PhoneNo.Trim() == "" || req.PhoneNo!.Length < 9)
-            {
-                return Result<EmployeeCreateResponseModel>.ValidationError("Phone number cannot be empty or less than 9 numbers!");
-            }
-
-            return null;
+            return Result<EmployeeUpdateResponseModel>.DuplicateRecordError("Email already exists!");
         }
 
-        private Result<EmployeeUpdateResponseModel> UpdateValiadation(EmployeeUpdateRequestModel req)
+        var validEmail = new MailAddress(reqModel.Email);
+        if (validEmail.Address != reqModel.Email)
         {
-
-            if (req.Name.IsNullOrEmpty())
-            {
-                return Result<EmployeeUpdateResponseModel>.ValidationError("Name is required");
-            }
-
-            if (req.Email.IsNullOrEmpty())
-            {
-                return Result<EmployeeUpdateResponseModel>.ValidationError("Email is required");
-            }
-
-            if (!checkEmail(req.Email))
-            {
-                return Result<EmployeeUpdateResponseModel>.ValidationError("Email format is not valid");
-            }
-
-            if (req.PhoneNo == null || req.PhoneNo.Trim() == "" || req.PhoneNo!.Length < 9)
-            {
-                return Result<EmployeeUpdateResponseModel>.ValidationError("Phone number cannot be empty or less than 9 numbers!");
-            }
-
-            return null;
+            return Result<EmployeeUpdateResponseModel>.BadRequestError("Invalid email format.");
         }
 
-        private static bool checkEmail(string email)
+        var phoneExist = await _daEmployee.DuplicateUpdatePhoneNo(employeeCode, reqModel.PhoneNo);
+        if (phoneExist.IsSuccess)
         {
-            try
-            {
-                var addr = new System.Net.Mail.MailAddress(email);
-                return addr.Address == email;
-            }
-            catch
-            {
-                return false;
-            }
+            return Result<EmployeeUpdateResponseModel>.DuplicateRecordError("PhoneNo already exists!");
         }
 
+        #endregion
 
-
-
+        var result = await _daEmployee.UpdateEmployee(employeeCode, reqModel);
+        return result;
     }
-}*/
+
+    public async Task<Result<EmployeeDeleteResponseModel>> DeleteEmployee(string employeeCode)
+    {
+        var result = await _daEmployee.DeleteEmployee(employeeCode);
+        return result;
+    }
+}
