@@ -8,11 +8,13 @@ public class DA_Auth : AuthorizationService
 {
     private readonly AppDbContext _appDbContext;
     private readonly JwtService _jwtService;
+    private readonly DA_Role _role;
 
-    public DA_Auth(IHttpContextAccessor contextAccessor, JwtService jwtService, AppDbContext appDbContext) : base(contextAccessor)
+    public DA_Auth(IHttpContextAccessor contextAccessor, JwtService jwtService, AppDbContext appDbContext, DA_Role role) : base(contextAccessor)
     {
         _jwtService = jwtService;
         _appDbContext = appDbContext;
+        _role = role;
     }
 
     public async Task<Result<AuthResponseModel>> LoginAsync(LoginRequestModel requestModel)
@@ -29,21 +31,32 @@ public class DA_Auth : AuthorizationService
                 return Result<AuthResponseModel>.ValidationError("Password cannot be blank or empty.");
             }
 
+            _jwtService.HashPassword(requestModel.Password);
+
             var user = _appDbContext.TblEmployees.FirstOrDefault(x => x.Username == requestModel.UserName);
 
             if (user is null)
             {
-                return Result<AuthResponseModel>.NotFoundError("Incorrect Username.");
+                return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
             }
+
 
             if (!_jwtService.VerifyPassword(requestModel.Password, user.Password))
             {
-                return Result<AuthResponseModel>.NotFoundError("Incorrect Password.");
+                return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
             }
 
             var token = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
             var jwtId = _jwtService.getJwtIdFromToken(token);
+
+            var role = await _role.GetByRoleCode(user.RoleCode);
+            Console.WriteLine("Role code is >>>>>>>>>>>>>>>>>>>>>>>", user);
+
+            Console.WriteLine("Role searched  is >>>>>>>>>>>>>>>>>>>>>>>", role);
+
+            if (!role.IsSuccess)
+                return Result<AuthResponseModel>.BadRequestError("Assign Role first!");
 
             var refreshToken = new TblRefreshToken
             {
@@ -64,6 +77,7 @@ public class DA_Auth : AuthorizationService
             {
                 AccessToken = token,
                 RefreshToken = refreshToken.Token,
+                RoleName = role.Data.RoleName,
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo,
             };
 

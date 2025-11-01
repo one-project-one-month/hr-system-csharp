@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -31,6 +31,18 @@ try
                         Encoding.UTF8.GetBytes(builder.Configuration["ApplicationSettings:JwtSecretKey"]!))
             };
         });
+
+    // Add CORS policy
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowFrontend", policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")  // 👈 your Vite/React app
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials(); // if you send cookies or auth headers
+        });
+    });
 
     builder.Services.AddAuthorization();
 
@@ -71,8 +83,9 @@ try
     builder.AddDomain();
 
     var app = builder.Build();
+    app.UseCors("AllowFrontend");
 
-// Configure the HTTP request pipeline.
+    // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
