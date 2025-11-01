@@ -16,7 +16,6 @@ global using HRSystem.Csharp.Domain.Features.Location;
 global using HRSystem.Csharp.Domain.Features.Task;
 global using HRSystem.Csharp.Domain.Features.Attendance;
 global using HRSystem.Csharp.Domain.Features.Project;
-global using HRSystem.Csharp.Domain.Features.Roles;
 global using HRSystem.Csharp.Domain.Features.Auth;
 global using HRSystem.Csharp.Domain.Features.Employee;
 global using HRSystem.Csharp.Domain.Features.Menu;

@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+﻿using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
 
 namespace HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 
