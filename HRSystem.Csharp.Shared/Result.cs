@@ -14,6 +14,7 @@ public class Result<T>
     public T Data { get; set; }
     public string Message { get; set; }
 
+    public static Result<T> Success(string message = "Success") { return new Result<T> { IsSuccess = true, Type = EnumRespType.Success, Message = message }; }
     public static Result<T> Success(T data, string message = "Success") => new Result<T> { IsSuccess = true, Type = EnumRespType.Success, Data = data, Message = message };
     public static Result<T> ValidationError(string message, T? data = default) => new Result<T> { IsSuccess = false, Data = data, Message = message, Type = EnumRespType.ValidationError };
     public static Result<T> SystemError(string message, T? data = default) => new Result<T> { IsSuccess = false, Data = data, Message = message, Type = EnumRespType.SystemError };

@@ -1,4 +1,7 @@
-﻿namespace HRSystem.Csharp.Domain;
+﻿using System.Data;
+using Microsoft.Data.SqlClient;
+
+namespace HRSystem.Csharp.Domain;
 
 public static class FeatureManager
 {
@@ -50,10 +53,13 @@ public static class FeatureManager
 
     public static void AddDomain(this WebApplicationBuilder builder)
     {
-        builder.Services.AddDbContext<AppDbContext>(opt =>
-        {
-            opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
-        }, ServiceLifetime.Transient, ServiceLifetime.Transient);
+        var mssqlConnection = builder.Configuration.GetConnectionString("DbConnection");
+
+        builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection); },
+            ServiceLifetime.Transient, ServiceLifetime.Transient);
+
+        builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
+            new SqlConnection(mssqlConnection));
 
         builder.AddServices();
     }

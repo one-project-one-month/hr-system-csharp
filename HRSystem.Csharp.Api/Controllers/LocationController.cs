@@ -12,9 +12,9 @@ public class LocationController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAllLocations()
+    public async Task<IActionResult> GetAllLocations()
     {
-        var result = _blLocation.GetAllLocations();
+        var result = await _blLocation.GetAllLocations();
 
         if (result.IsSuccess) return Ok(result);
         if (result.IsNotFound) return NotFound(result);
@@ -22,9 +22,9 @@ public class LocationController : ControllerBase
     }
 
     [HttpGet("{locationCode}")]
-    public IActionResult GetLocationByCode(string locationCode)
+    public async Task<IActionResult> GetLocationByCode(string locationCode)
     {
-        var result = _blLocation.GetLocationByCode(locationCode);
+        var result = await _blLocation.GetLocationByCode(locationCode);
 
         if (result.IsSuccess) return Ok(result);
         if (result.IsNotFound) return NotFound(result);
@@ -32,9 +32,9 @@ public class LocationController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateLocation([FromBody] LocationCreateRequestModel location)
+    public async Task<IActionResult> CreateLocation([FromBody] LocationCreateRequestModel location)
     {
-        var result = _blLocation.CreateLocation(location);
+        var result = await _blLocation.CreateLocation(location);
 
         if (result.IsSuccess) return Ok(result);
         if (result.IsDuplicateRecord) return Conflict(result);
@@ -43,9 +43,9 @@ public class LocationController : ControllerBase
     }
 
     [HttpPut("{locationCode}")]
-    public IActionResult UpdateLocation(string locationCode, [FromBody] LocationUpdateRequestModel location)
+    public async Task<IActionResult> UpdateLocation(string locationCode, [FromBody] LocationUpdateRequestModel location)
     {
-        var result = _blLocation.UpdateLocation(locationCode, location);
+        var result = await _blLocation.UpdateLocation(locationCode, location);
 
         if (result.IsSuccess) return Ok(result);
         if (result.IsNotFound) return NotFound(result);
@@ -54,9 +54,9 @@ public class LocationController : ControllerBase
     }
 
     [HttpDelete("{locationCode}")]
-    public IActionResult DeleteLocation(string locationCode)
+    public async Task<IActionResult> DeleteLocation(string locationCode)
     {
-        var result = _blLocation.DeleteLocation(locationCode);
+        var result = await _blLocation.DeleteLocation(locationCode);
 
         if (result.IsSuccess) return Ok(result);
         if (result.IsNotFound) return NotFound(result);

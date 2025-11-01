@@ -144,7 +144,7 @@ public class DA_MenuGroup
                 SortOrder = menuGroup.SortOrder,
                 HasMenuItem = menuGroup.HasMenuItem,
                 CreatedAt = menuGroup.CreatedAt,
-                DeleteFlag = menuGroup.DeleteFlag ?? false
+                DeleteFlag = menuGroup.DeleteFlag
             };
 
             return Result<MenuGroupModel>.Success(menuGroupModel);
