@@ -41,5 +41,5 @@ public partial class TblAttendance
 
     public DateTime? ModifiedAt { get; set; }
 
-    public bool? DeleteFlag { get; set; }
+    public bool DeleteFlag { get; set; }
 }
