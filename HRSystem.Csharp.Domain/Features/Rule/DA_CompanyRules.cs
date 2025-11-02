@@ -5,68 +5,86 @@ namespace HRSystem.Csharp.Domain.Features.Rule;
 public class DA_CompanyRules
 {
     private readonly AppDbContext _context;
+
     public DA_CompanyRules(AppDbContext context)
     {
         _context = context;
     }
 
-    public async Task<Result<List<CompanyRules>>> GetAllCompanyRulesAsync()
+    public async Task<Result<CompanyRuleListResponseModel>> GetAllCompanyRulesAsync(
+        CompanyRuleListRequestModel reqModel)
     {
         try
         {
-            var companyRules = _context.TblCompanyRules
-                .Select(cr => new CompanyRules
-                {
-                    CompanyRuleId = cr.CompanyRuleId,
-                    CompanyRuleCode = cr.CompanyRuleCode,
-                    Description = cr.Description,
-                    Value = cr.Value,
-                    IsActive = cr.IsActive == null? false: cr.IsActive,
-                    CreatedAt = cr.CreatedAt,
-                    CreatedBy = cr.CreatedBy,
-                    ModifiedAt = cr.ModifiedAt,
-                    ModifiedBy = cr.ModifiedBy,
-                    DeleteFlag = cr.DeleteFlag == null ? false : cr.DeleteFlag
-                })
-                .AsNoTracking().ToList();
+            var query = _context.TblCompanyRules
+                .AsNoTracking()
+                .Where(r => !r.DeleteFlag);
 
-            if (companyRules == null || companyRules.Count == 0)
+            if (!string.IsNullOrWhiteSpace(reqModel.RuleName))
             {
-                return Result<List<CompanyRules>>.NotFoundError("No company rules found.");
+                query = query.Where(r => r.Description != null
+                                         && r.Description.ToLower() == reqModel.RuleName.ToLower());
             }
-                
-            return Result<List<CompanyRules>>.Success(companyRules);
+
+            query = query.OrderByDescending(r => r.CreatedAt);
+
+            var rules = query.Select(cr => new CompanyRules
+            {
+                CompanyRuleId = cr.CompanyRuleId,
+                CompanyRuleCode = cr.CompanyRuleCode,
+                Description = cr.Description,
+                Value = cr.Value,
+                IsActive = cr.IsActive == null ? false : cr.IsActive,
+                CreatedAt = cr.CreatedAt,
+                CreatedBy = cr.CreatedBy,
+                ModifiedAt = cr.ModifiedAt,
+                ModifiedBy = cr.ModifiedBy,
+                DeleteFlag = cr.DeleteFlag == null ? false : cr.DeleteFlag
+            });
+
+            var pagedResult = await rules.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new CompanyRuleListResponseModel()
+            {
+                Items = pagedResult.Items ?? new List<CompanyRules>(),
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<CompanyRuleListResponseModel>.Success(result);
         }
         catch (Exception ex)
         {
-            return Result<List<CompanyRules>>.Error($"An error occurred while retrieving company rules: {ex.Message}");
+            return Result<CompanyRuleListResponseModel>.Error(
+                $"An error occurred while retrieving company rules: {ex.Message}");
         }
     }
 
-    public async Task<Result<CompanyRules>> UpdateCompanyRuleAsync(CompanyRules companyRule)
+    public async Task<Result<bool>> UpdateCompanyRuleAsync(RuleUpdateRequestModel reqModel)
     {
         try
         {
-            var existingRule = _context.TblCompanyRules.FirstOrDefault(cr => cr.CompanyRuleId == companyRule.CompanyRuleId);
+            var existingRule = await _context.TblCompanyRules
+                .FirstOrDefaultAsync(cr => cr.CompanyRuleCode == reqModel.CompanyRuleCode);
+
             if (existingRule == null)
             {
-                return Result<CompanyRules>.NotFoundError("Company rule not found.");
+                return Result<bool>.NotFoundError("Company rule not found.");
             }
-            existingRule.CompanyRuleCode = companyRule.CompanyRuleCode ?? string.Empty;
-            existingRule.Description = companyRule.Description;
-            existingRule.Value = companyRule.Value;
-            existingRule.IsActive = companyRule.IsActive;
+
+            existingRule.Description = reqModel.Description;
+            existingRule.Value = reqModel.Value;
             existingRule.ModifiedAt = DateTime.UtcNow;
-            existingRule.ModifiedBy = companyRule.ModifiedBy;
-            existingRule.DeleteFlag = companyRule.DeleteFlag;
+            existingRule.ModifiedBy = "admin";
 
             _context.TblCompanyRules.Update(existingRule);
             await _context.SaveChangesAsync();
-            return Result<CompanyRules>.Success(companyRule);
+            return Result<bool>.Success("Rule updated successfully!");
         }
         catch (Exception ex)
         {
-            return Result<CompanyRules>.Error($"An error occurred while updating the company rule: {ex.Message}");
+            return Result<bool>.Error($"An error occurred while updating the company rule: {ex.Message}");
         }
     }
 }
