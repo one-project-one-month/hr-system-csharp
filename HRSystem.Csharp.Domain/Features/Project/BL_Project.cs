@@ -26,9 +26,9 @@ public class BL_Project
         return await _daProject.CreateProject(project);
     }
 
-    public async Task<Result<List<ProjectResponseModel>>> GetAllProjects()
+    public async Task<Result<List<ProjectResponseModel>>> GetAllProjects(ProjectListRequestModel reqModel)
     {
-        return await _daProject.GetAllProjects();
+        return await _daProject.GetAllProjects(reqModel);
     }
 
     public async Task<Result<ProjectResponseModel>> GetProject(string code)

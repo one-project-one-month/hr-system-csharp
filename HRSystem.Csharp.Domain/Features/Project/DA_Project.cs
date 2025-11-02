@@ -46,11 +46,36 @@ public class DA_Project
         }
     }
 
-    public async Task<Result<List<ProjectResponseModel>>> GetAllProjects()
+    public async Task<Result<List<ProjectResponseModel>>> GetAllProjects(ProjectListRequestModel reqModel)
     {
         try
         {
-            var projects = await _appDbContext.TblProjects
+            var query = _appDbContext.TblProjects
+                .AsNoTracking()
+                .Where(r => !r.DeleteFlag);
+
+            if (!string.IsNullOrWhiteSpace(reqModel.ProjectName))
+            {
+                query = query.Where(r => r.ProjectName.ToLower() == reqModel.ProjectName.ToLower());
+            }
+
+            query = query.OrderByDescending(r => r.CreatedAt);
+
+            var roles = query.Select(r => r.ma);
+
+            var pagedResult = await roles.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new RoleListResponseModel
+            {
+                Items = pagedResult.Items,
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<ProjectListRequestModel>.Success(result);
+            
+            /*var projects = await _appDbContext.TblProjects
                 .AsNoTracking()
                 .Where(p => p.DeleteFlag == false)
                 .Select(p => p.Map())
@@ -59,7 +84,7 @@ public class DA_Project
             if (projects is null || projects.Count is 0)
                 return Result<List<ProjectResponseModel>>.NotFoundError("no projects found!");
 
-            return Result<List<ProjectResponseModel>>.Success(projects);
+            return Result<List<ProjectResponseModel>>.Success(projects);*/
         }
         catch (Exception ex)
         {

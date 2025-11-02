@@ -16,14 +16,11 @@ public class ProjectController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> GetALlProjects()
+    public async Task<IActionResult> GetALlProjects([FromQuery] ProjectRequestModel reqModel)
     {
         var result = await _blProject.GetAllProjects();
-
         if (result.IsSuccess) return Ok(result);
-
         if (result.IsNotFound) return NotFound(result);
-
         return StatusCode(500, result);
     }
 
@@ -67,16 +64,16 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpDelete("{code}")]
-    public async Task<IActionResult> DeleteProject(string code)
+    [HttpDelete("{projectCode}")]
+    public async Task<IActionResult> DeleteProject(string projectCode)
     {
-        if (string.IsNullOrWhiteSpace(code))
+        if (string.IsNullOrWhiteSpace(projectCode))
         {
             var error = Result<bool>.ValidationError("Project code is required!");
             return BadRequest(error);
         }
         
-        var result = await _blProject.DeleteProject(code);
+        var result = await _blProject.DeleteProject(projectCode);
 
         if (result.IsSuccess) return Ok(result);
 
