@@ -1,6 +1,8 @@
 ﻿using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Domain.Models.Auth;
+using HRSystem.Csharp.Domain.Models.Employee;
 using Microsoft.AspNetCore.Http;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace HRSystem.Csharp.Domain.Features.Auth;
@@ -51,9 +53,6 @@ public class DA_Auth : AuthorizationService
             var jwtId = _jwtService.getJwtIdFromToken(token);
 
             var role = await _role.GetByRoleCode(user.RoleCode);
-            Console.WriteLine("Role code is >>>>>>>>>>>>>>>>>>>>>>>", user);
-
-            Console.WriteLine("Role searched  is >>>>>>>>>>>>>>>>>>>>>>>", role);
 
             if (!role.IsSuccess)
                 return Result<AuthResponseModel>.BadRequestError("Assign Role first!");
@@ -77,7 +76,15 @@ public class DA_Auth : AuthorizationService
             {
                 AccessToken = token,
                 RefreshToken = refreshToken.Token,
-                RoleName = role.Data.RoleName,
+                User = new EmployeeResponseModel {
+                    ProfileImage = user.ProfileImage,
+                    EmployeeCode = user.EmployeeCode,
+                    Username = user.Username,
+                    RoleName = role.Data.RoleName,
+                    Name = user.Name,
+                    Email = user.Email,
+                    PhoneNo = user.PhoneNo
+                },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo,
             };
 
@@ -130,7 +137,13 @@ public class DA_Auth : AuthorizationService
             storedToken.IsRevoked = true;
             storedToken.RevokedAt = DateTime.UtcNow;
 
-            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.EmployeeCode == storedToken.EmployeeCode);
+            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.EmployeeCode == storedToken.EmployeeCode && !x.DeleteFlag);
+            if (user is null)
+                Result<AuthResponseModel>.NotFoundError("User not found");
+
+            var role = await _role.GetByRoleCode(user.RoleCode);
+            if (role is null)
+               Result<AuthResponseModel>.NotFoundError("Role with the user not found");
 
             var newToken = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
@@ -155,6 +168,16 @@ public class DA_Auth : AuthorizationService
             {
                 AccessToken = newToken,
                 RefreshToken = refreshToken.Token,
+                User = new EmployeeResponseModel
+                {
+                    ProfileImage = user.ProfileImage,
+                    EmployeeCode = user.EmployeeCode,
+                    Username = user.Username,
+                    RoleName = role.Data.RoleName,
+                    Name = user.Name,
+                    Email = user.Email,
+                    PhoneNo = user.PhoneNo
+                },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(newToken).ValidTo,
             };
 

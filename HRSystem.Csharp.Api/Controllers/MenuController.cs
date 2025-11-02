@@ -99,7 +99,7 @@ public class MenuController : ControllerBase
         };
 
         var result = await _blMenu.UpdateMenu(userId, updatingMenu);
-        return result.IsSuccess ? Ok(result.Data) : BadRequest(result);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 
     [HttpDelete("delete/{menuCode}")]
