@@ -12,7 +12,7 @@ public class RoleEditRequestModel
 
 public class RoleUpdateRequestModel
 {
-    public string RoleCode { get; set; }
+    // public string RoleCode { get; set; }
     public string RoleName { get; set; }
 }
 

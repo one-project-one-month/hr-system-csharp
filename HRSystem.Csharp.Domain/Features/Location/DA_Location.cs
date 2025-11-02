@@ -20,7 +20,7 @@ public class DA_Location
         var newLocation = location.Map();
 
         _appDbContext.TblLocations.Add(newLocation);
-        var result = _appDbContext.SaveChanges();
+        var result = await _appDbContext.SaveChangesAsync();
 
         return result > 0
             ? Result<bool>.Success(true, "Successfully added new location.")
@@ -35,10 +35,9 @@ public class DA_Location
             .Select(l => l.Map())
             .ToListAsync();
 
-        if (locations.Count == 0)
-        {
-            return Result<List<LocationResponseModel>>.NotFoundError("No locations found");
-        }
+        locations = locations.Count == 0
+            ? new List<LocationResponseModel>()
+            : locations;
 
         return Result<List<LocationResponseModel>>.Success(locations);
     }
@@ -70,10 +69,11 @@ public class DA_Location
             : Result<TblLocation>.Success(location);
     }
 
-    public async Task<Result<bool>> UpdateLocation(string locationCode, LocationUpdateRequestModel location)
+    public async Task<Result<bool>> UpdateLocation(string locationCode,
+        LocationUpdateRequestModel location)
     {
         var existingLocation = await _appDbContext.TblLocations
-            .FirstOrDefaultAsync(l => l.LocationCode == locationCode && l.DeleteFlag == false);
+            .FirstOrDefaultAsync(l => !l.DeleteFlag && l.LocationCode == locationCode);
 
         if (existingLocation == null)
         {
@@ -88,7 +88,7 @@ public class DA_Location
         existingLocation.ModifiedBy = "system";
 
         _appDbContext.TblLocations.Update(existingLocation);
-        var result = _appDbContext.SaveChanges();
+        var result = await _appDbContext.SaveChangesAsync();
         return result > 0
             ? Result<bool>.Success(true, "Successfully updated location.")
             : Result<bool>.Error("Failed to update location");
@@ -109,7 +109,8 @@ public class DA_Location
         existingLocation.ModifiedBy = "system";
 
         _appDbContext.TblLocations.Update(existingLocation);
-        var result = _appDbContext.SaveChanges();
+        var result = await _appDbContext.SaveChangesAsync();
+
         return result > 0
             ? Result<bool>.Success(true, "Successfully deleted location.")
             : Result<bool>.Error("Failed to delete location");

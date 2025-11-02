@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.MenuGroup;
 using HRSystem.Csharp.Domain.Models.MenuGroup;
+using HRSystem.Csharp.Shared;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -14,7 +15,7 @@ public class MenuGroupController : ControllerBase
         _blMenuGroup = blMenuGroup;
     }
 
-    [HttpGet("menu-groups")]
+    [HttpGet("list")]
     public async Task<IActionResult> GetAll()
     {
         var response = await _blMenuGroup.GetAllMenuGroups();
@@ -22,38 +23,60 @@ public class MenuGroupController : ControllerBase
         {
             return Ok(response);
         }
+
         return BadRequest(response);
     }
 
-    [HttpGet("menu-group/{menuGroupCode}")]
+    [HttpGet("edit/{menuGroupCode}")]
     public async Task<IActionResult> Get(string menuGroupCode)
     {
+        if (string.IsNullOrWhiteSpace(menuGroupCode))
+        {
+            var menuGpCode = Result<bool>.ValidationError("Menu code is required!");
+            return BadRequest(menuGpCode);
+        }
+
         var response = await _blMenuGroup.GetMenuGroup(menuGroupCode);
         if (response.IsSuccess)
         {
             return Ok(response);
         }
+
         return BadRequest(response);
     }
 
-    [HttpPut("menu-group/{menuGroupCode}")]
+    [HttpPut("update/{menuGroupCode}")]
     public async Task<IActionResult> Put(string menuGroupCode, [FromBody] MenuGroupUpdateRequestModel menuGroup)
     {
+        if (string.IsNullOrWhiteSpace(menuGroupCode))
+        {
+            var menuGpCode = Result<bool>.ValidationError("Menu code is required!");
+            return BadRequest(menuGpCode);
+        }
+
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
+
         var response = await _blMenuGroup.UpdateMenuGroup(menuGroupCode, menuGroup);
         if (response.IsSuccess)
         {
             return Ok(response);
         }
+
         return BadRequest(response);
     }
 
-    [HttpPost("menu-group")]
+    [HttpPost("create")]
     public async Task<IActionResult> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
     {
+        if (requestMenuGroup is null)
+        {
+            var menuGpCode = Result<bool>.BadRequestError("Invalid request data!");
+            return BadRequest(menuGpCode);
+        }
+
         var result = await _blMenuGroup.CreateMenuGroupAsync(requestMenuGroup);
         if (result.IsSuccess)
         {
@@ -64,14 +87,21 @@ public class MenuGroupController : ControllerBase
     }
 
 
-    [HttpDelete("menu-group/{menuGroupCode}")]
+    [HttpDelete("delete/{menuGroupCode}")]
     public async Task<IActionResult> DeleteMenuGroup(string menuGroupCode)
     {
+        if (string.IsNullOrWhiteSpace(menuGroupCode))
+        {
+            var menuGpCode = Result<bool>.ValidationError("Menu code is required!");
+            return BadRequest(menuGpCode);
+        }
+
         var result = await _blMenuGroup.DeleteMenuGroupAsync(menuGroupCode);
         if (result.IsSuccess)
         {
             return Ok(result);
         }
+
         return BadRequest(result);
     }
 }
