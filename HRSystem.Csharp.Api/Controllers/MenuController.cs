@@ -23,7 +23,7 @@ public class MenuController : ControllerBase
         var result = await _blMenu.GetAllMenus();
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
         return BadRequest(result);
     }
@@ -55,7 +55,7 @@ public class MenuController : ControllerBase
         var result = await _blMenu.GetMenu(menuCode);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);
@@ -85,7 +85,7 @@ public class MenuController : ControllerBase
         };
 
         var result = await _blMenu.UpdateMenu(userId, updatingMenu);
-        return result.IsSuccess ? Ok(result.Data) : BadRequest(result);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 
     [HttpDelete("menu/{menuCode}")]

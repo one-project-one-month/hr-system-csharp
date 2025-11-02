@@ -20,7 +20,7 @@ public class MenuGroupController : ControllerBase
         var response = await _blMenuGroup.GetAllMenuGroups();
         if (response.IsSuccess)
         {
-            return Ok(response.Data);
+            return Ok(response);
         }
         return BadRequest(response);
     }
@@ -31,7 +31,7 @@ public class MenuGroupController : ControllerBase
         var response = await _blMenuGroup.GetMenuGroup(menuGroupCode);
         if (response.IsSuccess)
         {
-            return Ok(response.Data);
+            return Ok(response);
         }
         return BadRequest(response);
     }
@@ -46,7 +46,7 @@ public class MenuGroupController : ControllerBase
         var response = await _blMenuGroup.UpdateMenuGroup(menuGroupCode, menuGroup);
         if (response.IsSuccess)
         {
-            return Ok(response.Data);
+            return Ok(response);
         }
         return BadRequest(response);
     }

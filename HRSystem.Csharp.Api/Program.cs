@@ -1,5 +1,6 @@
-﻿using System.Reflection;
+﻿using HRSystem.Csharp.Shared.Services;
 using Serilog;
+using System.Reflection;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -31,13 +32,13 @@ try
                         Encoding.UTF8.GetBytes(builder.Configuration["ApplicationSettings:JwtSecretKey"]!))
             };
         });
-
+    builder.Services.AddScoped<DapperService>();
     // Add CORS policy
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
         {
-            policy.WithOrigins("http://localhost:5173")  // 👈 your Vite/React app
+            policy.WithOrigins("http://localhost:5173") 
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials(); // if you send cookies or auth headers
