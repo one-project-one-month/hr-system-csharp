@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.Auth;
+﻿using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Models.Auth;
 using Microsoft.AspNetCore.Http;
 using System.IdentityModel.Tokens.Jwt;
 
