@@ -1,4 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Features.Rule;
+using Microsoft.Data.SqlClient;
 using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Features.Verification;
@@ -24,6 +26,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Employee>();
         builder.Services.AddScoped<BL_Auth>();
         builder.Services.AddScoped<BL_Sequence>();
+        builder.Services.AddScoped<BL_CompanyRules>();
         builder.Services.AddScoped<BL_Verification>();
 
         #endregion
@@ -45,6 +48,7 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Employee>();
         builder.Services.AddScoped<DA_Auth>();
         builder.Services.AddScoped<DA_Sequence>();
+        builder.Services.AddScoped<DA_CompanyRules>();
         builder.Services.AddScoped<DA_Verification>();
 
         #endregion

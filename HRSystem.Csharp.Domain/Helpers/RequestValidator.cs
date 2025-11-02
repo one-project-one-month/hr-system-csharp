@@ -30,8 +30,8 @@ public static class RequestValidator
         if (location is null)
             return Result<bool>.BadRequestError("Location data is required");
 
-        if (location.LocationCode.IsNullOrEmpty())
-            return Result<bool>.BadRequestError("Location code is required");
+        /*if (location.LocationCode.IsNullOrEmpty())
+            return Result<bool>.BadRequestError("Location code is required");*/
 
         if (location.Name.IsNullOrEmpty())
             return Result<bool>.BadRequestError("Location name is required");

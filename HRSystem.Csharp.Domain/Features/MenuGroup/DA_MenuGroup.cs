@@ -121,6 +121,7 @@ public class DA_MenuGroup
                 Icon = requestMenuGroup.Icon,
                 SortOrder = requestMenuGroup.SortOrder,
                 HasMenuItem = requestMenuGroup.HasMenuItem,
+                CreatedBy = "admin",
                 CreatedAt = DateTime.UtcNow,
                 DeleteFlag = false
             };

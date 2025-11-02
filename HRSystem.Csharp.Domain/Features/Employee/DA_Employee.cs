@@ -106,6 +106,7 @@ public class DA_Employee
         {
             var newEmployee = new TblEmployee
             {
+                EmployeeId = DevCode.GenerateNewUlid(),
                 RoleCode = reqModel.RoleCode,
                 Username = reqModel.Username,
                 Name = reqModel.Name,
@@ -119,6 +120,9 @@ public class DA_Employee
             };
 
             _appDbContext.TblEmployees.Add(newEmployee);
+            
+            Console.WriteLine($"ResignDate: {newEmployee.ResignDate}");
+
             await _appDbContext.SaveChangesAsync();
 
             return Result<EmployeeCreateResponseModel>.Success(new EmployeeCreateResponseModel(),

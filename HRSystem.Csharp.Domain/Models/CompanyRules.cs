@@ -8,7 +8,7 @@ public class CompanyRuleListResponseModel : PagedResult<CompanyRules>
 
 public class CompanyRuleListRequestModel : PaginationRequestModel
 {
-    public string RuleName { get; set; }
+    public string? RuleDescription { get; set; }
 }
 
 public class CompanyRules

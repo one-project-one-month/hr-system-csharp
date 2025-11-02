@@ -24,8 +24,8 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateProject([FromBody]ProjectRequestModel project)
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateProject([FromBody] ProjectRequestModel project)
     {
         var result = await _blProject.CreateProject(project);
 

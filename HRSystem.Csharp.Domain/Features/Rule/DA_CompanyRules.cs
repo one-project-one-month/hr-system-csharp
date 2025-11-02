@@ -20,10 +20,10 @@ public class DA_CompanyRules
                 .AsNoTracking()
                 .Where(r => !r.DeleteFlag);
 
-            if (!string.IsNullOrWhiteSpace(reqModel.RuleName))
+            if (!string.IsNullOrWhiteSpace(reqModel.RuleDescription))
             {
                 query = query.Where(r => r.Description != null
-                                         && r.Description.ToLower() == reqModel.RuleName.ToLower());
+                                         && r.Description.ToLower() == reqModel.RuleDescription.ToLower());
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);

@@ -1,24 +1,32 @@
-﻿namespace HRSystem.Csharp.Domain.Features.Location;
+﻿using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Shared.Enums;
+
+namespace HRSystem.Csharp.Domain.Features.Location;
 
 public class DA_Location
 {
     private readonly AppDbContext _appDbContext;
+    private readonly DA_Sequence _daSequence;
 
-    public DA_Location(AppDbContext appDbContext)
+    public DA_Location(AppDbContext appDbContext, DA_Sequence daSequence)
     {
         _appDbContext = appDbContext;
+        _daSequence = daSequence;
     }
 
     public async Task<Result<bool>> CreateLocation(LocationCreateRequestModel location)
     {
+        var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.LOC.ToString());
+
         var existingLocation = await _appDbContext.TblLocations
-            .FirstOrDefaultAsync(l => l.LocationCode == location.LocationCode && l.DeleteFlag == false);
+            .FirstOrDefaultAsync(l =>!l.DeleteFlag && l.Name == location.Name);
 
         if (existingLocation != null)
             return Result<bool>.DuplicateRecordError("Location with the same code already exists");
 
         var newLocation = location.Map();
 
+        newLocation.LocationCode = generatedCode;
         _appDbContext.TblLocations.Add(newLocation);
         var result = await _appDbContext.SaveChangesAsync();
 
@@ -27,19 +35,39 @@ public class DA_Location
             : Result<bool>.Error("Failed to add new location");
     }
 
-    public async Task<Result<List<LocationResponseModel>>> GetAllLocations()
+    public async Task<Result<LocationListResponseModel>> GetAllLocations(LocationListRequestModel reqModel)
     {
-        var locations = await _appDbContext.TblLocations
-            .AsNoTracking()
-            .Where(l => l.DeleteFlag == false)
-            .Select(l => l.Map())
-            .ToListAsync();
+        try
+        {
+            var query = _appDbContext.TblLocations
+                .AsQueryable()
+                .Where(l => !l.DeleteFlag);
 
-        locations = locations.Count == 0
-            ? new List<LocationResponseModel>()
-            : locations;
+            if (!string.IsNullOrWhiteSpace(reqModel.LocationName))
+            {
+                query = query.Where(l => l.Name.ToLower() == reqModel.LocationName.ToLower());
+            }
 
-        return Result<List<LocationResponseModel>>.Success(locations);
+            query = query.OrderByDescending(l => l.CreatedAt);
+
+            var locations = query.Select(l => l.Map());
+
+            var pagedResult = await locations.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new LocationListResponseModel()
+            {
+                Items = pagedResult.Items ?? new List<LocationResponseModel>(),
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<LocationListResponseModel>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result<LocationListResponseModel>.SystemError("An error occurred while retrieving locations.");
+        }
     }
 
     public async Task<Result<LocationResponseModel>> GetLocationByCode(string locationCode)

@@ -45,10 +45,6 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<TblVerification> TblVerifications { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=.;Database=HRSystem;User ID=sa;Password=sasa@123;TrustServerCertificate=True;");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TblAttendance>(entity =>
@@ -61,15 +57,10 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.AttendanceId).HasMaxLength(200);
             entity.Property(e => e.AttendanceCode).HasMaxLength(50);
-            entity.Property(e => e.AttendanceDate).HasColumnType("datetime");
             entity.Property(e => e.CheckInLocation).HasMaxLength(50);
-            entity.Property(e => e.CheckInTime).HasColumnType("datetime");
             entity.Property(e => e.CheckOutLocation).HasMaxLength(50);
-            entity.Property(e => e.CheckOutTime).HasColumnType("datetime");
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.Remark).HasMaxLength(200);
             entity.Property(e => e.WorkingHour).HasColumnType("decimal(4, 2)");
@@ -85,10 +76,8 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CompanyRuleId).HasMaxLength(200);
             entity.Property(e => e.CompanyRuleCode).HasMaxLength(50);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Description).HasMaxLength(200);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.Value).HasMaxLength(50);
         });
@@ -102,21 +91,17 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.EmployeeCode, "UQ__Tbl_Empl__1F642548D8A5E86F").IsUnique();
 
             entity.Property(e => e.EmployeeId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
             entity.Property(e => e.IsFirstTimeLogin).HasDefaultValue(true);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Password).IsUnicode(false);
             entity.Property(e => e.PhoneNo).HasMaxLength(50);
             entity.Property(e => e.ProfileImage).HasMaxLength(200);
-            entity.Property(e => e.ResignDate).HasColumnType("datetime");
             entity.Property(e => e.RoleCode).HasMaxLength(50);
             entity.Property(e => e.Salary).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.StartDate).HasColumnType("datetime");
             entity.Property(e => e.Username).HasMaxLength(200);
         });
 
@@ -129,11 +114,9 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.EmployeeProjectCode, "UQ__Tbl_Empl__51A84C46E17E83C9").IsUnique();
 
             entity.Property(e => e.EmployeeProjectId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
             entity.Property(e => e.EmployeeProjectCode).HasMaxLength(50);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.ProjectCode).HasMaxLength(50);
         });
@@ -147,12 +130,10 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.LocationCode, "UQ__Tbl_Loca__DDB144D5BB8E821C").IsUnique();
 
             entity.Property(e => e.LocationId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.Latitude).HasMaxLength(50);
             entity.Property(e => e.LocationCode).HasMaxLength(50);
             entity.Property(e => e.Longitude).HasMaxLength(50);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(50);
             entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.Radius).HasMaxLength(50);
@@ -167,13 +148,11 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.MenuCode, "UQ__Tbl_Menu__868A3A73598582D2").IsUnique();
 
             entity.Property(e => e.MenuId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Icon).HasMaxLength(200);
             entity.Property(e => e.MenuCode).HasMaxLength(50);
             entity.Property(e => e.MenuGroupCode).HasMaxLength(50);
             entity.Property(e => e.MenuName).HasMaxLength(200);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.Url).HasMaxLength(200);
         });
@@ -187,12 +166,10 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.MenuGroupCode, "UQ__Tbl_Menu__22599E845A616F2F").IsUnique();
 
             entity.Property(e => e.MenuGroupId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Icon).HasMaxLength(200);
             entity.Property(e => e.MenuGroupCode).HasMaxLength(50);
             entity.Property(e => e.MenuGroupName).HasMaxLength(200);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.Url).HasMaxLength(200);
         });
@@ -210,13 +187,11 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Allowance).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.BaseSalary).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Bonus).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Deduction).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
             entity.Property(e => e.GrossPay).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.LeaveHour).HasColumnType("decimal(8, 2)");
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.NetPay).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.PayrollCode).HasMaxLength(50);
@@ -234,16 +209,12 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.ProjectCode, "UQ__Tbl_Proj__2F3A4948AECAA9DA").IsUnique();
 
             entity.Property(e => e.ProjectId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
-            entity.Property(e => e.EndDate).HasColumnType("datetime");
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.ProjectCode).HasMaxLength(50);
             entity.Property(e => e.ProjectDescription).HasMaxLength(200);
             entity.Property(e => e.ProjectName).HasMaxLength(200);
             entity.Property(e => e.ProjectStatus).HasMaxLength(50);
-            entity.Property(e => e.StartDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<TblRefreshToken>(entity =>
@@ -253,11 +224,9 @@ public partial class AppDbContext : DbContext
             entity.ToTable("Tbl_RefreshToken");
 
             entity.Property(e => e.Token).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
             entity.Property(e => e.JwtId).HasMaxLength(450);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
         });
 
@@ -270,9 +239,7 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.RoleCode, "UQ__Tbl_Role__D62CB59C8AA235C5").IsUnique();
 
             entity.Property(e => e.RoleId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.RoleCode).HasMaxLength(50);
             entity.Property(e => e.RoleName).HasMaxLength(200);
@@ -287,11 +254,9 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.RoleAndMenuPermissionCode, "UQ__Tbl_Role__AB0007C896ABC595").IsUnique();
 
             entity.Property(e => e.RoleAndMenuPermissionId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.MenuCode).HasMaxLength(50);
             entity.Property(e => e.MenuGroupCode).HasMaxLength(50);
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.RoleAndMenuPermissionCode).HasMaxLength(50);
             entity.Property(e => e.RoleCode).HasMaxLength(50);
@@ -319,14 +284,10 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.TaskCode, "UQ__Tbl_Task__251D06996B0F73EF").IsUnique();
 
             entity.Property(e => e.TaskId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
-            entity.Property(e => e.EndDate).HasColumnType("datetime");
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.ProjectCode).HasMaxLength(50);
-            entity.Property(e => e.StartDate).HasColumnType("datetime");
             entity.Property(e => e.TaskCode).HasMaxLength(50);
             entity.Property(e => e.TaskDescription).HasMaxLength(200);
             entity.Property(e => e.TaskName).HasMaxLength(50);
@@ -343,11 +304,9 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.VerificationCode, "UQ__Tbl_Veri__DA24CB14A1F99E79").IsUnique();
 
             entity.Property(e => e.VerificationId).HasMaxLength(200);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.ExpiredTime).HasColumnType("datetime");
-            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.VerificationCode).HasMaxLength(50);
         });

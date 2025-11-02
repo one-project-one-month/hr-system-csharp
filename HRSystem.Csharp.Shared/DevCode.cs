@@ -7,6 +7,11 @@ namespace HRSystem.Csharp.Shared;
 
 public static class DevCode
 {
+    public static string GenerateNewUlid()
+    {
+        return Ulid.NewUlid().ToString()!;
+    }
+    
     public static string ToJson(this object obj)
     {
         return JsonConvert.SerializeObject(obj);
