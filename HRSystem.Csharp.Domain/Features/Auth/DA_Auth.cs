@@ -41,7 +41,6 @@ public class DA_Auth : AuthorizationService
                 return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
             }
 
-
             if (!_jwtService.VerifyPassword(requestModel.Password, user.Password))
             {
                 return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");

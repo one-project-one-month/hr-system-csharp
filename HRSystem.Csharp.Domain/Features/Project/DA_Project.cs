@@ -1,4 +1,6 @@
-﻿using HRSystem.Csharp.Domain.Models.Project;
+﻿using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models.Project;
+using HRSystem.Csharp.Shared.Enums;
 
 namespace HRSystem.Csharp.Domain.Features.Project;
 
@@ -6,39 +8,34 @@ public class DA_Project
 {
     private readonly AppDbContext _appDbContext;
     private readonly Generator _generator;
+    private readonly DA_Sequence _daSequence;
 
-    public DA_Project(AppDbContext appDbContext, Generator generator)
+    public DA_Project(AppDbContext appDbContext, Generator generator, DA_Sequence daSequence)
     {
         _appDbContext = appDbContext;
         _generator = generator;
+        _daSequence = daSequence;
     }
 
     public async Task<Result<bool>> CreateProject(ProjectRequestModel project)
     {
         try
         {
-            var lastProjectCode = await _appDbContext.TblProjects
+            /*var lastProjectCode = await _appDbContext.TblProjects
                 .AsNoTracking()
                 .OrderByDescending(p => p.CreatedAt)
                 .Select(p => p.ProjectCode)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();*/
 
             var newProject = project.Map();
-            newProject.ProjectCode = _generator.GenerateProjectCode(lastProjectCode);
-
-            /*var existingProject =
-                await _appDbContext.TblProjects.FirstOrDefaultAsync(p => p.ProjectCode == newProject.ProjectCode);
-
-            if (existingProject is not null)
-                return Result<bool>.DuplicateRecordError(
-                    $"A project with code '{newProject.ProjectCode}' already exists!");*/
+            newProject.ProjectCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.PJ.ToString());
 
             _appDbContext.TblProjects.Add(newProject);
             var result = await _appDbContext.SaveChangesAsync();
 
             return result > 0
-                ? Result<bool>.Success(true, "project created success")
-                : Result<bool>.Error("fail to create project!");
+                ? Result<bool>.Success(true, "Project created successfully!")
+                : Result<bool>.Error("Error creating project!");
         }
         catch (Exception ex)
         {
@@ -81,13 +78,13 @@ public class DA_Project
         }
     }
 
-    public async Task<Result<ProjectResponseModel>> GetProjectByCode(string code)
+    public async Task<Result<ProjectResponseModel>> GetProjectByCode(ProjectEditRequestModel reqModel)
     {
         try
         {
             var project = await _appDbContext.TblProjects
                 .AsNoTracking()
-                .Where(p => p.DeleteFlag == false && p.ProjectCode == code)
+                .Where(p => p.DeleteFlag == false && p.ProjectCode == reqModel.ProjectCode)
                 .Select(p => p.Map())
                 .FirstOrDefaultAsync();
 
@@ -101,22 +98,28 @@ public class DA_Project
         }
     }
 
-    public async Task<Result<TblProject>> GetProjectByName(string Name)
+    public async Task<Result<TblProject>> GetProjectByName(string name, string? excludeProjectCode = null)
     {
         try
         {
-            var project = await _appDbContext.TblProjects
+            var query = _appDbContext.TblProjects
                 .AsNoTracking()
-                .Where(p => p.DeleteFlag == false && p.ProjectName == Name)
-                .FirstOrDefaultAsync();
+                .Where(p => !p.DeleteFlag && p.ProjectName == name);
 
-            return project is null
-                ? Result<TblProject>.NotFoundError("No project found!")
-                : Result<TblProject>.Success(project);
+            if (!string.IsNullOrWhiteSpace(excludeProjectCode))
+            {
+                query = query.Where(p => p.ProjectCode != excludeProjectCode);
+            }
+
+            var project = await query.FirstOrDefaultAsync();
+
+            return project is not null
+                ? Result<TblProject>.Success(project, "Project already exists!")
+                : Result<TblProject>.NotFoundError("Project doesn't exist!");
         }
         catch (Exception ex)
         {
-            return Result<TblProject>.Error($"Error occured while retreving project: {ex.Message}");
+            return Result<TblProject>.Error($"Error occurred while checking project name: {ex.Message}");
         }
     }
 
@@ -162,7 +165,7 @@ public class DA_Project
 
             if (project is null)
             {
-                return Result<bool>.NotFoundError("no project found to delete!");
+                return Result<bool>.NotFoundError("Project doesn't exist!");
             }
 
             project.DeleteFlag = true;
@@ -171,8 +174,8 @@ public class DA_Project
             var result = await _appDbContext.SaveChangesAsync();
 
             return result > 0
-                ? Result<bool>.Success(true, "project deleted success.")
-                : Result<bool>.Error("fail to delete project!");
+                ? Result<bool>.Success(true, "Project deleted successfully!")
+                : Result<bool>.Error("Failed to delete project!");
         }
         catch (Exception ex)
         {

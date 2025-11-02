@@ -24,20 +24,8 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpGet("edit")]
-    public async Task<IActionResult> GetProject(ProjectEditRequestModel reqModel)
-    {
-        var result = await _blProject.GetProject(reqModel.ProjectCode);
-
-        if (result.IsSuccess) return Ok(result);
-
-        if (result.IsNotFound) return NotFound(result);
-
-        return StatusCode(500, result);
-    }
-
     [HttpPost]
-    public async Task<IActionResult> CreateProject(ProjectRequestModel project)
+    public async Task<IActionResult> CreateProject([FromBody]ProjectRequestModel project)
     {
         var result = await _blProject.CreateProject(project);
 
@@ -50,10 +38,24 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpPut("{code}")]
-    public async Task<IActionResult> UpdateProject(string code, ProjectRequestModel project)
+    [HttpGet("edit/{projectCode}")]
+    public async Task<IActionResult> GetProject(string projectCode)
     {
-        var result = await _blProject.UpdateProject(code, project);
+        var result = await _blProject.GetProject(new ProjectEditRequestModel
+        {
+            ProjectCode = projectCode
+        });
+        if (result.IsSuccess) return Ok(result);
+
+        if (result.IsNotFound) return NotFound(result);
+
+        return StatusCode(500, result);
+    }
+
+    [HttpPut("update/{projectCode}")]
+    public async Task<IActionResult> UpdateProject(string projectCode, ProjectRequestModel project)
+    {
+        var result = await _blProject.UpdateProject(projectCode, project);
 
         if (result.IsSuccess) return Ok(result);
 
@@ -64,7 +66,7 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
-    [HttpDelete("{projectCode}")]
+    [HttpDelete("delete/{projectCode}")]
     public async Task<IActionResult> DeleteProject(string projectCode)
     {
         if (string.IsNullOrWhiteSpace(projectCode))
@@ -72,7 +74,7 @@ public class ProjectController : ControllerBase
             var error = Result<bool>.ValidationError("Project code is required!");
             return BadRequest(error);
         }
-        
+
         var result = await _blProject.DeleteProject(projectCode);
 
         if (result.IsSuccess) return Ok(result);

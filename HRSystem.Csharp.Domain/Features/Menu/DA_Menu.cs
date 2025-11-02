@@ -13,7 +13,6 @@ public class DA_Menu
     }
 
     public async Task<Result<List<MenuModel>>> GetAllMenus()
-
     {
         try
         {
@@ -81,7 +80,8 @@ public class DA_Menu
     public async Task<bool> MenuGroupExists(string menuGroupCode)
     {
         var groupExists = await _dbContext.TblMenuGroups
-            .AnyAsync(mg => mg.MenuGroupCode == menuGroupCode && (mg.DeleteFlag == null || mg.DeleteFlag == false));
+            .AnyAsync(mg => mg.MenuGroupCode == menuGroupCode
+                            && (mg.DeleteFlag == false));
         if (groupExists)
             return true;
 
@@ -91,9 +91,9 @@ public class DA_Menu
     public async Task<bool> MenuCodeExists(MenuRequestModel menu)
     {
         return await _dbContext.TblMenus
-            .Where(m => !(m.DeleteFlag == false && m.MenuGroupCode != menu.MenuGroupCode))
+            .Where(m => !m.DeleteFlag && m.MenuGroupCode == menu.MenuGroupCode)
             .Join(
-                _dbContext.TblMenuGroups.Where(g => g.DeleteFlag == false),
+                _dbContext.TblMenuGroups.Where(g => !g.DeleteFlag),
                 m => m.MenuGroupCode,
                 g => g.MenuGroupCode,
                 (m, g) => m
@@ -170,11 +170,11 @@ public class DA_Menu
             var foundMenu = _dbContext.TblMenus.FirstOrDefault(x => x.MenuCode == menuCode);
             if (foundMenu is null)
             {
-                return Result<bool>.NotFoundError();
+                return Result<bool>.NotFoundError("Menu doesn't exist!");
             }
 
-            foundMenu.ModifiedAt = DateTime.UtcNow;
             foundMenu.DeleteFlag = true;
+            foundMenu.ModifiedAt = DateTime.UtcNow;
             foundMenu.ModifiedBy = userId;
 
             var result = await _dbContext.SaveChangesAsync();
@@ -183,7 +183,7 @@ public class DA_Menu
                 return Result<bool>.Error("Failed to delete Menu");
             }
 
-            return Result<bool>.Success(true);
+            return Result<bool>.Success("Menu deleted successfully!");
         }
         catch (Exception ex)
         {

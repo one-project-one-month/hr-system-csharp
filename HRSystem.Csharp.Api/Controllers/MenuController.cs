@@ -2,6 +2,7 @@
 using HRSystem.Csharp.Domain.Features.Menu;
 using HRSystem.Csharp.Domain.Models.Menu;
 using System.Security.Claims;
+using HRSystem.Csharp.Shared;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -16,30 +17,31 @@ public class MenuController : ControllerBase
         _blMenu = blMenu;
     }
 
-    [HttpGet("menus")]
+    [HttpGet("list")]
     public async Task<IActionResult> Get()
     {
-        
         var result = await _blMenu.GetAllMenus();
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
+
         return BadRequest(result);
     }
 
-    [HttpPost("menu")]
+    [HttpPost("create")]
     public async Task<IActionResult> CreateMenu([FromBody] MenuRequestModel requestMenu)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
+
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (userId == null)
             return Unauthorized("Invalid user token.");
-        
+
         var result = await _blMenu.CreateMenuAsync(userId, requestMenu);
         if (result.IsSuccess)
         {
@@ -49,21 +51,33 @@ public class MenuController : ControllerBase
         return BadRequest(result);
     }
 
-    [HttpGet("menu/{menuCode}")]
+    [HttpGet("edit/{menuCode}")]
     public async Task<IActionResult> Get(string menuCode)
     {
+        if (string.IsNullOrWhiteSpace(menuCode))
+        {
+            var response = Result<bool>.ValidationError("Menu code is required!");
+            return BadRequest(response);
+        }
+
         var result = await _blMenu.GetMenu(menuCode);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);
     }
 
-    [HttpPut("menu/{menuCode}")]
+    [HttpPut("update/{menuCode}")]
     public async Task<IActionResult> Put(string menuCode, [FromBody] MenuUpdateRequestModel menu)
     {
+        if (string.IsNullOrWhiteSpace(menuCode))
+        {
+            var response = Result<bool>.ValidationError("Menu code is required!");
+            return BadRequest(response);
+        }
+
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -88,15 +102,21 @@ public class MenuController : ControllerBase
         return result.IsSuccess ? Ok(result.Data) : BadRequest(result);
     }
 
-    [HttpDelete("menu/{menuCode}")]
+    [HttpDelete("delete/{menuCode}")]
     public async Task<IActionResult> DeleteMenu(string menuCode)
     {
+        if (string.IsNullOrWhiteSpace(menuCode))
+        {
+            var response = Result<bool>.ValidationError("Menu code is required!");
+            return BadRequest(response);
+        }
+
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (userId == null)
             return Unauthorized("Invalid user token.");
 
-        var result = await _blMenu.DeleteMenuAsync(userId,menuCode);
+        var result = await _blMenu.DeleteMenuAsync(userId, menuCode);
         if (result.IsSuccess)
         {
             return Ok(result);

@@ -33,7 +33,7 @@ public class RoleController : ControllerBase
     {
         if (role == null)
         {
-            var response = Result<bool>.ValidationError("Role data is required!");
+            var response = Result<bool>.BadRequestError("Role data is required!");
             return BadRequest(response);
         }
 

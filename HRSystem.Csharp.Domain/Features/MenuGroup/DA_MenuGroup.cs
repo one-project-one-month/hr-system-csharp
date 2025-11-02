@@ -132,7 +132,7 @@ public class DA_MenuGroup
             {
                 return Result<MenuGroupModel>.Error("Failed to create Menu Group");
             }
-          
+
             // Map entity to DTO
             var menuGroupModel = new MenuGroupModel
             {
@@ -154,8 +154,7 @@ public class DA_MenuGroup
             return Result<MenuGroupModel>.Error($"An error occurred while creating MenuGroup: {ex.Message}");
         }
     }
-
-
+    
     public async Task<Result<bool>> DeleteMenuGroup(string menuGroupCode)
     {
         try
