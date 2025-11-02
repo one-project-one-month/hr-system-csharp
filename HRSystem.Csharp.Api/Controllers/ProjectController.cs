@@ -15,14 +15,14 @@ public class ProjectController : ControllerBase
         _blProject = blProject;
     }
 
-    [HttpGet("list")]
+    /*[HttpGet("list")]
     public async Task<IActionResult> GetALlProjects([FromQuery] ProjectRequestModel reqModel)
     {
         var result = await _blProject.GetAllProjects();
         if (result.IsSuccess) return Ok(result);
         if (result.IsNotFound) return NotFound(result);
         return StatusCode(500, result);
-    }
+    }*/
 
     [HttpGet("edit")]
     public async Task<IActionResult> GetProject(ProjectEditRequestModel reqModel)
