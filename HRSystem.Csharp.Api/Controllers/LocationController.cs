@@ -12,9 +12,9 @@ public class LocationController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> GetAllLocations()
+    public async Task<IActionResult> GetAllLocations([FromQuery] LocationListRequestModel reqModel)
     {
-        var result = await _blLocation.GetAllLocations();
+        var result = await _blLocation.GetAllLocations(reqModel);
 
         if (result.IsSuccess) return Ok(result);
         if (result.IsNotFound) return NotFound(result);

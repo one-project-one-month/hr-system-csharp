@@ -1,8 +1,10 @@
-﻿namespace HRSystem.Csharp.Domain.Models.Location;
+﻿using HRSystem.Csharp.Domain.Models.Common;
+
+namespace HRSystem.Csharp.Domain.Models.Location;
 
 public class LocationCreateRequestModel
 {
-    public string LocationCode { get; set; }
+    // public string LocationCode { get; set; }
 
     public string? Name { get; set; }
 
@@ -13,7 +15,7 @@ public class LocationCreateRequestModel
     public string? Radius { get; set; }
 }
 
-public class  LocationUpdateRequestModel
+public class LocationUpdateRequestModel
 {
     public string? Name { get; set; }
 
@@ -22,4 +24,13 @@ public class  LocationUpdateRequestModel
     public string? Longitude { get; set; }
 
     public string? Radius { get; set; }
+}
+
+public class LocationListRequestModel : PaginationRequestModel
+{
+    public string? LocationName { get; set; }
+}
+
+public class LocationListResponseModel : PagedResult<LocationResponseModel>
+{
 }

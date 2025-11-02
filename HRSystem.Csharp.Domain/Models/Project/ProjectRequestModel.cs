@@ -23,7 +23,7 @@ public class ProjectEditRequestModel
 
 public class ProjectListRequestModel : PaginationRequestModel
 {
-    public string ProjectName { get; set; }
+    public string? ProjectName { get; set; }
 }
 
 public class ProjectListResponseModel : PagedResult<ProjectResponseModel>

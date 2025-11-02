@@ -17,8 +17,8 @@ public class RoleMenuPermissionController : ControllerBase
         _blRoleMenuPermission = blRoleMenuPermission;
     }
 
-    [HttpPost("menu-tree-with-permission")]
-    public async Task<IActionResult> GetMenuTreeWithPermissions(MenuTreeRequestModel reqModel)
+    [HttpGet("menu-tree")]
+    public async Task<IActionResult> GetMenuTreeWithPermissions([FromQuery] MenuTreeRequestModel reqModel)
     {
         try
         {
