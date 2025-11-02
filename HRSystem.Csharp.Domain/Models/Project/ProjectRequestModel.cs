@@ -26,9 +26,8 @@ public class ProjectListRequestModel : PaginationRequestModel
     public string ProjectName { get; set; }
 }
 
-public class ProjectListResponseModel
+public class ProjectListResponseModel : PagedResult<ProjectResponseModel>
 {
-    
 }
 
 //public class ProjectUpdateRequestModel

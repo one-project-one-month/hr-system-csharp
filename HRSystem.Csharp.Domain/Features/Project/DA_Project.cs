@@ -46,7 +46,7 @@ public class DA_Project
         }
     }
 
-    public async Task<Result<List<ProjectResponseModel>>> GetAllProjects(ProjectListRequestModel reqModel)
+    public async Task<Result<ProjectListResponseModel>> GetAllProjects(ProjectListRequestModel reqModel)
     {
         try
         {
@@ -61,11 +61,11 @@ public class DA_Project
 
             query = query.OrderByDescending(r => r.CreatedAt);
 
-            var roles = query.Select(r => r.ma);
+            var roles = query.Select(r => r.Map());
 
             var pagedResult = await roles.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
 
-            var result = new RoleListResponseModel
+            var result = new ProjectListResponseModel()
             {
                 Items = pagedResult.Items,
                 TotalCount = pagedResult.TotalCount,
@@ -73,22 +73,11 @@ public class DA_Project
                 PageSize = reqModel.PageSize
             };
 
-            return Result<ProjectListRequestModel>.Success(result);
-            
-            /*var projects = await _appDbContext.TblProjects
-                .AsNoTracking()
-                .Where(p => p.DeleteFlag == false)
-                .Select(p => p.Map())
-                .ToListAsync();
-
-            if (projects is null || projects.Count is 0)
-                return Result<List<ProjectResponseModel>>.NotFoundError("no projects found!");
-
-            return Result<List<ProjectResponseModel>>.Success(projects);*/
+            return Result<ProjectListResponseModel>.Success(result);
         }
         catch (Exception ex)
         {
-            return Result<List<ProjectResponseModel>>.Error($"Error occured while retreving projects: {ex.Message}");
+            return Result<ProjectListResponseModel>.Error($"Error occured while retrieving projects: {ex.Message}");
         }
     }
 

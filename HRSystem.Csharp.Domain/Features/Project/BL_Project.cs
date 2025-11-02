@@ -22,11 +22,11 @@ public class BL_Project
         {
             return Result<bool>.DuplicateRecordError("Project name already exists!");
         }
-        
+
         return await _daProject.CreateProject(project);
     }
 
-    public async Task<Result<List<ProjectResponseModel>>> GetAllProjects(ProjectListRequestModel reqModel)
+    public async Task<Result<ProjectListResponseModel>> GetAllProjects(ProjectListRequestModel reqModel)
     {
         return await _daProject.GetAllProjects(reqModel);
     }
