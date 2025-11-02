@@ -2,6 +2,7 @@
 using System.Data;
 using HRSystem.Csharp.Domain.Features.Role;
 using Microsoft.Data.SqlClient;
+using HRSystem.Csharp.Domain.Features.Sequence;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -19,6 +20,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Project>();
         builder.Services.AddScoped<BL_Employee>();
         builder.Services.AddScoped<BL_Auth>();
+        builder.Services.AddScoped<BL_Sequence>();
 
         #endregion
 
@@ -38,6 +40,7 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Project>();
         builder.Services.AddScoped<DA_Employee>();
         builder.Services.AddScoped<DA_Auth>();
+        builder.Services.AddScoped<DA_Sequence>();
 
         #endregion
 
