@@ -1,8 +1,11 @@
-﻿using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
-using System.Data;
-using HRSystem.Csharp.Domain.Features.Role;
-using Microsoft.Data.SqlClient;
+﻿using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Features.Verification;
+using Microsoft.Data.SqlClient;
+using System.Data;
+using System.Net;
+using System.Net.Mail;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -21,6 +24,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Employee>();
         builder.Services.AddScoped<BL_Auth>();
         builder.Services.AddScoped<BL_Sequence>();
+        builder.Services.AddScoped<BL_Verification>();
 
         #endregion
 
@@ -41,6 +45,7 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Employee>();
         builder.Services.AddScoped<DA_Auth>();
         builder.Services.AddScoped<DA_Sequence>();
+        builder.Services.AddScoped<DA_Verification>();
 
         #endregion
 
@@ -61,17 +66,34 @@ public static class FeatureManager
         builder.Services.AddScoped<JwtService>();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<AuthorizationService>();
+        builder.Services.AddScoped<EmailService>();
     }
 
     public static void AddDomain(this WebApplicationBuilder builder)
     {
         var mssqlConnection = builder.Configuration.GetConnectionString("DbConnection");
 
-        builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection); },
-            ServiceLifetime.Transient, ServiceLifetime.Transient);
+        builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
+            ServiceLifetime.Transient, 
+            ServiceLifetime.Transient);
 
         builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
             new SqlConnection(mssqlConnection));
+
+        builder.Services
+            .AddFluentEmail("hrsystem.opom@gmail.com")
+            .AddSmtpSender(new SmtpClient("smtp.gmail.com")
+            {
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(
+                        "hrsystem.opom@gmail.com",
+                        "rkjs utor bqqm diyw"),
+                EnableSsl = true,
+                Port = 587,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Timeout = 10000
+            });
 
         builder.AddServices();
     }
