@@ -1,5 +1,7 @@
-﻿using HRSystem.Csharp.Domain.Models.Auth;
-using Microsoft.AspNetCore.Http;
+﻿using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Models.Auth;
+using HRSystem.Csharp.Domain.Models.Employee;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace HRSystem.Csharp.Domain.Features.Auth;
@@ -8,11 +10,13 @@ public class DA_Auth : AuthorizationService
 {
     private readonly AppDbContext _appDbContext;
     private readonly JwtService _jwtService;
+    private readonly DA_Role _role;
 
-    public DA_Auth(IHttpContextAccessor contextAccessor, JwtService jwtService, AppDbContext appDbContext) : base(contextAccessor)
+    public DA_Auth(IHttpContextAccessor contextAccessor, JwtService jwtService, AppDbContext appDbContext, DA_Role role) : base(contextAccessor)
     {
         _jwtService = jwtService;
         _appDbContext = appDbContext;
+        _role = role;
     }
 
     public async Task<Result<AuthResponseModel>> LoginAsync(LoginRequestModel requestModel)
@@ -29,21 +33,45 @@ public class DA_Auth : AuthorizationService
                 return Result<AuthResponseModel>.ValidationError("Password cannot be blank or empty.");
             }
 
+            _jwtService.HashPassword(requestModel.Password);
+
             var user = _appDbContext.TblEmployees.FirstOrDefault(x => x.Username == requestModel.UserName);
 
             if (user is null)
             {
-                return Result<AuthResponseModel>.NotFoundError("Incorrect Username.");
+                return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
             }
 
             if (!_jwtService.VerifyPassword(requestModel.Password, user.Password))
             {
-                return Result<AuthResponseModel>.NotFoundError("Incorrect Password.");
+                return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
+            }
+
+            if (user.IsFirstTimeLogin == true)
+            {
+                return Result<AuthResponseModel>.Success(
+                    new AuthResponseModel 
+                    { 
+                        User = new EmployeeResponseModel 
+                        {
+                            EmployeeCode = user.EmployeeCode,
+                            Username = user.Username,
+                            Name = user.Name,
+                            Email = user.Email,
+                            PhoneNo = user.PhoneNo
+                        } 
+                    }, 
+                    "User is First Time.");
             }
 
             var token = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
             var jwtId = _jwtService.getJwtIdFromToken(token);
+
+            var role = await _role.GetByRoleCode(user.RoleCode);
+
+            if (!role.IsSuccess)
+                return Result<AuthResponseModel>.BadRequestError("Assign Role first!");
 
             var refreshToken = new TblRefreshToken
             {
@@ -64,6 +92,16 @@ public class DA_Auth : AuthorizationService
             {
                 AccessToken = token,
                 RefreshToken = refreshToken.Token,
+                User = new EmployeeResponseModel
+                {
+                    ProfileImage = user.ProfileImage,
+                    EmployeeCode = user.EmployeeCode,
+                    Username = user.Username,
+                    RoleName = role.Data.RoleName,
+                    Name = user.Name,
+                    Email = user.Email,
+                    PhoneNo = user.PhoneNo
+                },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo,
             };
 
@@ -116,7 +154,13 @@ public class DA_Auth : AuthorizationService
             storedToken.IsRevoked = true;
             storedToken.RevokedAt = DateTime.UtcNow;
 
-            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.EmployeeCode == storedToken.EmployeeCode);
+            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.EmployeeCode == storedToken.EmployeeCode && !x.DeleteFlag);
+            if (user is null)
+                Result<AuthResponseModel>.NotFoundError("User not found");
+
+            var role = await _role.GetByRoleCode(user.RoleCode);
+            if (role is null)
+                Result<AuthResponseModel>.NotFoundError("Role with the user not found");
 
             var newToken = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
@@ -141,6 +185,16 @@ public class DA_Auth : AuthorizationService
             {
                 AccessToken = newToken,
                 RefreshToken = refreshToken.Token,
+                User = new EmployeeResponseModel
+                {
+                    ProfileImage = user.ProfileImage,
+                    EmployeeCode = user.EmployeeCode,
+                    Username = user.Username,
+                    RoleName = role.Data.RoleName,
+                    Name = user.Name,
+                    Email = user.Email,
+                    PhoneNo = user.PhoneNo
+                },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(newToken).ValidTo,
             };
 
@@ -176,4 +230,66 @@ public class DA_Auth : AuthorizationService
             return Result<string>.SystemError(ex.Message);
         }
     }
+
+    public async Task<Result<bool>> ChangePassword(ChangePasswordRequestModel requestModel)
+    {
+        if (requestModel is null)
+        {
+            return Result<bool>.ValidationError("Request cannot be null.");
+        }
+
+        if (string.IsNullOrEmpty(requestModel.EmployeeCode))
+        {
+            return Result<bool>.ValidationError("Employee code is required.");
+        }
+
+        if (string.IsNullOrEmpty(requestModel.OldPassword))
+        {
+            return Result<bool>.ValidationError("Old password is required.");
+        }
+
+        if (string.IsNullOrEmpty(requestModel.NewPassword))
+        {
+            return Result<bool>.ValidationError("New password is required.");
+        }
+
+        if (string.IsNullOrEmpty(requestModel.ConfirmPassword))
+        {
+            return Result<bool>.ValidationError("Confirm password is required.");
+        }
+
+        if (requestModel.NewPassword != requestModel.ConfirmPassword)
+        {
+            return Result<bool>.ValidationError("New password and confirm password do not match.");
+        }
+
+        if (requestModel.NewPassword.Length < 6)
+        {
+            return Result<bool>.ValidationError("New password must be at least 6 characters long.");
+        }
+
+        var user = await _appDbContext.TblEmployees
+            .FirstOrDefaultAsync(x => x.EmployeeCode == requestModel.EmployeeCode);
+
+        if (user is null)
+        {
+            return Result<bool>.NotFoundError("User not found.");
+        }
+
+        if (!_jwtService.VerifyPassword(requestModel.OldPassword, user.Password))
+        {
+            return Result<bool>.ValidationError("Old password is incorrect.");
+        }
+
+        user.Password = _jwtService.HashPassword(requestModel.NewPassword);
+        user.IsFirstTimeLogin = false;
+
+        _appDbContext.TblEmployees.Update(user);
+        var result = await _appDbContext.SaveChangesAsync();
+
+        return result > 0
+            ? Result<bool>.Success(true, "Password updated. Please login again.")
+            : Result<bool>.SystemError("Failed to update user.");
+    }
+
 }

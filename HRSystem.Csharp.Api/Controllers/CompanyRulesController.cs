@@ -1,6 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Features;
+﻿using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.Csharp.Api.Controllers
 {
@@ -8,24 +7,25 @@ namespace HRSystem.Csharp.Api.Controllers
     [ApiController]
     public class CompanyRulesController : Controller
     {
-        private readonly BL_CompanyRules_ _blCompanyRules;
-        public CompanyRulesController(BL_CompanyRules_ blCompanyRules)
+        private readonly BL_CompanyRules _blCompanyRules;
+
+        public CompanyRulesController(BL_CompanyRules blCompanyRules)
         {
             _blCompanyRules = blCompanyRules;
         }
 
-        [HttpGet("GetAllCompanyRules")]
-        public async Task<IActionResult> GetAllCompanyRules()
+        [HttpGet("list")]
+        public async Task<IActionResult> GetAllCompanyRules([FromQuery] CompanyRuleListRequestModel reqModel)
         {
-            var result = await _blCompanyRules.GetAllCompanyRulesAsync();
+            var result = await _blCompanyRules.GetAllCompanyRulesAsync(reqModel);
             return Ok(result);
-
         }
 
-        [HttpPost("UpdateCompanyRule")]
-        public async Task<IActionResult> UpdateCompanyRule(CompanyRules companyRules)
+        [HttpPost("update/{ruleCode}")]
+        public async Task<IActionResult> UpdateCompanyRule(string ruleCode, RuleUpdateRequestModel reqModel)
         {
-            var result = await _blCompanyRules.Update(companyRules);
+            reqModel.CompanyRuleCode = ruleCode;
+            var result = await _blCompanyRules.Update(reqModel);
             return Ok(result);
         }
     }

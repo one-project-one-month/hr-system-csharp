@@ -14,7 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C6E6566C-4F5A-4FAE-8C82-9BF45A736EFD}"
 	ProjectSection(SolutionItems) = preProject
 		documentation.md = documentation.md
-		hrsys.sql = hrsys.sql
+		hr-system.sql = hr-system.sql
 	EndProjectSection
 EndProject
 Global

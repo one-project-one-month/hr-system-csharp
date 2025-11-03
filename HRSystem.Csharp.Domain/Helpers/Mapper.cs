@@ -10,13 +10,12 @@ public static class Mapper
         return new TblProject
         {
             ProjectId = Ulid.NewUlid().ToString(),
-            // ProjectCode = project.ProjectCode,
             ProjectName = project.ProjectName,
             ProjectDescription = project.ProjectDescription,
             StartDate = project.StartDate,
             EndDate = project.EndDate,
             ProjectStatus = project.ProjectStatus.ToString(),
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             CreatedBy = "TestingUser",
             DeleteFlag = false
         };
@@ -44,7 +43,6 @@ public static class Mapper
         return new TblLocation
         {
             LocationId = Ulid.NewUlid().ToString(),
-            LocationCode = location.LocationCode,
             Name = location.Name,
             Latitude = location.Latitude,
             Longitude = location.Longitude,

@@ -22,7 +22,7 @@ public class BL_MenuGroup
         {
             return Result<MenuGroupModel>.BadRequestError("MenuGroupId is required.");
         }
-        var menuGroup = await _daMenuGroup.GetMenuGroupById(menuGroupId);
+        var menuGroup = await _daMenuGroup.GetMenuGroupByCode(menuGroupId);
         if (menuGroup == null)
         {
             return Result<MenuGroupModel>.Error("Menu group not found.");
@@ -35,28 +35,17 @@ public class BL_MenuGroup
         return await _daMenuGroup.UpdateMenuGroup(menuGroupCode, menuGroup);
     }
 
-    public async Task<Result<TblMenuGroup>> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
+    public async Task<Result<MenuGroupModel>> CreateMenuGroupAsync(MenuGroupRequestModel requestMenuGroup)
     {
-        if (requestMenuGroup.MenuGroupCode is null || string.IsNullOrWhiteSpace(requestMenuGroup.MenuGroupCode))
-        {
-            return Result<TblMenuGroup>.BadRequestError("MenuGroupCode cannot be null");
-        }
-
-        if (requestMenuGroup is null)
-        {
-            return Result<TblMenuGroup>.BadRequestError("Request MenuGroup cannot be null");
-        }
-
-
         var response = await _daMenuGroup.CreateMenuGroupAsync(requestMenuGroup);
         return response;
     }
 
-    public async Task<Result<TblMenuGroup>> DeleteMenuGroupAsync(string menuGroupCode)
+    public async Task<Result<bool>> DeleteMenuGroupAsync(string menuGroupCode)
     {
         if (menuGroupCode is null)
         {
-            return Result<TblMenuGroup>.BadRequestError("Menu Group Code is required.");
+            return Result<bool>.BadRequestError("Menu Group Code is required.");
         }
         var response = await _daMenuGroup.DeleteMenuGroup(menuGroupCode);
         return response;

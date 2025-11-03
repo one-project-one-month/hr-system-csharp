@@ -28,4 +28,10 @@ public class BL_Auth
         var response = await _da_Auth.LogoutAsync(requestModel);
         return response;
     }
+
+    public async Task<Result<bool>> ChangePassword(ChangePasswordRequestModel requestModel)
+    {
+        var response = await _da_Auth.ChangePassword(requestModel);
+        return response;
+    }
 }

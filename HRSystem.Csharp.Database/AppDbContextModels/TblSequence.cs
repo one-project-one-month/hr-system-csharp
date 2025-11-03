@@ -15,7 +15,5 @@ public partial class TblSequence
 
     public string? SequenceType { get; set; }
 
-    public string? RoleCode { get; set; }
-
     public bool? DeleteFlag { get; set; }
 }

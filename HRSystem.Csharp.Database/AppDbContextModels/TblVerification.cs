@@ -9,19 +9,19 @@ public partial class TblVerification
 
     public string VerificationCode { get; set; } = null!;
 
-    public string? Email { get; set; }
+    public string Email { get; set; } = null!;
 
     public DateTime? ExpiredTime { get; set; }
 
     public bool? IsUsed { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public string? CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = null!;
 
     public DateTime? ModifiedAt { get; set; }
 
     public string? ModifiedBy { get; set; }
 
-    public bool? DeleteFlag { get; set; }
+    public bool DeleteFlag { get; set; }
 }
