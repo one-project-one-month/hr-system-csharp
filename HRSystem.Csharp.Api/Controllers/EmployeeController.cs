@@ -38,6 +38,17 @@ public class EmployeeController : ControllerBase
         return BadRequest(result);
     }
 
+    [HttpPost("userProfile")]
+    public async Task<IActionResult> GetUserProfile(UserProfileRequestModel req)
+    {
+        var result = await _blEmployee.getUserProfile(req);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Data);
+        }
+        return BadRequest(result);
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> CreateEmployee([FromBody] EmployeeCreateRequestModel req)
     {
@@ -73,4 +84,5 @@ public class EmployeeController : ControllerBase
 
         return BadRequest(result);
     }
+
 }

@@ -10,17 +10,26 @@ public class DA_Employee
 
     private readonly AppDbContext _appDbContext;
     private readonly ILogger<DA_Employee> _logger;
-
-    public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger)
+    private readonly JwtService _jwtService;
+    public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger, JwtService jwtService)
     {
         _appDbContext = appDbContext;
         _logger = logger;
+        _jwtService = jwtService;
     }
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
     {
         try
         {
+            var employee = await _appDbContext.TblEmployees
+                .FirstOrDefaultAsync(r => r.Name != null
+                                         && r.Name.ToLower() == reqModel.EmployeeName.ToLower() && r.DeleteFlag == false);
+
+            if (employee == null)
+            {
+                return Result<EmployeeListResponseModel>.ValidationError("Employee doesn't exist!");
+            }
             var query = _appDbContext.TblEmployees
                 .AsNoTracking()
                 .Where(e => !e.DeleteFlag)
@@ -44,6 +53,8 @@ public class DA_Employee
                 query = query.Where(r => r.Name != null
                                          && r.Name.ToLower() == reqModel.EmployeeName.ToLower());
             }
+
+        
 
             query = query.OrderByDescending(r => r.CreatedAt);
 
@@ -99,26 +110,73 @@ public class DA_Employee
         }
     }
 
+    public async Task<Result<UserProfileResponseModel>> GetUserProfile(UserProfileRequestModel req)
+    {
+        try
+        {
+            var result = await _appDbContext.TblEmployees
+                .AsNoTracking()
+                .Where(e => e.EmployeeCode == req.EmployeeCode && e.DeleteFlag == false)
+                .Join(_appDbContext.TblRoles,
+                    e => e.RoleCode,
+                    r => r.RoleCode,
+                    (e, r) => new UserProfileResponseModel
+                    {
+                        EmployeeCode = e.EmployeeCode,
+                        ProfileImage = e.ProfileImage,
+                        Username = e.Username,
+                        Name = e.Name,
+                        RoleName = r.RoleName,
+                        Email = e.Email,
+                        PhoneNo = e.PhoneNo
+                    })
+                .FirstOrDefaultAsync();
+
+            if (result == null)
+            {
+                return Result<UserProfileResponseModel>.ValidationError("Employee doesn't exist!");
+            }
+
+            return Result<UserProfileResponseModel>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result<UserProfileResponseModel>.Error(
+                $"An error occurred while retrieving employees: {ex.Message}");
+        }
+    }
+
+
     public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(
         EmployeeCreateRequestModel reqModel)
     {
         try
         {
+            var hashPassowrd = _jwtService.HashPassword(reqModel.Password);
             var newEmployee = new TblEmployee
             {
+                EmployeeId = Ulid.NewUlid().ToString(),
+                EmployeeCode = "EMP" + new Random().Next(1000, 9999).ToString(), //testing only
                 RoleCode = reqModel.RoleCode,
                 Username = reqModel.Username,
                 Name = reqModel.Name,
                 Email = reqModel.Email,
                 PhoneNo = reqModel.PhoneNo,
-                Password = reqModel.Password,
+                Password = hashPassowrd,
+                IsFirstTimeLogin = true,
+                ProfileImage = null,
                 Salary = reqModel.Salary,
                 StartDate = reqModel.StartDate,
                 ResignDate = reqModel.ResignDate,
-                CreatedBy = currentUser,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = currentUser, //testing only
+                
+                DeleteFlag = false,
+          
+
             };
 
-            _appDbContext.TblEmployees.Add(newEmployee);
+            await _appDbContext.TblEmployees.AddAsync(newEmployee);
             await _appDbContext.SaveChangesAsync();
 
             return Result<EmployeeCreateResponseModel>.Success(new EmployeeCreateResponseModel(),
@@ -180,7 +238,7 @@ public class DA_Employee
     {
         try
         {
-            var employee = await _appDbContext.TblEmployees
+            var employee = await _appDbContext.TblEmployees.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Username == username && !x.DeleteFlag);
             return employee != null
                 ? Result<TblEmployee>.Success(employee)

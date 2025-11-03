@@ -24,6 +24,12 @@ public class BL_Employee
         return employees;
     }
 
+    public async Task<Result<UserProfileResponseModel>> getUserProfile(UserProfileRequestModel req)
+    {
+      var result = await _daEmployee.GetUserProfile(req);
+        return result;
+    }
+
     public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(EmployeeCreateRequestModel reqModel)
     {
         #region User Input Validation
@@ -80,11 +86,15 @@ public class BL_Employee
             return Result<EmployeeCreateResponseModel>.DuplicateRecordError("Email already exists!");
         }
 
-        var validEmail = new MailAddress(reqModel.Email);
-        if (validEmail.Address != reqModel.Email)
+        try
+        {
+           var validEmail = new MailAddress(reqModel.Email);
+        }
+        catch
         {
             return Result<EmployeeCreateResponseModel>.BadRequestError("Invalid email format.");
         }
+       
 
         var phoneExist = await _daEmployee.DuplicatePhoneNo(reqModel.PhoneNo);
         if (phoneExist.IsSuccess)
@@ -133,7 +143,7 @@ public class BL_Employee
         #region Check Employee Exists
 
         var employee = await _daEmployee.GetEmployeeByCode(employeeCode);
-        if (employee?.Data != null)
+        if (employee?.Data == null)
         {
             return Result<EmployeeUpdateResponseModel>.NotFoundError("Employee doesn't exist!");
         }
