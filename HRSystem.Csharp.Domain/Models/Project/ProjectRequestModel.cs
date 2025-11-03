@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Shared.Enums;
+﻿using HRSystem.Csharp.Domain.Models.Common;
+using HRSystem.Csharp.Shared.Enums;
 
 namespace HRSystem.Csharp.Domain.Models.Project;
 
@@ -13,6 +14,20 @@ public class ProjectRequestModel
     public DateTime? EndDate { get; set; }
 
     public EnumProjectStatus ProjectStatus { get; set; }
+}
+
+public class ProjectEditRequestModel
+{
+    public string ProjectCode { get; set; }
+}
+
+public class ProjectListRequestModel : PaginationRequestModel
+{
+    public string? ProjectName { get; set; }
+}
+
+public class ProjectListResponseModel : PagedResult<ProjectResponseModel>
+{
 }
 
 //public class ProjectUpdateRequestModel

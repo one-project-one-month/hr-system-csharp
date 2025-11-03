@@ -26,6 +26,21 @@ namespace HRSystem.Csharp.Domain.Models
 
         public CompanyRulesInfoModel()
         {
+            OfficeStartTime = null;
+            OfficeEndTime = null;
+            OfficeBreakHour = null;
+            CheckinAcceptable = null;
+            CheckinOneHourLate = null;
+            CheckoutAcceptable = null;
+            CheckoutHourLate = null;
+            MorningHalfCheckinAcceptable = null;
+            MorningHalfCheckinHourLate = null;
+            EveningHalfCheckoutAcceptable = null;
+            EveningHalfCheckoutHourLate = null;
+            HourLateFlagDeduction = null;
+            HalfDayFlagDeduction = null;
+            FullDayFlagDeduction = null;
+
         }
     }
 }
