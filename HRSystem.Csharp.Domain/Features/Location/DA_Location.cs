@@ -72,20 +72,20 @@ public class DA_Location
 
     public async Task<Result<LocationResponseModel>> GetLocationByCode(string locationCode)
     {
-        var location = await _appDbContext.TblLocations
+        var locationEntity = await _appDbContext.TblLocations
             .AsNoTracking()
-            .Where(l => l.DeleteFlag == false)
-            .Select(l => l.Map())
-            .FirstOrDefaultAsync(l => l.LocationCode == locationCode);
+            .Where(l => l.DeleteFlag == false && l.LocationCode == locationCode)
+            .FirstOrDefaultAsync();
 
-        if (location == null)
+        if (locationEntity == null)
         {
             return Result<LocationResponseModel>.NotFoundError("Location not found");
         }
 
+        var location = locationEntity.Map();
         return Result<LocationResponseModel>.Success(location);
     }
-
+    
     public async Task<Result<TblLocation>> GetLocationByName(string locationName)
     {
         var location = await _appDbContext.TblLocations

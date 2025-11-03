@@ -1,5 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Models.Employee;
 using System.Data;
+using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Shared.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
@@ -10,11 +12,13 @@ public class DA_Employee
 
     private readonly AppDbContext _appDbContext;
     private readonly ILogger<DA_Employee> _logger;
+    private readonly DA_Sequence _daSequence;
 
-    public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger)
+    public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger, DA_Sequence daSequence)
     {
         _appDbContext = appDbContext;
         _logger = logger;
+        _daSequence = daSequence;
     }
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
@@ -104,9 +108,12 @@ public class DA_Employee
     {
         try
         {
+            var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
+            
             var newEmployee = new TblEmployee
             {
                 EmployeeId = DevCode.GenerateNewUlid(),
+                EmployeeCode = generatedCode,
                 RoleCode = reqModel.RoleCode,
                 Username = reqModel.Username,
                 Name = reqModel.Name,
@@ -116,11 +123,11 @@ public class DA_Employee
                 Salary = reqModel.Salary,
                 StartDate = reqModel.StartDate,
                 ResignDate = reqModel.ResignDate,
-                CreatedBy = currentUser,
+                CreatedBy = currentUser
             };
 
             _appDbContext.TblEmployees.Add(newEmployee);
-            
+
             Console.WriteLine($"ResignDate: {newEmployee.ResignDate}");
 
             await _appDbContext.SaveChangesAsync();
