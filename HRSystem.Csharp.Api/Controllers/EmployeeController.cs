@@ -15,7 +15,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> GetAllEmployee(EmployeeListRequestModel reqModel)
+    public async Task<IActionResult> GetAllEmployee([FromQuery] EmployeeListRequestModel reqModel)
     {
         var result = await _blEmployee.GetAllEmployee(reqModel);
         if (result.IsSuccess)

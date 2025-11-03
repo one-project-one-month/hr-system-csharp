@@ -14,6 +14,10 @@ public class BL_Employee
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
     {
+        if (string.IsNullOrEmpty(reqModel.EmployeeName))
+        {
+            return Result<EmployeeListResponseModel>.ValidationError("Enter employee name");
+        }
         var employees = await _daEmployee.GetAllEmployee(reqModel);
         return employees;
     }
