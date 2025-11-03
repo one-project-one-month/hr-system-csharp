@@ -152,7 +152,7 @@ public class DA_Role
             role.DeleteFlag = true;
             var deleted = await _appDbContext.SaveChangesAsync() > 0;
             return deleted
-                ? Result<bool>.Success(true)
+                ? Result<bool>.Success("Role deleted successfully!")
                 : Result<bool>.Error("Failed to delete role.");
         }
         catch (Exception ex)

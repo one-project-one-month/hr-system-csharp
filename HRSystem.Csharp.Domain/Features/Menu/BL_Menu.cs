@@ -21,7 +21,7 @@ public class BL_Menu
         MenuModel? menu = await _daMenu.GetMenuByCode(menuCode);
         if (menu == null)
         {
-            return Result<MenuModel>.Error("Menu not found.");
+            return Result<MenuModel>.NotFoundError("Menu not found.");
         }
 
         return Result<MenuModel>.Success(menu);
@@ -63,7 +63,9 @@ public class BL_Menu
         };
 
         var updated = await _daMenu.UpdateMenu(updating);
-        return updated ? Result<bool>.Success(true) : Result<bool>.Error("Update Menu Failed");
+        return updated
+            ? Result<bool>.Success("Menu updated successfully!")
+            : Result<bool>.Error("Update Menu Failed");
     }
 
     public async Task<Result<MenuModel>> CreateMenuAsync(string userId, MenuRequestModel requestMenu)

@@ -20,3 +20,8 @@ global using HRSystem.Csharp.Domain.Features.Auth;
 global using HRSystem.Csharp.Domain.Features.Employee;
 global using HRSystem.Csharp.Domain.Features.Menu;
 global using HRSystem.Csharp.Domain.Features.MenuGroup;
+global using HRSystem.Csharp.Domain.Models.Verification;
+global using HRSystem.Csharp.Shared.Constants;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.IdentityModel.Tokens;

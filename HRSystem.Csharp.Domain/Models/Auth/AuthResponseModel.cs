@@ -1,4 +1,6 @@
-﻿namespace HRSystem.Csharp.Domain.Models.Auth;
+﻿using HRSystem.Csharp.Domain.Models.Employee;
+
+namespace HRSystem.Csharp.Domain.Models.Auth;
 
 public class AuthResponseModel
 {
@@ -6,7 +8,7 @@ public class AuthResponseModel
 
     public string RefreshToken { get; set; } = null!;
 
-    public string RoleName { get; set; } = null!;
+    public EmployeeResponseModel User { get; set; } = null!;
 
     public DateTime ExpiresAt { get; set; } 
 }
