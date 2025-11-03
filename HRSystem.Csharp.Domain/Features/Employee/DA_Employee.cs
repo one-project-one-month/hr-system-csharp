@@ -16,12 +16,12 @@ public class DA_Employee
     private readonly DA_Sequence _daSequence;
 
     public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger, DA_Sequence daSequence,
-                      JwtService jwtService)
+        JwtService jwtService)
     {
         _appDbContext = appDbContext;
         _logger = logger;
         _daSequence = daSequence;
-       _jwtService = jwtService;
+        _jwtService = jwtService;
     }
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
@@ -30,12 +30,14 @@ public class DA_Employee
         {
             var employee = await _appDbContext.TblEmployees
                 .FirstOrDefaultAsync(r => r.Name != null
-                                         && r.Name.ToLower() == reqModel.EmployeeName.ToLower() && r.DeleteFlag == false);
+                                          && r.Name.ToLower() == reqModel.EmployeeName.ToLower() &&
+                                          r.DeleteFlag == false);
 
             if (employee == null)
             {
                 return Result<EmployeeListResponseModel>.ValidationError("Employee doesn't exist!");
             }
+
             var query = _appDbContext.TblEmployees
                 .AsNoTracking()
                 .Where(e => !e.DeleteFlag)
@@ -60,7 +62,6 @@ public class DA_Employee
                                          && r.Name.ToLower() == reqModel.EmployeeName.ToLower());
             }
 
-        
 
             query = query.OrderByDescending(r => r.CreatedAt);
 
@@ -159,9 +160,9 @@ public class DA_Employee
         try
         {
             var hashPassowrd = _jwtService.HashPassword(reqModel.Password);
-          
+
             var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
-            
+
             var newEmployee = new TblEmployee
             {
                 EmployeeId = DevCode.GenerateNewUlid(),

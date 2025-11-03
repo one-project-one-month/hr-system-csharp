@@ -26,7 +26,7 @@ public class BL_Employee
 
     public async Task<Result<UserProfileResponseModel>> getUserProfile(UserProfileRequestModel req)
     {
-      var result = await _daEmployee.GetUserProfile(req);
+        var result = await _daEmployee.GetUserProfile(req);
         return result;
     }
 
@@ -88,13 +88,13 @@ public class BL_Employee
 
         try
         {
-           var validEmail = new MailAddress(reqModel.Email);
+            var validEmail = new MailAddress(reqModel.Email);
         }
         catch
         {
             return Result<EmployeeCreateResponseModel>.BadRequestError("Invalid email format.");
         }
-       
+
 
         var phoneExist = await _daEmployee.DuplicatePhoneNo(reqModel.PhoneNo);
         if (phoneExist.IsSuccess)
