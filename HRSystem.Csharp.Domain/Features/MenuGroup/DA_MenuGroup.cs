@@ -1,4 +1,6 @@
-﻿using HRSystem.Csharp.Domain.Models.MenuGroup;
+﻿using Azure.Core;
+using HRSystem.Csharp.Domain.Models.Common;
+using HRSystem.Csharp.Domain.Models.MenuGroup;
 
 namespace HRSystem.Csharp.Domain.Features.MenuGroup;
 
@@ -11,8 +13,10 @@ public class DA_MenuGroup
         _context = context;
     }
 
-    public async Task<List<MenuGroupModel>> GetAllMenuGroups()
+    public async Task<List<MenuGroupModel>> GetAllMenuGroups(PaginationRequestModel PaginationModel)
     {
+        int pageNumber = PaginationModel.PageNo < 1 ? 1 : PaginationModel.PageNo;
+        int pageSize = PaginationModel.PageSize <= 0 ? 10 : PaginationModel.PageSize;
         return await _context.TblMenuGroups
             .Where(mg => mg.DeleteFlag == false)
             .Select(mg => new MenuGroupModel
@@ -30,6 +34,8 @@ public class DA_MenuGroup
                 ModifiedBy = mg.ModifiedBy,
             })
             .AsNoTracking()
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
     }
 

@@ -1,4 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Features.MenuGroup;
+using HRSystem.Csharp.Domain.Models.Common;
 using HRSystem.Csharp.Domain.Models.MenuGroup;
 using HRSystem.Csharp.Shared;
 
@@ -16,9 +17,9 @@ public class MenuGroupController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery]PaginationRequestModel model)
     {
-        var response = await _blMenuGroup.GetAllMenuGroups();
+        var response = await _blMenuGroup.GetAllMenuGroups(model);
         if (response.IsSuccess)
         {
             return Ok(response);

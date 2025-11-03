@@ -17,6 +17,9 @@ public class DA_Menu
     {
         try
         {
+            int pageNumber = PaginationModel.PageNo < 1 ? 1 : PaginationModel.PageNo;
+            int pageSize = PaginationModel.PageSize <= 0 ? 10 : PaginationModel.PageSize;
+
             var menus = await _dbContext.TblMenus
                 .Join(_dbContext.TblMenuGroups,
                     menu => menu.MenuGroupCode,
@@ -36,8 +39,8 @@ public class DA_Menu
                     SortOrder = m.menu.SortOrder,
                 })
                 .AsNoTracking()
-                .Skip((PaginationModel.PageNo - 1) * PaginationModel.PageSize)
-                .Take(PaginationModel.PageSize)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             return Result<List<MenuModel>>.Success(menus);
