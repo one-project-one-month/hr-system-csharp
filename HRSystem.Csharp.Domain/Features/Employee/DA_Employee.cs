@@ -1,5 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Models.Employee;
 using System.Data;
+using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Shared.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
@@ -11,11 +13,15 @@ public class DA_Employee
     private readonly AppDbContext _appDbContext;
     private readonly ILogger<DA_Employee> _logger;
     private readonly JwtService _jwtService;
-    public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger, JwtService jwtService)
+    private readonly DA_Sequence _daSequence;
+
+    public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger, DA_Sequence daSequence,
+                      JwtService jwtService)
     {
         _appDbContext = appDbContext;
         _logger = logger;
-        _jwtService = jwtService;
+        _daSequence = daSequence;
+       _jwtService = jwtService;
     }
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
@@ -153,10 +159,13 @@ public class DA_Employee
         try
         {
             var hashPassowrd = _jwtService.HashPassword(reqModel.Password);
+          
+            var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
+            
             var newEmployee = new TblEmployee
             {
-                EmployeeId = Ulid.NewUlid().ToString(),
-                EmployeeCode = "EMP" + new Random().Next(1000, 9999).ToString(), //testing only
+                EmployeeId = DevCode.GenerateNewUlid(),
+                EmployeeCode = generatedCode,
                 RoleCode = reqModel.RoleCode,
                 Username = reqModel.Username,
                 Name = reqModel.Name,
@@ -169,12 +178,13 @@ public class DA_Employee
                 StartDate = reqModel.StartDate,
                 ResignDate = reqModel.ResignDate,
                 CreatedAt = DateTime.UtcNow,
-                CreatedBy = currentUser, //testing only
-                
-                DeleteFlag = false,
-          
-
+                CreatedBy = currentUser,
+                DeleteFlag = false
             };
+
+            _appDbContext.TblEmployees.Add(newEmployee);
+
+            Console.WriteLine($"ResignDate: {newEmployee.ResignDate}");
 
             await _appDbContext.TblEmployees.AddAsync(newEmployee);
             await _appDbContext.SaveChangesAsync();
