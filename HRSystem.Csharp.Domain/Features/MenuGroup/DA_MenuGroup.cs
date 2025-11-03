@@ -35,7 +35,7 @@ public class DA_MenuGroup
             })
             .AsNoTracking()
             .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
+            .Take(PaginationModel.PageSize)
             .ToListAsync();
     }
 
@@ -70,20 +70,16 @@ public class DA_MenuGroup
                 .SingleOrDefaultAsync();
 
             if (existingMenuGroup == null)
-            {
                 return Result<bool>.Error("Menu group not found.");
-            }
 
             var duplicate = await _context.TblMenuGroups
                 .AnyAsync(mg =>
                     mg.MenuGroupName == menuGroup.MenuGroupName
                     && menuGroupCode != mg.MenuGroupCode
                     && mg.DeleteFlag == false);
-
+            Console.WriteLine("Duplicate is ?????????????????????????"+ duplicate);
             if (duplicate)
-            {
                 return Result<bool>.DuplicateRecordError("Menu Group Name already exists!");
-            }
 
             existingMenuGroup.MenuGroupName = menuGroup.MenuGroupName;
             existingMenuGroup.Url = menuGroup.Url;

@@ -56,17 +56,14 @@ public class MenuGroupController : ControllerBase
         }
 
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var response = await _blMenuGroup.UpdateMenuGroup(menuGroupCode, menuGroup);
-        if (response.IsSuccess)
-        {
-            return Ok(response);
-        }
+        if (!response.IsSuccess)
+            return BadRequest(response);
 
-        return BadRequest(response);
+        return Ok(response);
+
     }
 
     [HttpPost("create")]
