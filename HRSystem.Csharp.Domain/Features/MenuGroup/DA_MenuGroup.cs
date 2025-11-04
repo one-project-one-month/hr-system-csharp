@@ -77,7 +77,6 @@ public class DA_MenuGroup
                     mg.MenuGroupName == menuGroup.MenuGroupName
                     && menuGroupCode != mg.MenuGroupCode
                     && mg.DeleteFlag == false);
-            Console.WriteLine("Duplicate is ?????????????????????????"+ duplicate);
             if (duplicate)
                 return Result<bool>.DuplicateRecordError("Menu Group Name already exists!");
 
