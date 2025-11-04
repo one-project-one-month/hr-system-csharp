@@ -1,4 +1,6 @@
-﻿using HRSystem.Csharp.Domain.Models.Project;
+﻿using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models.Project;
+using HRSystem.Csharp.Shared.Enums;
 
 namespace HRSystem.Csharp.Domain.Features.Project;
 
@@ -6,137 +8,178 @@ public class DA_Project
 {
     private readonly AppDbContext _appDbContext;
     private readonly Generator _generator;
+    private readonly DA_Sequence _daSequence;
 
-    public DA_Project(AppDbContext appDbContext, Generator generator)
+    public DA_Project(AppDbContext appDbContext, Generator generator, DA_Sequence daSequence)
     {
         _appDbContext = appDbContext;
         _generator = generator;
+        _daSequence = daSequence;
     }
 
-    public async Task<Result<Boolean>> CreateProject(ProjectRequestModel project)
+    public async Task<Result<bool>> CreateProject(ProjectRequestModel project)
     {
         try
         {
-            var lastProjectCode = await _appDbContext.TblProjects
-                    .OrderByDescending(p => p.CreatedAt)
-                    .Select(p => p.ProjectCode)
-                    .FirstOrDefaultAsync();
+            /*var lastProjectCode = await _appDbContext.TblProjects
+                .AsNoTracking()
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => p.ProjectCode)
+                .FirstOrDefaultAsync();*/
 
             var newProject = project.Map();
-            newProject.ProjectCode = _generator.GenerateProjectCode(lastProjectCode);
-
-            var existingProject = await _appDbContext.TblProjects.FirstOrDefaultAsync(p => p.ProjectCode == newProject.ProjectCode);
-
-            if (existingProject is not null)
-                return Result<Boolean>.DuplicateRecordError($"A project with code '{newProject.ProjectCode}' already exists!");
+            newProject.ProjectCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.PJ.ToString());
 
             _appDbContext.TblProjects.Add(newProject);
-            var result = _appDbContext.SaveChanges();
+            var result = await _appDbContext.SaveChangesAsync();
 
-            return result > 0 ? Result<Boolean>.Success(true, "project created success")
-                    : Result<Boolean>.Error("fail to create project!");
+            return result > 0
+                ? Result<bool>.Success(true, "Project created successfully!")
+                : Result<bool>.Error("Error creating project!");
         }
         catch (Exception ex)
         {
-
-            return Result<Boolean>.Error($"Error occured while creating project: {ex.Message}");
+            return Result<bool>.Error($"Error occured while creating project: {ex.Message}");
         }
     }
 
-    public async Task<Result<List<ProjectResponseModel>>> GetAllProjects()
+    public async Task<Result<ProjectListResponseModel>> GetAllProjects(ProjectListRequestModel reqModel)
     {
         try
         {
-            var projects = await _appDbContext.TblProjects
-                    .Where(p => p.DeleteFlag == false)
-                    .Select(p => p.Map())
-                    .ToListAsync();
+            var query = _appDbContext.TblProjects
+                .AsNoTracking()
+                .Where(r => !r.DeleteFlag);
 
-            if (projects is null || projects.Count is 0)
-                return Result<List<ProjectResponseModel>>.NotFoundError("no projects found!");
+            if (!string.IsNullOrWhiteSpace(reqModel.ProjectName))
+            {
+                query = query.Where(r => r.ProjectName.ToLower() == reqModel.ProjectName.ToLower());
+            }
 
-            return Result<List<ProjectResponseModel>>.Success(projects);
+            query = query.OrderByDescending(r => r.CreatedAt);
 
+            var roles = query.Select(r => r.Map());
+
+            var pagedResult = await roles.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new ProjectListResponseModel()
+            {
+                Items = pagedResult.Items,
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<ProjectListResponseModel>.Success(result);
         }
         catch (Exception ex)
         {
-
-            return Result<List<ProjectResponseModel>>.Error($"Error occured while retreving projects: {ex.Message}");
+            return Result<ProjectListResponseModel>.Error($"Error occured while retrieving projects: {ex.Message}");
         }
     }
 
-    public async Task<Result<ProjectResponseModel>> GetProjectByCode(string code)
+    public async Task<Result<ProjectResponseModel>> GetProjectByCode(ProjectEditRequestModel reqModel)
     {
         try
         {
             var project = await _appDbContext.TblProjects
-                    .Where(p => p.DeleteFlag == false && p.ProjectCode == code)
-                    .Select(p => p.Map())
-                    .FirstOrDefaultAsync();
+                .AsNoTracking()
+                .Where(p => p.DeleteFlag == false && p.ProjectCode == reqModel.ProjectCode)
+                .Select(p => p.Map())
+                .FirstOrDefaultAsync();
 
-            if (project is null) return Result<ProjectResponseModel>.NotFoundError("no project found!");
-
-            return Result<ProjectResponseModel>.Success(project);
+            return project is null
+                ? Result<ProjectResponseModel>.NotFoundError("No project found!")
+                : Result<ProjectResponseModel>.Success(project);
         }
         catch (Exception ex)
         {
-
-            return Result<ProjectResponseModel>.Error($"Error occured while retreving project: {ex.Message}");
+            return Result<ProjectResponseModel>.Error($"Error occured while retrieving project: {ex.Message}");
         }
     }
 
-    public async Task<Result<Boolean>> UpdateProject(string code, ProjectRequestModel project)
+    public async Task<Result<TblProject>> GetProjectByName(string name, string? excludeProjectCode = null)
+    {
+        try
+        {
+            var query = _appDbContext.TblProjects
+                .AsNoTracking()
+                .Where(p => !p.DeleteFlag && p.ProjectName == name);
+
+            if (!string.IsNullOrWhiteSpace(excludeProjectCode))
+            {
+                query = query.Where(p => p.ProjectCode != excludeProjectCode);
+            }
+
+            var project = await query.FirstOrDefaultAsync();
+
+            return project is not null
+                ? Result<TblProject>.Success(project, "Project already exists!")
+                : Result<TblProject>.NotFoundError("Project doesn't exist!");
+        }
+        catch (Exception ex)
+        {
+            return Result<TblProject>.Error($"Error occurred while checking project name: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> UpdateProject(string code, ProjectRequestModel project)
     {
         try
         {
             var existingProject = await _appDbContext.TblProjects
-                    .FirstOrDefaultAsync(p => p.ProjectCode == code && p.DeleteFlag == false);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ProjectCode == code && p.DeleteFlag == false);
 
             if (existingProject is null)
-                return Result<Boolean>.NotFoundError("no project found to update!");
+                return Result<bool>.NotFoundError("Project doesn't exist!");
 
             existingProject.ProjectName = project.ProjectName;
             existingProject.ProjectDescription = project.ProjectDescription;
             existingProject.StartDate = project.StartDate;
             existingProject.EndDate = project.EndDate;
             existingProject.ProjectStatus = project.ProjectStatus.ToString();
-            existingProject.ModifiedAt = DateTime.Now;
+            existingProject.ModifiedAt = DateTime.UtcNow;
             existingProject.ModifiedBy = "TestingUser";
 
             _appDbContext.TblProjects.Update(existingProject);
-            var result = _appDbContext.SaveChanges();
+            var result = await _appDbContext.SaveChangesAsync();
 
-            return result > 0 ? Result<Boolean>.Success(true, "project updated success")
-                    : Result<Boolean>.Error("fail to update project!");
+            return result > 0
+                ? Result<bool>.Success(true, "project updated success")
+                : Result<bool>.Error("fail to update project!");
         }
         catch (Exception ex)
         {
-
-            return Result<Boolean>.Error($"Error occured while updating project: {ex.Message}\"");
+            return Result<bool>.Error($"Error occured while updating project: {ex.Message}");
         }
     }
 
-    public async Task<Result<Boolean>> DeleteProject(string code)
+    public async Task<Result<bool>> DeleteProject(string code)
     {
         try
         {
             var project = await _appDbContext.TblProjects
-                    .FirstOrDefaultAsync(p => p.ProjectCode == code && p.DeleteFlag == false);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ProjectCode == code && p.DeleteFlag == false);
 
-            if (project is null) return Result<Boolean>.NotFoundError("no project found to delete!");
+            if (project is null)
+            {
+                return Result<bool>.NotFoundError("Project doesn't exist!");
+            }
 
             project.DeleteFlag = true;
 
             _appDbContext.TblProjects.Update(project);
-            var result = _appDbContext.SaveChanges();
+            var result = await _appDbContext.SaveChangesAsync();
 
-            return result > 0 ? Result<Boolean>.Success(true, "project deleted success.")
-                    : Result<Boolean>.Error("fail to delete project!");
+            return result > 0
+                ? Result<bool>.Success(true, "Project deleted successfully!")
+                : Result<bool>.Error("Failed to delete project!");
         }
         catch (Exception ex)
         {
-
-            return Result<Boolean>.Error($"Error occured while deleting projects: {ex.Message}");
+            return Result<bool>.Error($"Error occured while deleting projects: {ex.Message}");
         }
     }
 }

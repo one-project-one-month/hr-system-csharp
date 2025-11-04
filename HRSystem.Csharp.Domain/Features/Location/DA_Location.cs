@@ -1,67 +1,111 @@
-﻿namespace HRSystem.Csharp.Domain.Features.Location;
+﻿using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Shared.Enums;
+
+namespace HRSystem.Csharp.Domain.Features.Location;
 
 public class DA_Location
 {
     private readonly AppDbContext _appDbContext;
+    private readonly DA_Sequence _daSequence;
 
-    public DA_Location(AppDbContext appDbContext)
+    public DA_Location(AppDbContext appDbContext, DA_Sequence daSequence)
     {
         _appDbContext = appDbContext;
+        _daSequence = daSequence;
     }
 
-    public Result<Boolean> CreateLocation(LocationCreateRequestModel location)
+    public async Task<Result<bool>> CreateLocation(LocationCreateRequestModel location)
     {
-        var existingLocation = _appDbContext.TblLocations
-            .FirstOrDefault(l => l.LocationCode == location.LocationCode && l.DeleteFlag == false);
+        var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.LOC.ToString());
+
+        var existingLocation = await _appDbContext.TblLocations
+            .FirstOrDefaultAsync(l =>!l.DeleteFlag && l.Name == location.Name);
 
         if (existingLocation != null)
-            return Result<Boolean>.DuplicateRecordError("Location with the same code already exists");
+            return Result<bool>.DuplicateRecordError("Location with the same code already exists");
 
         var newLocation = location.Map();
 
+        newLocation.LocationCode = generatedCode;
         _appDbContext.TblLocations.Add(newLocation);
-        var result = _appDbContext.SaveChanges();
+        var result = await _appDbContext.SaveChangesAsync();
 
-        return result > 0 ? Result<Boolean>.Success(true)
-            : Result<Boolean>.Error("Failed to create location");
+        return result > 0
+            ? Result<bool>.Success(true, "Successfully added new location.")
+            : Result<bool>.Error("Failed to add new location");
     }
 
-    public Result<List<LocationResponseModel>> GetAllLocations()
+    public async Task<Result<LocationListResponseModel>> GetAllLocations(LocationListRequestModel reqModel)
     {
-        var locations = _appDbContext.TblLocations
-            .Where(l => l.DeleteFlag == false)
-            .Select(l => l.Map())
-            .ToList();
-
-        if (locations == null || locations.Count == 0)
+        try
         {
-            return Result<List<LocationResponseModel>>.NotFoundError("No locations found");
+            var query = _appDbContext.TblLocations
+                .AsQueryable()
+                .Where(l => !l.DeleteFlag);
+
+            if (!string.IsNullOrWhiteSpace(reqModel.LocationName))
+            {
+                query = query.Where(l => l.Name.ToLower() == reqModel.LocationName.ToLower());
+            }
+
+            query = query.OrderByDescending(l => l.CreatedAt);
+
+            var locations = query.Select(l => l.Map());
+
+            var pagedResult = await locations.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new LocationListResponseModel()
+            {
+                Items = pagedResult.Items ?? new List<LocationResponseModel>(),
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<LocationListResponseModel>.Success(result);
         }
-        return Result<List<LocationResponseModel>>.Success(locations);
+        catch (Exception ex)
+        {
+            return Result<LocationListResponseModel>.SystemError("An error occurred while retrieving locations.");
+        }
     }
 
-    public Result<LocationResponseModel> GetLocationByCode(string locationCode)
+    public async Task<Result<LocationResponseModel>> GetLocationByCode(string locationCode)
     {
-        var location = _appDbContext.TblLocations
-            .Where(l => l.DeleteFlag == false)
-            .Select(l => l.Map())
-            .FirstOrDefault(l => l.LocationCode == locationCode);
+        var locationEntity = await _appDbContext.TblLocations
+            .AsNoTracking()
+            .Where(l => l.DeleteFlag == false && l.LocationCode == locationCode)
+            .FirstOrDefaultAsync();
 
-        if (location == null)
+        if (locationEntity == null)
         {
             return Result<LocationResponseModel>.NotFoundError("Location not found");
         }
+
+        var location = locationEntity.Map();
         return Result<LocationResponseModel>.Success(location);
     }
-
-    public Result<Boolean> UpdateLocation(string locationCode, LocationUpdateRequestModel location)
+    
+    public async Task<Result<TblLocation>> GetLocationByName(string locationName)
     {
-        var existingLocation = _appDbContext.TblLocations
-            .FirstOrDefault(l => l.LocationCode == locationCode && l.DeleteFlag == false);
+        var location = await _appDbContext.TblLocations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(l => l.DeleteFlag == false && l.Name == locationName);
+
+        return location == null
+            ? Result<TblLocation>.NotFoundError("Location not found")
+            : Result<TblLocation>.Success(location);
+    }
+
+    public async Task<Result<bool>> UpdateLocation(string locationCode,
+        LocationUpdateRequestModel location)
+    {
+        var existingLocation = await _appDbContext.TblLocations
+            .FirstOrDefaultAsync(l => !l.DeleteFlag && l.LocationCode == locationCode);
 
         if (existingLocation == null)
         {
-            return Result<Boolean>.NotFoundError("Location not found");
+            return Result<bool>.NotFoundError("Location not found");
         }
 
         existingLocation.Name = location.Name ?? existingLocation.Name;
@@ -72,19 +116,20 @@ public class DA_Location
         existingLocation.ModifiedBy = "system";
 
         _appDbContext.TblLocations.Update(existingLocation);
-        var result = _appDbContext.SaveChanges();
-        return result > 0 ? Result<Boolean>.Success(true)
-            : Result<Boolean>.Error("Failed to update location");
+        var result = await _appDbContext.SaveChangesAsync();
+        return result > 0
+            ? Result<bool>.Success(true, "Successfully updated location.")
+            : Result<bool>.Error("Failed to update location");
     }
 
-    public Result<Boolean> DeleteLocation(string locationCode)
+    public async Task<Result<bool>> DeleteLocation(string locationCode)
     {
-        var existingLocation = _appDbContext.TblLocations
-            .FirstOrDefault(l => l.LocationCode == locationCode && l.DeleteFlag == false);
+        var existingLocation = await _appDbContext.TblLocations
+            .FirstOrDefaultAsync(l => l.LocationCode == locationCode && l.DeleteFlag == false);
 
         if (existingLocation == null)
         {
-            return Result<Boolean>.NotFoundError("Location not found");
+            return Result<bool>.NotFoundError("Location not found");
         }
 
         existingLocation.DeleteFlag = true;
@@ -92,8 +137,10 @@ public class DA_Location
         existingLocation.ModifiedBy = "system";
 
         _appDbContext.TblLocations.Update(existingLocation);
-        var result = _appDbContext.SaveChanges();
-        return result > 0 ? Result<Boolean>.Success(true)
-            : Result<Boolean>.Error("Failed to delete location");
+        var result = await _appDbContext.SaveChangesAsync();
+
+        return result > 0
+            ? Result<bool>.Success(true, "Successfully deleted location.")
+            : Result<bool>.Error("Failed to delete location");
     }
 }
