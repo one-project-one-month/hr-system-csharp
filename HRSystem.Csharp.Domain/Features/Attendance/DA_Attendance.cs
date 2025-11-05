@@ -21,6 +21,7 @@ public class DA_Attendance
                     .OrderByDescending(x => x.AttendanceDate)
                     .Skip((pageNo - 1) * PageSize)
                     .Take(PageSize)
+                    .AsNoTracking()
                     .ToListAsync();
 
             if (!attendanceList.Any() || attendanceList is null)
