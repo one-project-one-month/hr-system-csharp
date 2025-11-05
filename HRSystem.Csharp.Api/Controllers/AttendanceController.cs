@@ -5,11 +5,11 @@ namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AttendanceConroller : ControllerBase
+public class AttendanceController : ControllerBase
 {
     private readonly BL_Attendance _bL_Attendance;
 
-    public AttendanceConroller(BL_Attendance bL_Attendance)
+    public AttendanceController(BL_Attendance bL_Attendance)
     {
         _bL_Attendance = bL_Attendance;
     }
