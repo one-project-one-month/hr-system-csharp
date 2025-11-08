@@ -1,6 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Domain.Models.Auth;
 using HRSystem.Csharp.Domain.Models.Employee;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -34,18 +35,22 @@ public class DA_Auth : AuthorizationService
             }
 
             _jwtService.HashPassword(requestModel.Password);
-
             var user = _appDbContext.TblEmployees.FirstOrDefault(x => x.Username == requestModel.UserName);
 
             if (user is null)
-            {
                 return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
-            }
+            
 
             if (!_jwtService.VerifyPassword(requestModel.Password, user.Password))
-            {
                 return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
-            }
+            
+
+            if(string.IsNullOrEmpty(user.RoleCode))
+                return Result<AuthResponseModel>.InvalidDataError("The user doen't have an assigned role!");
+
+            var role = await _role.GetByRoleCode(user.RoleCode);
+            if (!role.IsSuccess)
+                return Result<AuthResponseModel>.InvalidDataError("The user doen't have an assigned role!");
 
             if (user.IsFirstTimeLogin == true)
             {
@@ -68,11 +73,6 @@ public class DA_Auth : AuthorizationService
 
             var jwtId = _jwtService.getJwtIdFromToken(token);
 
-            var role = await _role.GetByRoleCode(user.RoleCode);
-
-            if (!role.IsSuccess)
-                return Result<AuthResponseModel>.BadRequestError("Assign Role first!");
-
             var refreshToken = new TblRefreshToken
             {
                 JwtId = jwtId,
@@ -87,7 +87,8 @@ public class DA_Auth : AuthorizationService
 
             _appDbContext.TblRefreshTokens.Add(refreshToken);
             await _appDbContext.SaveChangesAsync();
-
+            Console.WriteLine("refresh token is ________________"+ refreshToken.ToString());
+            Console.WriteLine("jwtId is -------------" + jwtId);
             var response = new AuthResponseModel
             {
                 AccessToken = token,

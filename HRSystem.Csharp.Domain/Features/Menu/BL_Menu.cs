@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.Menu;
+﻿using HRSystem.Csharp.Domain.Models.Common;
+using HRSystem.Csharp.Domain.Models.Menu;
 
 namespace HRSystem.Csharp.Domain.Features.Menu;
 
@@ -11,9 +12,9 @@ public class BL_Menu
         _daMenu = daMenu;
     }
 
-    public async Task<Result<List<MenuModel>>> GetAllMenus()
+    public async Task<Result<List<MenuModel>>> GetAllMenus(PaginationRequestModel model)
     {
-        return await _daMenu.GetAllMenus();
+        return await _daMenu.GetAllMenus(model);
     }
 
     public async Task<Result<MenuModel>> GetMenu(string menuCode)

@@ -1,0 +1,73 @@
+name: Deploy .NET API to EC2
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # 3️⃣ Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # 4️⃣ Build and publish
+      - name: Build and publish
+        run: dotnet publish -c Release -o ./publish
+
+      # 5️⃣ Copy files to EC2
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "./publish/*"
+          target: "/home/ubuntu/app"
+          rm: true  # optional: remove old files first
+          strip_components: 0
+
+      # 6️⃣ Restart API on EC2 safely
+      - name: Restart API on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            # Ensure folder exists
+            mkdir -p /home/ubuntu/app
+            cd /home/ubuntu/app
+
+            # Kill old process
+            pkill -f 'dotnet HRSystem.Csharp.Api.dll' || true
+
+            # Run new build in background with logging
+            nohup dotnet HRSystem.Csharp.Api.dll --urls "http://0.0.0.0:5000" > log.txt 2>&1 &
+
+            # Wait and check if process started
+            sleep 3
+            if ! pgrep -f 'dotnet HRSystem.Csharp.Api.dll'; then
+                echo "❌ App failed to start"
+                cat log.txt
+                exit 1
+            fi
+
+            echo "✅ Deployment finished successfully"
+            exit 0
