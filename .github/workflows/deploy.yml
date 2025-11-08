@@ -47,3 +47,4 @@ jobs:
             pkill -f 'dotnet HRSystem.Csharp.Api.dll' || true
             # run new build in background
             nohup dotnet HRSystem.Csharp.Api.dll > log.txt 2>&1 &
+            echo "Deployment finished successfully"
