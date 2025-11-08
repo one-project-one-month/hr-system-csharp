@@ -1,0 +1,49 @@
+name: Deploy .NET API to EC2
+
+on:
+  push:
+    branches:
+      - dev  # Only trigger on merge/push to dev branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet publish -c Release -o ./publish
+
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "./publish/*"
+          target: "/home/deployer/app"
+
+      - name: Restart API on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /home/deployer/app
+            # kill old process if running
+            pkill -f 'dotnet MyApp.dll' || true
+            # run new build in background
+            nohup dotnet MyApp.dll > log.txt 2>&1 &
