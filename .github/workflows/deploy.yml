@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - dev  # Only trigger on merge/push to dev branch
-
+      - main
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -32,7 +32,7 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
           source: "./publish/*"
-          target: "/home/deployer/app"
+          target: "/home/ubuntu/app"
 
       - name: Restart API on EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -42,8 +42,8 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /home/deployer/app
+            cd /home/ubuntu/app
             # kill old process if running
-            pkill -f 'dotnet MyApp.dll' || true
+            pkill -f 'dotnet HRSystem.Csharp.Api.dll' || true
             # run new build in background
-            nohup dotnet MyApp.dll > log.txt 2>&1 &
+            nohup dotnet HRSystem.Csharp.Api.dll > log.txt 2>&1 &
