@@ -27,9 +27,6 @@ jobs:
 
       # 4️⃣ Build and publish
       - name: Build and publish
-        run: dotnet publish -c Release -o ./publish
-
-      - name: Build and publish
         run: dotnet publish HRSystem.Csharp.Api/HRSystem.Csharp.Api.csproj -c Release -o ./publish
 
       # 5️⃣ Copy files to EC2
