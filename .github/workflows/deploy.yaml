@@ -23,11 +23,14 @@ jobs:
 
       # 3️⃣ Restore dependencies
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore HRSystem.Csharp.sln
 
       # 4️⃣ Build and publish
       - name: Build and publish
         run: dotnet publish -c Release -o ./publish
+
+      - name: Build and publish
+        run: dotnet publish HRSystem.Csharp.Api/HRSystem.Csharp.Api.csproj -c Release -o ./publish
 
       # 5️⃣ Copy files to EC2
       - name: Copy files to EC2
