@@ -8,6 +8,8 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using System.Net.Mail;
+using DotNetEnv;
+
 
 namespace HRSystem.Csharp.Domain;
 
@@ -75,8 +77,13 @@ public static class FeatureManager
 
     public static void AddDomain(this WebApplicationBuilder builder)
     {
-        var mssqlConnection = builder.Configuration.GetConnectionString("DbConnection");
+        Env.Load(".env.development");
 
+        var mssqlConnection = Environment.GetEnvironmentVariable("DbConnection");
+        Console.WriteLine($"Connection string: {mssqlConnection}");
+
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(mssqlConnection));
         builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
             ServiceLifetime.Transient, 
