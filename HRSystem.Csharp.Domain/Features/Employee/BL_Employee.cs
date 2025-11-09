@@ -162,11 +162,15 @@ public class BL_Employee
             return Result<EmployeeUpdateResponseModel>.DuplicateRecordError("Email already exists!");
         }
 
-        var validEmail = new MailAddress(reqModel.Email);
-        if (validEmail.Address != reqModel.Email)
+        try
+        {
+            var validEmail = new MailAddress(reqModel.Email);
+        }
+        catch
         {
             return Result<EmployeeUpdateResponseModel>.BadRequestError("Invalid email format.");
         }
+
 
         var phoneExist = await _daEmployee.DuplicateUpdatePhoneNo(employeeCode, reqModel.PhoneNo);
         if (phoneExist.IsSuccess)

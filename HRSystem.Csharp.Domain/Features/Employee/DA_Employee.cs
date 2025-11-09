@@ -88,6 +88,7 @@ public class DA_Employee
         try
         {
             var employee = await _appDbContext.TblEmployees
+               
                 .FirstOrDefaultAsync(e => e.EmployeeCode == employeeCode && e.DeleteFlag == false);
 
             if (employee == null)
@@ -173,7 +174,7 @@ public class DA_Employee
                 PhoneNo = reqModel.PhoneNo,
                 Password = hashPassowrd,
                 IsFirstTimeLogin = true,
-                ProfileImage = null,
+                ProfileImage = "",
                 Salary = reqModel.Salary,
                 StartDate = reqModel.StartDate,
                 ResignDate = reqModel.ResignDate,
@@ -218,6 +219,7 @@ public class DA_Employee
         existingEmp.ModifiedAt = DateTime.UtcNow;
         existingEmp.ModifiedBy = currentUser;
 
+        _appDbContext.TblEmployees.Update(existingEmp);
         await _appDbContext.SaveChangesAsync();
 
         return Result<EmployeeUpdateResponseModel>.Success(new EmployeeUpdateResponseModel(),
@@ -238,6 +240,7 @@ public class DA_Employee
         model.ModifiedAt = DateTime.UtcNow;
         model.ModifiedBy = currentUser;
 
+        _appDbContext.TblEmployees.Update(model);
         await _appDbContext.SaveChangesAsync();
 
         return Result<EmployeeDeleteResponseModel>.Success(new EmployeeDeleteResponseModel(),
