@@ -11,9 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repo
+      # 1 Checkout the repo
       - name: Checkout code
         uses: actions/checkout@v4
+
+      # 2 debug
+      - name: List files to verify paths
+        run: ls -R
 
       # 2️⃣ Setup .NET SDK
       - name: Setup .NET
@@ -25,8 +29,11 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore HRSystem.Csharp.sln
 
+      - name: Build
+        run: dotnet build HRSystem.Csharp.sln --configuration Release --no-restore
+
       # 4️⃣ Build and publish the API project
-      - name: Build and publish API
+      - name: publish API
         run: dotnet publish HRSystem.Csharp.Api/HRSystem.Csharp.Api.csproj -c Release -o ./publish
 
       # 5️⃣ Copy publish folder to EC2
