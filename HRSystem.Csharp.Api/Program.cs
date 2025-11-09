@@ -1,6 +1,9 @@
-﻿using HRSystem.Csharp.Shared.Services;
+﻿using HRSystem.Csharp.Database.AppDbContextModels;
+using HRSystem.Csharp.Shared.Services;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Reflection;
+using DotNetEnv;
 using System.Text.Json.Serialization;
 
 Log.Logger = new LoggerConfiguration()
@@ -51,6 +54,20 @@ try
                 .AllowCredentials(); // if you send cookies or auth headers
         });
     });
+    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+
+    // Load the correct .env file
+    if (env == "Production")
+    {
+        Env.Load(".env.production");
+    }
+    else
+    {
+        Env.Load(".env.development");
+    }
+
+    // Read connection string from env
+    var connectionString = Environment.GetEnvironmentVariable("DbConnection");
 
     builder.Services.AddAuthorization();
 
