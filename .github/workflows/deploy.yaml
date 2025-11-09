@@ -51,23 +51,7 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            # Ensure folder exists
-            mkdir -p /home/ubuntu/app
-            cd /home/ubuntu/app
-
-            # Kill old process
-            pkill -f 'dotnet HRSystem.Csharp.Api.dll' || true
-
-            # Run new build in background with logging
-            nohup dotnet HRSystem.Csharp.Api.dll --urls "http://0.0.0.0:5000" > log.txt 2>&1 &
-
-            # Wait and check if process started
+            sudo systemctl daemon-reload
+            sudo systemctl restart dotnet-api
             sleep 3
-            if ! pgrep -f 'dotnet HRSystem.Csharp.Api.dll'; then
-                echo "❌ App failed to start"
-                cat log.txt
-                exit 1
-            fi
-
-            echo "✅ Deployment finished successfully"
-            exit 0
+            sudo systemctl status dotnet-api
