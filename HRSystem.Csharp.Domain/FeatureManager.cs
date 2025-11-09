@@ -79,8 +79,13 @@ public static class FeatureManager
     {
         Env.Load(".env.development");
 
-        var mssqlConnection = Environment.GetEnvironmentVariable("DbConnection");
-        Console.WriteLine($"Connection string: {mssqlConnection}");
+        var host = Environment.GetEnvironmentVariable("DB_HOST");
+        //var port = Environment.GetEnvironmentVariable("DB_PORT");
+        var db = Environment.GetEnvironmentVariable("DB_NAME");
+        var user = Environment.GetEnvironmentVariable("DB_USER");
+        var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+
+        var mssqlConnection = $"Server={host};Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(mssqlConnection));
