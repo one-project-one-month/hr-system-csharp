@@ -11,38 +11,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repo
+      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup .NET SDK
+      # 2️⃣ Debug: list files to verify paths
+      - name: List files for debugging
+        run: ls -R
+
+      # 3️⃣ Setup .NET SDK
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      # 3️⃣ Restore dependencies
+      # 4️⃣ Restore dependencies from solution
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore HRSystem.Csharp.sln
 
-      # 4️⃣ Build and publish
-      - name: Build and publish
-        run: dotnet publish -c Release -o ./publish
+      # 5️⃣ Build and publish API project
+      - name: Build and publish API
+        run: dotnet publish HRSystem.Csharp.Api/HRSystem.Csharp.Api.csproj -c Release -o ./publish
 
-      # 5️⃣ Copy files to EC2
+      # 6️⃣ Copy publish folder to EC2
       - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: ${{ secrets.PORT }}
+          host: ${{ secrets.HOST }} # EC2 public IP or DNS
+          username: ${{ secrets.USERNAME }} # usually 'ubuntu'
+          key: ${{ secrets.PRIVATE_KEY }} # private key
+          port: ${{ secrets.PORT }} # usually 22
           source: "./publish/*"
           target: "/home/ubuntu/app"
-          rm: true # optional: remove old files first
+          rm: true
           strip_components: 0
 
-      # 6️⃣ Restart API on EC2 safely
+      # 7️⃣ Restart API service on EC2
       - name: Restart API on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -53,5 +57,5 @@ jobs:
           script: |
             sudo systemctl daemon-reload
             sudo systemctl restart dotnet-api
-            sleep 3
-            sudo systemctl status dotnet-api
+            sleep 5
+            sudo systemctl status dotnet-api --no-pager
