@@ -1,6 +1,7 @@
-﻿using HRSystem.Csharp.Domain.Features.Roles;
-using HRSystem.Csharp.Domain.Models.Roles;
+﻿using HRSystem.Csharp.Domain.Models.Roles;
 using System.Threading.Tasks;
+using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Shared;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -15,61 +16,99 @@ public class RoleController : ControllerBase
         _blRole = blRole;
     }
 
-    [HttpPost("create")]
-    public async Task<IActionResult> CreateRole([FromBody] RoleRequestModel role)
-    {
-        var result = await _blRole.CreateRole(role);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Data);
-        }
-
-        return BadRequest(result);
-    }
-
-    [HttpPost("list")]
-    public async Task<IActionResult> GetAllRoles([FromBody] RoleListRequestModel reqModel)
+    [HttpGet("list")]
+    public async Task<IActionResult> GetAllRoles([FromQuery] RoleListRequestModel reqModel)
     {
         var result = await _blRole.GetAllRoles(reqModel);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);
     }
 
-    [HttpPost("edit")]
-    public async Task<IActionResult> GetRoleByCode(RoleEditRequestModel reqModel)
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateRole([FromBody] RoleRequestModel role)
     {
-        var result = await _blRole.GetRoleByCode(reqModel);
+        if (role == null)
+        {
+            var response = Result<bool>.BadRequestError("Role data is required!");
+            return BadRequest(response);
+        }
+
+        if (string.IsNullOrWhiteSpace(role.RoleName))
+        {
+            var response = Result<bool>.ValidationError("Role name is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blRole.CreateRole(role);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);
     }
 
-    [HttpPatch("update")]
-    public async Task<IActionResult> UpdateRole([FromBody] RoleUpdateRequestModel reqModel)
+    [HttpGet("edit/{roleCode}")]
+    public async Task<IActionResult> GetRoleByCode(string roleCode)
     {
-        var result = await _blRole.UpdateRole(reqModel);
+        if (string.IsNullOrWhiteSpace(roleCode))
+        {
+            var response = Result<bool>.ValidationError("Role code is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blRole.GetRoleByCode(new RoleEditRequestModel()
+        {
+            RoleCode = roleCode
+        });
+
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         return BadRequest(result);
     }
 
-    [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteRole([FromBody] RoleDeleteRequestModel reqModel)
+    [HttpPut("update/{roleCode}")]
+    public async Task<IActionResult> UpdateRole(string roleCode, [FromBody] RoleUpdateRequestModel reqModel)
     {
-        var result = await _blRole.DeleteRole(reqModel);
+        if (string.IsNullOrWhiteSpace(roleCode))
+        {
+            var response = Result<bool>.ValidationError("Role name is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blRole.UpdateRole(roleCode, reqModel);
         if (result.IsSuccess)
         {
-            return Ok(result.Data);
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    [HttpDelete("delete/{roleCode}")]
+    public async Task<IActionResult> DeleteRole(string roleCode)
+    {
+        if (string.IsNullOrWhiteSpace(roleCode))
+        {
+            var response = Result<bool>.ValidationError("Role code is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blRole.DeleteRole(new RoleDeleteRequestModel()
+        {
+            RoleCode = roleCode
+        });
+
+        if (result.IsSuccess)
+        {
+            return Ok(result);
         }
 
         return BadRequest(result);

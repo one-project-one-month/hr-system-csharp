@@ -1,19 +1,20 @@
-﻿using HRSystem.Csharp.Domain.Models.Menu;
+﻿using HRSystem.Csharp.Domain.Models.Common;
+using HRSystem.Csharp.Domain.Models.Menu;
 
 namespace HRSystem.Csharp.Domain.Features.Menu;
 
 public class BL_Menu
 {
     private readonly DA_Menu _daMenu;
+
     public BL_Menu(DA_Menu daMenu)
     {
         _daMenu = daMenu;
     }
 
-    public async Task<Result<List<MenuModel>>> GetAllMenus()
+    public async Task<Result<List<MenuModel>>> GetAllMenus(PaginationRequestModel model)
     {
-
-        return await _daMenu.GetAllMenus();
+        return await _daMenu.GetAllMenus(model);
     }
 
     public async Task<Result<MenuModel>> GetMenu(string menuCode)
@@ -21,13 +22,14 @@ public class BL_Menu
         MenuModel? menu = await _daMenu.GetMenuByCode(menuCode);
         if (menu == null)
         {
-            return Result<MenuModel>.Error("Menu not found.");
+            return Result<MenuModel>.NotFoundError("Menu not found.");
         }
+
         return Result<MenuModel>.Success(menu);
     }
 
     public async Task<Result<bool>> UpdateMenu(string userId, TblMenu menu)
-    {   
+    {
         var existing = await _daMenu.GetMenuByCode(menu.MenuCode);
         Console.WriteLine(existing);
         Console.WriteLine(menu.MenuCode);
@@ -52,7 +54,6 @@ public class BL_Menu
         {
             MenuId = existing.MenuId,
             MenuCode = existing.MenuCode,
-
             MenuName = menu.MenuName,
             MenuGroupCode = menu.MenuGroupCode,
             Url = menu.Url,
@@ -63,17 +64,19 @@ public class BL_Menu
         };
 
         var updated = await _daMenu.UpdateMenu(updating);
-        return updated ? Result<bool>.Success(true) : Result<bool>.Error("Update Menu Failed");
+        return updated
+            ? Result<bool>.Success("Menu updated successfully!")
+            : Result<bool>.Error("Update Menu Failed");
     }
 
-    public async Task<Result<MenuModel>> CreateMenuAsync(string userId,MenuRequestModel requestMenu)
+    public async Task<Result<MenuModel>> CreateMenuAsync(string userId, MenuRequestModel requestMenu)
     {
         bool menuGroupExist = await _daMenu.MenuGroupExists(requestMenu.MenuGroupCode);
-        if(!menuGroupExist)
+        if (!menuGroupExist)
         {
             return Result<MenuModel>.Error("Menu Group does not exist. Create Menu Group First!");
         }
-       
+
         bool duplicateMenu = await _daMenu.MenuCodeExists(requestMenu);
 
         if (duplicateMenu)
@@ -92,7 +95,7 @@ public class BL_Menu
             return Result<bool>.BadRequestError("MenuCode is required.");
         }
 
-        var response = await _daMenu.DeleteMenuAsync(userId,menuCode);
+        var response = await _daMenu.DeleteMenuAsync(userId, menuCode);
         return response;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Features.Auth;
+using HRSystem.Csharp.Shared;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
@@ -20,6 +21,8 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginRequestModel requestModel)
     {
         var response = await _bl_Auth.LoginAsync(requestModel);
+        if (!response.IsSuccess)
+            return BadRequest(response);
         return Ok(response);
     }
 
@@ -47,7 +50,7 @@ public class AuthController : ControllerBase
 
     [HttpGet("HashPassword")]
     public IActionResult HashPassword(string password)
-    {
+    {   
         var hashPassword = _jwtService.HashPassword(password);
         return Ok(hashPassword);
     }

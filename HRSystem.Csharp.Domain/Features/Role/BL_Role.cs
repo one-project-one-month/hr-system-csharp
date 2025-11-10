@@ -1,7 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Models.Roles;
 using Microsoft.Extensions.Logging;
 
-namespace HRSystem.Csharp.Domain.Features.Roles;
+namespace HRSystem.Csharp.Domain.Features.Role;
 
 public class BL_Role
 {
@@ -47,7 +47,8 @@ public class BL_Role
             CreatedBy = "admin"
         };
 
-        return await _daRole.CreateRole(newRole);
+        var response = await _daRole.CreateRole(newRole);
+        return response;
     }
 
     public async Task<Result<RoleResponseModel>> GetRoleByCode(RoleEditRequestModel reqModel)
@@ -79,15 +80,15 @@ public class BL_Role
         return Result<RoleResponseModel>.Success(response);
     }
 
-    public async Task<Result<bool>> UpdateRole(RoleUpdateRequestModel reqModel)
+    public async Task<Result<bool>> UpdateRole(string roleCode, RoleUpdateRequestModel reqModel)
     {
-        if (reqModel == null || string.IsNullOrWhiteSpace(reqModel.RoleCode) ||
+        if (reqModel == null || string.IsNullOrWhiteSpace(roleCode) ||
             string.IsNullOrWhiteSpace(reqModel.RoleName))
         {
             return Result<bool>.InvalidDataError("Role code and name are required");
         }
 
-        var existing = await _daRole.GetByRoleCode(reqModel.RoleCode);
+        var existing = await _daRole.GetByRoleCode(roleCode);
         if (!existing.IsSuccess)
         {
             return Result<bool>.Error(existing.Message);

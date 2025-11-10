@@ -43,7 +43,6 @@ public static class Mapper
         return new TblLocation
         {
             LocationId = Ulid.NewUlid().ToString(),
-            LocationCode = location.LocationCode,
             Name = location.Name,
             Latitude = location.Latitude,
             Longitude = location.Longitude,

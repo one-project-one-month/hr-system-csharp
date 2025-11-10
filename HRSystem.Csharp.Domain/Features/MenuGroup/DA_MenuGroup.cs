@@ -1,4 +1,6 @@
-﻿using HRSystem.Csharp.Domain.Models.MenuGroup;
+﻿using Azure.Core;
+using HRSystem.Csharp.Domain.Models.Common;
+using HRSystem.Csharp.Domain.Models.MenuGroup;
 
 namespace HRSystem.Csharp.Domain.Features.MenuGroup;
 
@@ -11,8 +13,10 @@ public class DA_MenuGroup
         _context = context;
     }
 
-    public async Task<List<MenuGroupModel>> GetAllMenuGroups()
+    public async Task<List<MenuGroupModel>> GetAllMenuGroups(PaginationRequestModel PaginationModel)
     {
+        int pageNumber = PaginationModel.PageNo < 1 ? 1 : PaginationModel.PageNo;
+        int pageSize = PaginationModel.PageSize <= 0 ? 10 : PaginationModel.PageSize;
         return await _context.TblMenuGroups
             .Where(mg => mg.DeleteFlag == false)
             .Select(mg => new MenuGroupModel
@@ -30,6 +34,8 @@ public class DA_MenuGroup
                 ModifiedBy = mg.ModifiedBy,
             })
             .AsNoTracking()
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(PaginationModel.PageSize)
             .ToListAsync();
     }
 
@@ -64,20 +70,15 @@ public class DA_MenuGroup
                 .SingleOrDefaultAsync();
 
             if (existingMenuGroup == null)
-            {
                 return Result<bool>.Error("Menu group not found.");
-            }
 
             var duplicate = await _context.TblMenuGroups
                 .AnyAsync(mg =>
                     mg.MenuGroupName == menuGroup.MenuGroupName
                     && menuGroupCode != mg.MenuGroupCode
                     && mg.DeleteFlag == false);
-
             if (duplicate)
-            {
                 return Result<bool>.DuplicateRecordError("Menu Group Name already exists!");
-            }
 
             existingMenuGroup.MenuGroupName = menuGroup.MenuGroupName;
             existingMenuGroup.Url = menuGroup.Url;
@@ -121,6 +122,7 @@ public class DA_MenuGroup
                 Icon = requestMenuGroup.Icon,
                 SortOrder = requestMenuGroup.SortOrder,
                 HasMenuItem = requestMenuGroup.HasMenuItem,
+                CreatedBy = "admin",
                 CreatedAt = DateTime.UtcNow,
                 DeleteFlag = false
             };
@@ -132,7 +134,7 @@ public class DA_MenuGroup
             {
                 return Result<MenuGroupModel>.Error("Failed to create Menu Group");
             }
-          
+
             // Map entity to DTO
             var menuGroupModel = new MenuGroupModel
             {
@@ -154,8 +156,7 @@ public class DA_MenuGroup
             return Result<MenuGroupModel>.Error($"An error occurred while creating MenuGroup: {ex.Message}");
         }
     }
-
-
+    
     public async Task<Result<bool>> DeleteMenuGroup(string menuGroupCode)
     {
         try
