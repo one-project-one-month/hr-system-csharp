@@ -25,7 +25,7 @@ public class EmployeeCreateRequestModel
     public string RoleCode { get; set; }
     public string PhoneNo { get; set; }
     public decimal Salary { get; set; }
-    public DateTime? StartDate { get; set; }
+    public DateTime StartDate { get; set; }
     public DateTime? ResignDate { get; set; }
 }
 
@@ -41,7 +41,7 @@ public class EmployeeUpdateRequestModel
 
     public decimal Salary { get; set; }
 
-    public DateTime? StartDate { get; set; }
+    public DateTime StartDate { get; set; }
 
     public DateTime? ResignDate { get; set; }
 }

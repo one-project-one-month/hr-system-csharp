@@ -89,10 +89,11 @@ public static class FeatureManager
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(mssqlConnection));
-        builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
+        
+        /*builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
             ServiceLifetime.Transient, 
-            ServiceLifetime.Transient);
+            ServiceLifetime.Transient);*/
 
         builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
             new SqlConnection(mssqlConnection));
