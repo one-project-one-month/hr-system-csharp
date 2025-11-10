@@ -38,7 +38,7 @@ public class DA_Employee
             if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
             {
                 query = query.Where(e => e.Name != null
-                                         && e.Name.ToLower() == reqModel.EmployeeName.ToLower());
+                                         && e.Name.Contains(reqModel.EmployeeName));
             }
 
             query = query.OrderByDescending(e => e.CreatedAt);
