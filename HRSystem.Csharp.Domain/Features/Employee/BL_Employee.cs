@@ -14,10 +14,7 @@ public class BL_Employee
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
     {
-        if (string.IsNullOrEmpty(reqModel.EmployeeName))
-        {
-            return Result<EmployeeListResponseModel>.ValidationError("Enter employee name");
-        }
+        
         var employees = await _daEmployee.GetAllEmployee(reqModel);
         return employees;
     }
@@ -28,11 +25,7 @@ public class BL_Employee
         return employees;
     }
 
-    public async Task<Result<UserProfileResponseModel>> getUserProfile(UserProfileRequestModel req)
-    {
-      var result = await _daEmployee.GetUserProfile(req);
-        return result;
-    }
+ 
 
     public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(EmployeeCreateRequestModel reqModel)
     {
@@ -106,6 +99,12 @@ public class BL_Employee
             return Result<EmployeeCreateResponseModel>.DuplicateRecordError("PhoneNo already exists!");
         }
 
+
+        var roleExist = await _daEmployee.roleCodeExist(reqModel.RoleCode);
+        if (!roleExist.IsSuccess)
+        {
+            return Result<EmployeeCreateResponseModel>.NotFoundError("Role Code not found.");
+        }
         #endregion
 
         var result = await _daEmployee.CreateEmployee(reqModel);
@@ -154,6 +153,15 @@ public class BL_Employee
 
         #endregion
 
+
+        #region Check Role Code Exists  
+        var roleExist = await _daEmployee.roleCodeExist(reqModel.RoleCode);
+        if (!roleExist.IsSuccess)
+        {
+            return Result<EmployeeUpdateResponseModel>.NotFoundError("Role Code not found.");
+        }
+        #endregion
+
         #region Duplicate Data Validation
 
         var emailExist = await _daEmployee.DuplicateUpdateEmail(employeeCode, reqModel.Email);
@@ -189,4 +197,6 @@ public class BL_Employee
         var result = await _daEmployee.DeleteEmployee(employeeCode);
         return result;
     }
+
+
 }
