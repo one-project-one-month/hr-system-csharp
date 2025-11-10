@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.Menu;
+﻿using HRSystem.Csharp.Domain.Models.Common;
+using HRSystem.Csharp.Domain.Models.Menu;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace HRSystem.Csharp.Domain.Features.Menu;
@@ -12,10 +13,13 @@ public class DA_Menu
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<MenuModel>>> GetAllMenus()
+    public async Task<Result<List<MenuModel>>> GetAllMenus(PaginationRequestModel PaginationModel)
     {
         try
         {
+            int pageNumber = PaginationModel.PageNo < 1 ? 1 : PaginationModel.PageNo;
+            int pageSize = PaginationModel.PageSize <= 0 ? 10 : PaginationModel.PageSize;
+
             var menus = await _dbContext.TblMenus
                 .Join(_dbContext.TblMenuGroups,
                     menu => menu.MenuGroupCode,
@@ -35,6 +39,8 @@ public class DA_Menu
                     SortOrder = m.menu.SortOrder,
                 })
                 .AsNoTracking()
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             return Result<List<MenuModel>>.Success(menus);

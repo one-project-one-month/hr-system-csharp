@@ -2,7 +2,7 @@
 
 public class TaskUpdateRequestModel
 {
-    public Guid TaskId { get; set; }
+    public string TaskId { get; set; }
 
     public string? EmployeeCode { get; set; }
 

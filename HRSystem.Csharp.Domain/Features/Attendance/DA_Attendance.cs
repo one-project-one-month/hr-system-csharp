@@ -1,15 +1,19 @@
-﻿using HRSystem.Csharp.Domain.Models.Attendance;
+﻿using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models.Attendance;
+using HRSystem.Csharp.Shared.Enums;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HRSystem.Csharp.Domain.Features.Attendance;
 
 public class DA_Attendance
 {
+    private readonly DA_Sequence _daSequence;
     private readonly AppDbContext _db;
 
-    public DA_Attendance(AppDbContext appDbContext)
+    public DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence)
     {
         _db = appDbContext;
+        _daSequence = daSequence;
     }
 
     public async Task<Result<AttendanceListResponseModel>> List(int pageNo, int PageSize)
@@ -21,6 +25,7 @@ public class DA_Attendance
                     .OrderByDescending(x => x.AttendanceDate)
                     .Skip((pageNo - 1) * PageSize)
                     .Take(PageSize)
+                    .AsNoTracking()
                     .ToListAsync();
 
             if (!attendanceList.Any() || attendanceList is null)
@@ -65,7 +70,7 @@ public class DA_Attendance
 
         try
         {
-            var attendanceCode = await GenerateSequenceCodeAsync("AT");
+            var attendanceCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.ATT.ToString());
 
             //Working Hour
             DateTime checkIn = (DateTime)requestModel.CheckInTime;
@@ -118,8 +123,6 @@ public class DA_Attendance
             };
             await _db.AddAsync(newAttendance);
             await _db.SaveChangesAsync();
-
-            UpdateSequenceNoAsync("AT", attendanceCode.Substring(2));
 
             return Result<AttendanceCreateResponseModel>.Success(null, "Attendance is successfully created");
         }

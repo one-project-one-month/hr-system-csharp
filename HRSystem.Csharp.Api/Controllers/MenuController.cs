@@ -3,6 +3,7 @@ using HRSystem.Csharp.Domain.Features.Menu;
 using HRSystem.Csharp.Domain.Models.Menu;
 using System.Security.Claims;
 using HRSystem.Csharp.Shared;
+using HRSystem.Csharp.Domain.Models.Common;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -18,9 +19,9 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> Get([FromQuery] PaginationRequestModel model)
     {
-        var result = await _blMenu.GetAllMenus();
+        var result = await _blMenu.GetAllMenus(model);
         if (result.IsSuccess)
         {
             return Ok(result);
@@ -62,9 +63,7 @@ public class MenuController : ControllerBase
 
         var result = await _blMenu.GetMenu(menuCode);
         if (result.IsSuccess)
-        {
             return Ok(result);
-        }
 
         return BadRequest(result);
     }
