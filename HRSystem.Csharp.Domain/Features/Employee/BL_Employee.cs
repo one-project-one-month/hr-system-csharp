@@ -86,11 +86,8 @@ public class BL_Employee
             return Result<EmployeeCreateResponseModel>.DuplicateRecordError("Email already exists!");
         }
 
-        try
-        {
-            var validEmail = new MailAddress(reqModel.Email);
-        }
-        catch
+        var validEmail = new MailAddress(reqModel.Email);
+        if (validEmail.Address != reqModel.Email)
         {
             return Result<EmployeeCreateResponseModel>.BadRequestError("Invalid email format.");
         }
