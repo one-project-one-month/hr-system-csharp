@@ -19,7 +19,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> Get([FromQuery] PaginationRequestModel model)
+    public async Task<IActionResult> Get([FromQuery] MenuPaginationModel model)
     {
         var result = await _blMenu.GetAllMenus(model);
         if (result.IsSuccess)

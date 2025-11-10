@@ -12,7 +12,7 @@ public class BL_Menu
         _daMenu = daMenu;
     }
 
-    public async Task<Result<List<MenuModel>>> GetAllMenus(PaginationRequestModel model)
+    public async Task<Result<List<MenuModel>>> GetAllMenus(MenuPaginationModel model)
     {
         return await _daMenu.GetAllMenus(model);
     }
