@@ -14,7 +14,7 @@ public class EmployeeController : ControllerBase
         _blEmployee = blEmployee;
     }
 
-    [HttpPost("list")]
+    [HttpGet("list")]
     public async Task<IActionResult> GetAllEmployee(EmployeeListRequestModel reqModel)
     {
         var result = await _blEmployee.GetAllEmployee(reqModel);
@@ -35,6 +35,17 @@ public class EmployeeController : ControllerBase
             return Ok(result.Data);
         }
 
+        return BadRequest(result);
+    }
+
+    [HttpPost("userProfile")]
+    public async Task<IActionResult> GetUserProfile(UserProfileRequestModel req)
+    {
+        var result = await _blEmployee.getUserProfile(req);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Data);
+        }
         return BadRequest(result);
     }
 
@@ -73,4 +84,5 @@ public class EmployeeController : ControllerBase
 
         return BadRequest(result);
     }
+
 }

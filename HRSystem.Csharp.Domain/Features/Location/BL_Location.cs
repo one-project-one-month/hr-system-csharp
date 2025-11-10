@@ -26,9 +26,9 @@ public class BL_Location
         return result;
     }
 
-    public async Task<Result<List<LocationResponseModel>>> GetAllLocations()
+    public async Task<Result<LocationListResponseModel>> GetAllLocations(LocationListRequestModel reqModel)
     {
-        var result = await _daLocation.GetAllLocations();
+        var result = await _daLocation.GetAllLocations(reqModel);
         return result;
     }
 

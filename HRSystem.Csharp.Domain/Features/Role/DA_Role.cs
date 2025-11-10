@@ -1,18 +1,21 @@
-﻿using HRSystem.Csharp.Domain.Models.Roles;
-using Microsoft.EntityFrameworkCore;
+﻿using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models.Roles;
+using HRSystem.Csharp.Shared.Enums;
 using Microsoft.Extensions.Logging;
 
-namespace HRSystem.Csharp.Domain.Features.Roles;
+namespace HRSystem.Csharp.Domain.Features.Role;
 
 public class DA_Role
 {
     private readonly AppDbContext _appDbContext;
     private readonly ILogger<DA_Role> _logger;
+    private readonly DA_Sequence _daSequence;
 
-    public DA_Role(AppDbContext appDbContext, ILogger<DA_Role> logger)
+    public DA_Role(AppDbContext appDbContext, ILogger<DA_Role> logger, DA_Sequence daSequence)
     {
         _appDbContext = appDbContext;
         _logger = logger;
+        _daSequence = daSequence;
     }
 
     public async Task<Result<RoleListResponseModel>> GetRoles(RoleListRequestModel reqModel)
@@ -101,9 +104,11 @@ public class DA_Role
     {
         try
         {
+            var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.RL.ToString());
             var role = new TblRole
             {
                 RoleId = reqModel.RoleId,
+                RoleCode = generatedCode,
                 RoleName = reqModel.RoleName,
                 CreatedAt = reqModel.CreatedAt,
                 CreatedBy = reqModel.CreatedBy,
@@ -114,7 +119,7 @@ public class DA_Role
             var saved = await _appDbContext.SaveChangesAsync() > 0;
 
             return saved
-                ? Result<bool>.Success(true)
+                ? Result<bool>.Success("Role created successfully!")
                 : Result<bool>.Error("Failed to save role.");
         }
         catch (Exception ex)
@@ -130,7 +135,7 @@ public class DA_Role
         {
             var updated = await _appDbContext.SaveChangesAsync() > 0;
             return updated
-                ? Result<bool>.Success(true)
+                ? Result<bool>.Success("Role updated successfully!")
                 : Result<bool>.Error("Failed to update role.");
         }
         catch (Exception ex)
@@ -147,7 +152,7 @@ public class DA_Role
             role.DeleteFlag = true;
             var deleted = await _appDbContext.SaveChangesAsync() > 0;
             return deleted
-                ? Result<bool>.Success(true)
+                ? Result<bool>.Success("Role deleted successfully!")
                 : Result<bool>.Error("Failed to delete role.");
         }
         catch (Exception ex)

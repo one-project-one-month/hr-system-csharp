@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.MenuGroup;
+﻿using HRSystem.Csharp.Domain.Models.Common;
+using HRSystem.Csharp.Domain.Models.MenuGroup;
 
 namespace HRSystem.Csharp.Domain.Features.MenuGroup;
 
@@ -10,9 +11,9 @@ public class BL_MenuGroup
         _daMenuGroup = daMenuGroup;
     }
 
-    public async Task<Result<List<MenuGroupModel>>> GetAllMenuGroups()
+    public async Task<Result<List<MenuGroupModel>>> GetAllMenuGroups(PaginationRequestModel model)
     {
-        var response = await _daMenuGroup.GetAllMenuGroups();
+        var response = await _daMenuGroup.GetAllMenuGroups(model);
         return Result<List<MenuGroupModel>>.Success(response);
     }
 

@@ -1,5 +1,10 @@
-using System.Reflection;
+﻿using DotNetEnv;
+using HRSystem.Csharp.Database.AppDbContextModels;
+using HRSystem.Csharp.Shared.Services;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Reflection;
+using System.Text.Json.Serialization;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -10,10 +15,15 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Starting web application");
-
     var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddSerilog();
 
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+    
     // Add services to the container.
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -31,6 +41,20 @@ try
                         Encoding.UTF8.GetBytes(builder.Configuration["ApplicationSettings:JwtSecretKey"]!))
             };
         });
+    builder.Services.AddScoped<DapperService>();
+    // Add CORS policy
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowFrontend", policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials(); // if you send cookies or auth headers
+        });
+    });
+
+    
 
     builder.Services.AddAuthorization();
 
@@ -71,8 +95,9 @@ try
     builder.AddDomain();
 
     var app = builder.Build();
+    app.UseCors("AllowFrontend");
 
-// Configure the HTTP request pipeline.
+    // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
