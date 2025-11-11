@@ -20,6 +20,7 @@ public class TaskModel
     public string? ProjectCode { get; set; }
 
     public string? ProjectName { get; set; }
+    public string? TaskDescription { get; set; }
 
     public DateTime? StartDate { get; set; }
 
@@ -46,6 +47,7 @@ public class TaskModel
             TaskName = tblTask.TaskName,
             EmployeeCode = tblTask.EmployeeCode,
             ProjectCode = tblTask.ProjectCode,
+            TaskDescription = tblTask.TaskDescription,
             StartDate = tblTask.StartDate,
             EndDate = tblTask.EndDate,
             TaskStatus = tblTask.TaskStatus,

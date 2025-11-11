@@ -19,12 +19,12 @@ public class DA_Employee
     private readonly DA_Sequence _daSequence;
 
     public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger, DA_Sequence daSequence,
-                      JwtService jwtService)
+        JwtService jwtService)
     {
         _appDbContext = appDbContext;
         _logger = logger;
         _daSequence = daSequence;
-       _jwtService = jwtService;
+        _jwtService = jwtService;
     }
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
@@ -44,6 +44,9 @@ public class DA_Employee
             query = query.OrderByDescending(e => e.CreatedAt);
 
             var rules = query.Join(_appDbContext.TblRoles,
+                .AsNoTracking()
+                .Where(e => !e.DeleteFlag)
+                .Join(_appDbContext.TblRoles,
                     e => e.RoleCode,
                     r => r.RoleCode,
                     (e, r) => new EmployeeResponseModel
@@ -117,10 +120,10 @@ public class DA_Employee
     {
         try
         {
-            var hashPassowrd = _jwtService.HashPassword(reqModel.Password);
-          
+            var hashPassword = _jwtService.HashPassword(reqModel.Password);
+
             var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
-            
+
             var newEmployee = new TblEmployee
             {
                 EmployeeId = DevCode.GenerateNewUlid(),
@@ -130,9 +133,9 @@ public class DA_Employee
                 Name = reqModel.Name,
                 Email = reqModel.Email,
                 PhoneNo = reqModel.PhoneNo,
-                Password = hashPassowrd,
+                Password = hashPassword,
                 IsFirstTimeLogin = true,
-                ProfileImage = "",
+                ProfileImage = "Profile",
                 Salary = reqModel.Salary,
                 StartDate = reqModel.StartDate,
                 ResignDate = reqModel.ResignDate,
@@ -148,8 +151,7 @@ public class DA_Employee
             await _appDbContext.TblEmployees.AddAsync(newEmployee);
             await _appDbContext.SaveChangesAsync();
 
-            return Result<EmployeeCreateResponseModel>.Success(new EmployeeCreateResponseModel(),
-                "Employee Created Successfully");
+            return Result<EmployeeCreateResponseModel>.Success("Employee Created Successfully");
         }
         catch (Exception ex)
         {
@@ -161,27 +163,37 @@ public class DA_Employee
     public async Task<Result<EmployeeUpdateResponseModel>> UpdateEmployee(string empCode,
         EmployeeUpdateRequestModel emp)
     {
-        var existingEmp = await _appDbContext.TblEmployees
-            .FirstOrDefaultAsync(e => e.EmployeeCode == empCode && e.DeleteFlag != true);
+        try
+        {
+            var existingEmp = await _appDbContext.TblEmployees
+                .FirstOrDefaultAsync(e => e.EmployeeCode == empCode && e.DeleteFlag != true);
+          
+            if (existingEmp == null)
+            {
+                return Result<EmployeeUpdateResponseModel>.NotFoundError("Employee not found for update.");
+            }
 
-        if (existingEmp == null)
-            return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the role to be updated");
+            existingEmp.Name = emp.Name;
+            existingEmp.RoleCode = emp.RoleCode;
+            existingEmp.Email = emp.Email;
+            existingEmp.PhoneNo = emp.PhoneNo;
+            existingEmp.Salary = emp.Salary;
+            existingEmp.StartDate = emp.StartDate;
+            existingEmp.ResignDate = emp.ResignDate;
+            existingEmp.ModifiedAt = DateTime.UtcNow;
+            existingEmp.ModifiedBy = currentUser;
 
-        existingEmp.Name = emp.Name;
-        existingEmp.RoleCode = emp.RoleCode;
-        existingEmp.Email = emp.Email;
-        existingEmp.PhoneNo = emp.PhoneNo;
-        existingEmp.Salary = emp.Salary;
-        existingEmp.StartDate = emp.StartDate;
-        existingEmp.ResignDate = emp.ResignDate;
-        existingEmp.ModifiedAt = DateTime.UtcNow;
-        existingEmp.ModifiedBy = currentUser;
+            var updated = await _appDbContext.SaveChangesAsync() > 0;
 
-        _appDbContext.TblEmployees.Update(existingEmp);
-        await _appDbContext.SaveChangesAsync();
-
-        return Result<EmployeeUpdateResponseModel>.Success(new EmployeeUpdateResponseModel(),
-            "Employee Updated Successfully");
+            return updated
+                ? Result<EmployeeUpdateResponseModel>.Success("Role updated successfully!")
+                : Result<EmployeeUpdateResponseModel>.Error("Failed to update role.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return Result<EmployeeUpdateResponseModel>.Error("Employee Update failed!");
+        }
     }
 
     public async Task<Result<EmployeeDeleteResponseModel>> DeleteEmployee(string employeeCode)

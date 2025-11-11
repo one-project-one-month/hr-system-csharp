@@ -39,6 +39,17 @@ public class EmployeeController : ControllerBase
     }
 
 
+    [HttpPost("userProfile")]
+    public async Task<IActionResult> GetUserProfile([FromBody] UserProfileRequestModel req)
+    {
+        var result = await _blEmployee.getUserProfile(req);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Data);
+        }
+
+        return BadRequest(result);
+    }
 
     [HttpPost("create")]
     public async Task<IActionResult> CreateEmployee([FromBody] EmployeeCreateRequestModel req)
@@ -46,7 +57,7 @@ public class EmployeeController : ControllerBase
         var result = await _blEmployee.CreateEmployee(req);
         if (result.IsSuccess)
         {
-            return Ok(result.Message);
+            return Ok(result);
         }
 
         return BadRequest(result);
@@ -58,7 +69,7 @@ public class EmployeeController : ControllerBase
         var result = await _blEmployee.UpdateEmployee(employeeCode, req);
         if (result.IsSuccess)
         {
-            return Ok(result.Message);
+            return Ok(result);
         }
 
         return BadRequest(result);
@@ -70,10 +81,9 @@ public class EmployeeController : ControllerBase
         var result = await _blEmployee.DeleteEmployee(employeeCode);
         if (result.IsSuccess)
         {
-            return Ok(result.Message);
+            return Ok(result);
         }
 
         return BadRequest(result);
     }
-
 }

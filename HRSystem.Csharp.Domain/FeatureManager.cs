@@ -8,6 +8,8 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using System.Net.Mail;
+using DotNetEnv;
+
 
 namespace HRSystem.Csharp.Domain;
 
@@ -75,12 +77,23 @@ public static class FeatureManager
 
     public static void AddDomain(this WebApplicationBuilder builder)
     {
-        var mssqlConnection = builder.Configuration.GetConnectionString("DbConnection");
+        Env.Load(".env.development");
 
-        builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
+        var host = Environment.GetEnvironmentVariable("DB_HOST");
+        //var port = Environment.GetEnvironmentVariable("DB_PORT");
+        var db = Environment.GetEnvironmentVariable("DB_NAME");
+        var user = Environment.GetEnvironmentVariable("DB_USER");
+        var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+
+        var mssqlConnection = $"Server={host};Database={db};User Id={user};Password={password};TrustServerCertificate=True";
+
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(mssqlConnection));
+        
+        /*builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
             ServiceLifetime.Transient, 
-            ServiceLifetime.Transient);
+            ServiceLifetime.Transient);*/
 
         builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
             new SqlConnection(mssqlConnection));
