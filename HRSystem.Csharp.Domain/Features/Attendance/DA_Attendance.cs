@@ -34,9 +34,44 @@ public class DA_Attendance
             var model = new AttendanceListResponseModel
             {
                 AttendanceList = attendanceList
-                    .Select(AttendanceListModel.FromTblAttendance)
+                    .Select(t =>
+                    {
+                        var attendance = AttendanceListModel.FromTblAttendance(t);
+                        attendance.EmployeeName = _db.TblEmployees
+                            .Where(e => e.EmployeeCode == t.EmployeeCode && e.DeleteFlag == false)
+                            .Select(e => e.Name)
+                            .FirstOrDefault();
+                        return attendance;
+                    })
                     .ToList()
             };
+
+            //var model = new AttendanceListResponseModel
+            //{
+            //    AttendanceList = attendanceList
+            //      .Select(AttendanceListModel.FromTblAttendance)
+            //      .ToList()
+            //};
+
+
+            //var model = new TaskListResponseModel()
+            //{
+            //    Tasks = tasks.Select(t =>
+            //    {
+            //        var task = TaskModel.FromTblTask(t);
+            //        task.EmployeeName = _db.TblEmployees
+            //            .Where(e => e.EmployeeCode == t.EmployeeCode && e.DeleteFlag == false)
+            //            .Select(e => e.Name)
+            //            .FirstOrDefault();
+            //        task.ProjectName = _db.TblProjects
+            //            .Where(p => p.ProjectCode == t.ProjectCode && p.DeleteFlag == false)
+            //            .Select(p => p.ProjectName)
+            //            .FirstOrDefault();
+            //        return task;
+            //    }).ToList()
+            //};
+
+
 
             return Result<AttendanceListResponseModel>.Success(model);
         }
