@@ -4,12 +4,10 @@ using Microsoft.Data.SqlClient;
 using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Features.Verification;
-using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using System.Net.Mail;
 using DotNetEnv;
-
 
 namespace HRSystem.Csharp.Domain;
 
