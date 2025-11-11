@@ -38,10 +38,10 @@ public class EmployeeController : ControllerBase
         return BadRequest(result);
     }
 
-    [HttpPost("userProfile")]
-    public async Task<IActionResult> GetUserProfile([FromBody] UserProfileRequestModel req)
+    [HttpGet("profile/{employeeCode}")]
+    public async Task<IActionResult> GetUserProfile(string employeeCode)
     {
-        var result = await _blEmployee.getUserProfile(req);
+        var result = await _blEmployee.getUserProfile(employeeCode);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
@@ -62,7 +62,7 @@ public class EmployeeController : ControllerBase
         return BadRequest(result);
     }
 
-    [HttpPost("update/{employeeCode}")]
+    [HttpPut("update/{employeeCode}")]
     public async Task<IActionResult> UpdateEmployee(string employeeCode, [FromBody] EmployeeUpdateRequestModel req)
     {
         var result = await _blEmployee.UpdateEmployee(employeeCode, req);
@@ -74,7 +74,7 @@ public class EmployeeController : ControllerBase
         return BadRequest(result);
     }
 
-    [HttpPost("delete/{employeeCode}")]
+    [HttpDelete("delete/{employeeCode}")]
     public async Task<IActionResult> DeleteEmployee(string employeeCode)
     {
         var result = await _blEmployee.DeleteEmployee(employeeCode);

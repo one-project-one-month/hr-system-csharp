@@ -107,13 +107,13 @@ public class DA_Employee
         }
     }
 
-    public async Task<Result<UserProfileResponseModel>> GetUserProfile(UserProfileRequestModel req)
+    public async Task<Result<UserProfileResponseModel>> GetUserProfile(string employeeCode)
     {
         try
         {
             var result = await _appDbContext.TblEmployees
                 .AsNoTracking()
-                .Where(e => e.EmployeeCode == req.EmployeeCode && e.DeleteFlag == false)
+                .Where(e => e.EmployeeCode == employeeCode && e.DeleteFlag == false)
                 .Join(_appDbContext.TblRoles,
                     e => e.RoleCode,
                     r => r.RoleCode,
