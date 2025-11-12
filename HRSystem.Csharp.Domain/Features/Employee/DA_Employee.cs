@@ -114,6 +114,42 @@ public class DA_Employee
         }
     }
 
+    public async Task<Result<UserProfileResponseModel>> GetUserProfile(string employeeCode)
+    {
+        try
+        {
+            var result = await _appDbContext.TblEmployees
+                .AsNoTracking()
+                .Where(e => e.EmployeeCode == employeeCode && e.DeleteFlag == false)
+                .Join(_appDbContext.TblRoles,
+                    e => e.RoleCode,
+                    r => r.RoleCode,
+                    (e, r) => new UserProfileResponseModel
+                    {
+                        EmployeeCode = e.EmployeeCode,
+                        ProfileImage = e.ProfileImage,
+                        Username = e.Username,
+                        Name = e.Name,
+                        RoleName = r.RoleName,
+                        Email = e.Email,
+                        PhoneNo = e.PhoneNo
+                    })
+                .FirstOrDefaultAsync();
+
+            if (result == null)
+            {
+                return Result<UserProfileResponseModel>.ValidationError("Employee doesn't exist!");
+            }
+
+            return Result<UserProfileResponseModel>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result<UserProfileResponseModel>.Error(
+                $"An error occurred while retrieving employees: {ex.Message}");
+        }
+    }
+
 
     public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(
         EmployeeCreateRequestModel reqModel)
