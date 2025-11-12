@@ -1,8 +1,11 @@
-﻿using HRSystem.Csharp.Domain.Models.Employee;
-using System.Data;
-using HRSystem.Csharp.Domain.Features.Sequence;
+﻿using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models;
+using HRSystem.Csharp.Domain.Models.Employee;
+using HRSystem.Csharp.Domain.Models.MenuGroup;
 using HRSystem.Csharp.Shared.Enums;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Data;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
 
@@ -29,6 +32,18 @@ public class DA_Employee
         try
         {
             var query = _appDbContext.TblEmployees
+               .AsNoTracking()
+               .Where(e => !e.DeleteFlag);
+
+            if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
+            {
+                query = query.Where(e => e.Name != null
+                                         && e.Name.Contains(reqModel.EmployeeName));
+            }
+
+            query = query.OrderByDescending(e => e.CreatedAt);
+
+            var rules = query.Join(_appDbContext.TblRoles,
                 .AsNoTracking()
                 .Where(e => !e.DeleteFlag)
                 .Join(_appDbContext.TblRoles,
@@ -42,20 +57,10 @@ public class DA_Employee
                         Name = e.Name,
                         RoleName = r.RoleName,
                         Email = e.Email,
-                        PhoneNo = e.PhoneNo,
-                        CreatedAt = e.CreatedAt
+                        PhoneNo = e.PhoneNo
                     });
 
-            if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
-            {
-                query = query.Where(r => r.Name != null
-                                         && r.Name.ToLower() == reqModel.EmployeeName.ToLower());
-            }
-
-
-            query = query.OrderByDescending(r => r.CreatedAt);
-
-            var pagedResult = await query.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+            var pagedResult = await rules.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
 
             var result = new EmployeeListResponseModel
             {
@@ -79,6 +84,7 @@ public class DA_Employee
         try
         {
             var employee = await _appDbContext.TblEmployees
+               
                 .FirstOrDefaultAsync(e => e.EmployeeCode == employeeCode && e.DeleteFlag == false);
 
             if (employee == null)
@@ -89,6 +95,7 @@ public class DA_Employee
             var result = new EmployeeEditResponseModel()
             {
                 EmployeeCode = employee.EmployeeCode,
+                ProfileImage = employee.ProfileImage,
                 Username = employee.Username,
                 Name = employee.Name,
                 RoleCode = employee.RoleCode,
@@ -196,7 +203,7 @@ public class DA_Employee
         {
             var existingEmp = await _appDbContext.TblEmployees
                 .FirstOrDefaultAsync(e => e.EmployeeCode == empCode && e.DeleteFlag != true);
-
+          
             if (existingEmp == null)
             {
                 return Result<EmployeeUpdateResponseModel>.NotFoundError("Employee not found for update.");
@@ -239,6 +246,7 @@ public class DA_Employee
         model.ModifiedAt = DateTime.UtcNow;
         model.ModifiedBy = currentUser;
 
+        _appDbContext.TblEmployees.Update(model);
         await _appDbContext.SaveChangesAsync();
 
         return Result<EmployeeDeleteResponseModel>.Success(new EmployeeDeleteResponseModel(),
@@ -272,6 +280,26 @@ public class DA_Employee
             return employee != null
                 ? Result<bool>.Success()
                 : Result<bool>.NotFoundError("Employee not found.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching employee by name");
+            return Result<bool>.SystemError("An error occurred while retrieving the employee.");
+        }
+    }
+
+
+    public async Task<Result<bool>> roleCodeExist(string roleCode)
+    {
+ 
+        try
+        {
+            var roleCodeExist = await _appDbContext.TblEmployees
+                .FirstOrDefaultAsync(x => x.RoleCode == roleCode && !x.DeleteFlag);
+
+            return roleCodeExist != null
+                ? Result<bool>.Success()
+                : Result<bool>.NotFoundError("Role Code not found.");
         }
         catch (Exception ex)
         {

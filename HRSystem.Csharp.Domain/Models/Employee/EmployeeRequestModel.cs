@@ -12,10 +12,6 @@ public class EmployeeListRequestModel: PaginationRequestModel
     public string? EmployeeName { get; set; }
 }
 
-public class UserProfileRequestModel
-{
-    public string EmployeeCode { get; set; }
-}
 public class EmployeeCreateRequestModel
 {
     public string Username { get; set; } = null!;

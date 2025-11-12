@@ -14,6 +14,7 @@ public class BL_Employee
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
     {
+        
         var employees = await _daEmployee.GetAllEmployee(reqModel);
         return employees;
     }
@@ -99,6 +100,12 @@ public class BL_Employee
             return Result<EmployeeCreateResponseModel>.DuplicateRecordError("PhoneNo already exists!");
         }
 
+
+        var roleExist = await _daEmployee.roleCodeExist(reqModel.RoleCode);
+        if (!roleExist.IsSuccess)
+        {
+            return Result<EmployeeCreateResponseModel>.NotFoundError("Role Code not found.");
+        }
         #endregion
 
         var result = await _daEmployee.CreateEmployee(reqModel);
@@ -147,6 +154,15 @@ public class BL_Employee
 
         #endregion
 
+
+        #region Check Role Code Exists  
+        var roleExist = await _daEmployee.roleCodeExist(reqModel.RoleCode);
+        if (!roleExist.IsSuccess)
+        {
+            return Result<EmployeeUpdateResponseModel>.NotFoundError("Role Code not found.");
+        }
+        #endregion
+
         #region Duplicate Data Validation
 
         var emailExist = await _daEmployee.DuplicateUpdateEmail(employeeCode, reqModel.Email);
@@ -155,11 +171,15 @@ public class BL_Employee
             return Result<EmployeeUpdateResponseModel>.DuplicateRecordError("Email already exists!");
         }
 
-        var validEmail = new MailAddress(reqModel.Email);
-        if (validEmail.Address != reqModel.Email)
+        try
+        {
+            var validEmail = new MailAddress(reqModel.Email);
+        }
+        catch
         {
             return Result<EmployeeUpdateResponseModel>.BadRequestError("Invalid email format.");
         }
+
 
         var phoneExist = await _daEmployee.DuplicateUpdatePhoneNo(employeeCode, reqModel.PhoneNo);
         if (phoneExist.IsSuccess)
@@ -178,4 +198,6 @@ public class BL_Employee
         var result = await _daEmployee.DeleteEmployee(employeeCode);
         return result;
     }
+
+
 }
