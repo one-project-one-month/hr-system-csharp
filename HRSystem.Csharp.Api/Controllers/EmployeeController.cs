@@ -15,7 +15,7 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> GetAllEmployee(EmployeeListRequestModel reqModel)
+    public async Task<IActionResult> GetAllEmployee([FromQuery] EmployeeListRequestModel reqModel)
     {
         var result = await _blEmployee.GetAllEmployee(reqModel);
         if (result.IsSuccess)
@@ -38,14 +38,15 @@ public class EmployeeController : ControllerBase
         return BadRequest(result);
     }
 
-    [HttpPost("userProfile")]
-    public async Task<IActionResult> GetUserProfile(UserProfileRequestModel req)
+    [HttpGet("profile/{employeeCode}")]
+    public async Task<IActionResult> GetUserProfile(string employeeCode)
     {
-        var result = await _blEmployee.getUserProfile(req);
+        var result = await _blEmployee.getUserProfile(employeeCode);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
         }
+
         return BadRequest(result);
     }
 
@@ -55,34 +56,33 @@ public class EmployeeController : ControllerBase
         var result = await _blEmployee.CreateEmployee(req);
         if (result.IsSuccess)
         {
-            return Ok(result.Message);
+            return Ok(result);
         }
 
         return BadRequest(result);
     }
 
-    [HttpPost("update/{employeeCode}")]
+    [HttpPut("update/{employeeCode}")]
     public async Task<IActionResult> UpdateEmployee(string employeeCode, [FromBody] EmployeeUpdateRequestModel req)
     {
         var result = await _blEmployee.UpdateEmployee(employeeCode, req);
         if (result.IsSuccess)
         {
-            return Ok(result.Message);
+            return Ok(result);
         }
 
         return BadRequest(result);
     }
 
-    [HttpPost("delete/{employeeCode}")]
+    [HttpDelete("delete/{employeeCode}")]
     public async Task<IActionResult> DeleteEmployee(string employeeCode)
     {
         var result = await _blEmployee.DeleteEmployee(employeeCode);
         if (result.IsSuccess)
         {
-            return Ok(result.Message);
+            return Ok(result);
         }
 
         return BadRequest(result);
     }
-
 }

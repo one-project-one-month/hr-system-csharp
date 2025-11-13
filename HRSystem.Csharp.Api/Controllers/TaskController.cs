@@ -35,14 +35,14 @@ public class TaskController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("update")]
+    [HttpPut("update")]
     public async Task<IActionResult> UpdateAsync(TaskUpdateRequestModel requestModel)
     {
         var result = await _blTask.UpdateAsync(requestModel);
         return Ok(result);
     }
 
-    [HttpPost("delete")]
+    [HttpDelete("delete")]
     public async Task<IActionResult> DeleteAsync(string taskId)
     {
         var result = await _blTask.DeleteAsync(taskId);

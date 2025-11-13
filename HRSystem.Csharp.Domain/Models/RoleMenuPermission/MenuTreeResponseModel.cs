@@ -13,6 +13,7 @@ public class MenuGroupResponseModel
     public string MenuGroupUrl { get; set; }
     public bool IsChecked { get; set; }
     public List<MenuItemResponseModel> ChildMenus { get; set; }
+
 }
 
 public class MenuItemResponseModel
@@ -22,6 +23,7 @@ public class MenuItemResponseModel
     public string MenuItemIcon { get; set; }
     public string MenuItemUrl { get; set; }
     public bool IsChecked { get; set; }
+    public List<string> Permissions { get; set; } = new List<string>();
 }
 
 public class MenuTreeRequestModel
