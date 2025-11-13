@@ -152,12 +152,6 @@ public class DA_Employee
             var hashPassword = _jwtService.HashPassword(reqModel.Password);
 
             var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
-<<<<<<< HEAD
-            DateTime? nullableStartDate = reqModel.StartDate;
-
-=======
-            
->>>>>>> parent of d58d5d7 (db added permission)
             var newEmployee = new TblEmployee
             {
                 EmployeeId = DevCode.GenerateNewUlid(),
