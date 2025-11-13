@@ -1,8 +1,9 @@
-﻿using HRSystem.Csharp.Domain.Models.Employee;
-using System.Data;
-using HRSystem.Csharp.Domain.Features.Sequence;
+﻿using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models.Employee;
 using HRSystem.Csharp.Shared.Enums;
 using Microsoft.Extensions.Logging;
+using System.Data;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
 
@@ -161,7 +162,7 @@ public class DA_Employee
             var hashPassowrd = _jwtService.HashPassword(reqModel.Password);
           
             var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
-            
+            DateTime? nullableStartDate = reqModel.StartDate;
             var newEmployee = new TblEmployee
             {
                 EmployeeId = DevCode.GenerateNewUlid(),
@@ -175,7 +176,7 @@ public class DA_Employee
                 IsFirstTimeLogin = true,
                 ProfileImage = null,
                 Salary = reqModel.Salary,
-                StartDate = reqModel.StartDate,
+                StartDate = nullableStartDate.GetValueOrDefault(),
                 ResignDate = reqModel.ResignDate,
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = currentUser,
@@ -207,13 +208,13 @@ public class DA_Employee
 
         if (existingEmp == null)
             return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the role to be updated");
-
+        DateTime? nullableStartDate = emp.StartDate;
         existingEmp.Name = emp.Name;
         existingEmp.RoleCode = emp.RoleCode;
         existingEmp.Email = emp.Email;
         existingEmp.PhoneNo = emp.PhoneNo;
         existingEmp.Salary = emp.Salary;
-        existingEmp.StartDate = emp.StartDate;
+        existingEmp.StartDate = nullableStartDate.GetValueOrDefault();
         existingEmp.ResignDate = emp.ResignDate;
         existingEmp.ModifiedAt = DateTime.UtcNow;
         existingEmp.ModifiedBy = currentUser;
