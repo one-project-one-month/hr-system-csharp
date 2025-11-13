@@ -88,7 +88,7 @@ public static class FeatureManager
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(mssqlConnection,
-            sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null))
+            sqlOptions => sqlOptions.EnableRetryOnFailure(10, TimeSpan.FromSeconds(15), null))
               .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
         );
 
@@ -100,7 +100,9 @@ public static class FeatureManager
 
         builder.Services.AddScoped<IDbConnection>(sp =>
         {
-            return new SqlConnection(mssqlConnection); // connection will open lazily when Dapper executes
+            var conn = new SqlConnection(mssqlConnection);
+            conn.Open();
+            return conn;
         });
 
         builder.Services
