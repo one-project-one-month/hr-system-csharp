@@ -87,7 +87,10 @@ public static class FeatureManager
         var mssqlConnection = $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(mssqlConnection));
+            options.UseSqlServer(mssqlConnection,
+            sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null))
+              .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+        );
 
         /*builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
@@ -95,8 +98,10 @@ public static class FeatureManager
             ServiceLifetime.Transient);*/
 
 
-        builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
-            new SqlConnection(mssqlConnection));
+        builder.Services.AddScoped<IDbConnection>(sp =>
+        {
+            return new SqlConnection(mssqlConnection); // connection will open lazily when Dapper executes
+        });
 
         builder.Services
             .AddFluentEmail("hrsystem.opom@gmail.com")
