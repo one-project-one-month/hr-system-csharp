@@ -86,21 +86,23 @@ public static class FeatureManager
 
         var mssqlConnection = $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(mssqlConnection,
-            sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null))
-              .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-        );
+        //builder.Services.AddDbContext<AppDbContext>(options =>
+        //    options.UseSqlServer(mssqlConnection,
+        //    sqlOptions => sqlOptions.EnableRetryOnFailure(10, TimeSpan.FromSeconds(15), null))
+        //      .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+        //);
 
-        /*builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
+        builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
             ServiceLifetime.Transient, 
-            ServiceLifetime.Transient);*/
+            ServiceLifetime.Transient);
 
 
         builder.Services.AddScoped<IDbConnection>(sp =>
         {
-            return new SqlConnection(mssqlConnection); // connection will open lazily when Dapper executes
+            var conn = new SqlConnection(mssqlConnection);
+            conn.Open();
+            return conn;
         });
 
         builder.Services
