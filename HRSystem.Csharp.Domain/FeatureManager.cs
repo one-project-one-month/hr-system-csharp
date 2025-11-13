@@ -88,16 +88,14 @@ public static class FeatureManager
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(mssqlConnection));
-        
+
         /*builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
             ServiceLifetime.Transient, 
             ServiceLifetime.Transient);*/
 
-        builder.Services.AddScoped<IDbConnection>(sp =>
-        {
-            return new SqlConnection(mssqlConnection); // connection will open lazily when Dapper executes
-        });
+        builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
+            new SqlConnection(mssqlConnection));
 
         builder.Services
             .AddFluentEmail("hrsystem.opom@gmail.com")
