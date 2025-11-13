@@ -98,13 +98,6 @@ public class DA_Attendance
                 FullDayFlag = 1;
             }
 
-            //Status
-            if (HourLateFlag == 1)
-            {
-
-            }
-
-
             //Check Location
             bool IsSavedLocation = false;
             var location = await _db.TblLocations
@@ -150,9 +143,9 @@ public class DA_Attendance
     public TimeSpan CalculateWorkingHours(DateTime checkIn, DateTime checkOut)
     {
         var StartTimeValue = "";
-        TimeSpan officeStartTime = new System.TimeSpan();
+        double StartTime = 0.0;
         var OfficeEndValue = "";
-        TimeSpan officeEndTime = new System.TimeSpan();
+        double OfficeEnd = 0.0;
 
         #region Office Start Time
 
@@ -160,12 +153,12 @@ public class DA_Attendance
         if (ComRuleOfficeStart != null)
         {
             StartTimeValue = ComRuleOfficeStart.Value;
-            officeStartTime = TimeSpan.Parse(StartTimeValue);
+            StartTime = Double.Parse(StartTimeValue);
         }
 
         #endregion
 
-        DateTime officeStart = checkIn.Date.Add(officeStartTime);
+        DateTime officeStart = checkIn.Date.AddHours(StartTime);
 
         #region Office End Time
 
@@ -173,12 +166,12 @@ public class DA_Attendance
         if (ComRuleOfficeEnd != null)
         {
             OfficeEndValue = ComRuleOfficeEnd.Value;
-            officeEndTime = TimeSpan.Parse(OfficeEndValue);
+            OfficeEnd = Double.Parse(OfficeEndValue);
         }
 
         #endregion
 
-        DateTime officeEnd = checkIn.Date.Add(officeEndTime);
+        DateTime officeEnd = checkIn.Date.AddHours(OfficeEnd);
 
         if (checkIn < officeStart)
             checkIn = officeStart;
@@ -194,17 +187,17 @@ public class DA_Attendance
     public int CalculateHourlyLate(DateTime checkIn, DateTime checkOut)
     {
         var StartTimeValue = "";
-        TimeSpan StartTime = new System.TimeSpan();
+        double StartTime = 0.0;
         var CheckInAcceptValue = "";
-        TimeSpan CheckInAccept = new System.TimeSpan();
+        double CheckInAccept = 0.0;
         var CheckInLateValue = "";
-        TimeSpan CheckInLate = new System.TimeSpan();
+        double CheckInLate = 0.0;
         var OfficeEndValue = "";
-        TimeSpan OfficeEnd = new System.TimeSpan();
+        double OfficeEnd = 0.0;
         var CheckoutAcceptValue = "";
-        TimeSpan CheckoutAccept = new System.TimeSpan();
+        double CheckoutAccept = 0.0;
         var CheckoutLateValue = "";
-        TimeSpan CheckoutLate = new System.TimeSpan();
+        double CheckoutLate = 0.0;
 
         #region Office Start Time
 
@@ -212,12 +205,12 @@ public class DA_Attendance
         if (ComRuleOfficeStart != null)
         {
             StartTimeValue = ComRuleOfficeStart.Value;
-            StartTime = TimeSpan.Parse(StartTimeValue);
+            StartTime = Double.Parse(StartTimeValue);
         }
 
         #endregion
 
-        DateTime officeStart = checkIn.Date.Add(StartTime);
+        DateTime officeStart = checkIn.Date.AddHours(StartTime);
 
         #region Office Acceptable CheckIn
 
@@ -225,12 +218,12 @@ public class DA_Attendance
         if (ComRuleCheckinAccept != null)
         {
             CheckInAcceptValue = ComRuleCheckinAccept.Value;
-            CheckInAccept = TimeSpan.Parse(CheckInAcceptValue);
+            CheckInAccept = Double.Parse(CheckInAcceptValue);
         }
 
         #endregion
 
-        DateTime MorningFirstLate = checkIn.Date.Add(CheckInAccept);
+        DateTime MorningFirstLate = checkIn.Date.AddHours(CheckInAccept);
 
         #region One Hour Late CheckIn
 
@@ -238,12 +231,12 @@ public class DA_Attendance
         if (ComRuleCheckinLate != null)
         {
             CheckInLateValue = ComRuleCheckinLate.Value;
-            CheckInLate = TimeSpan.Parse(CheckInLateValue);
+            CheckInLate = Double.Parse(CheckInLateValue);
         }
 
         #endregion
 
-        DateTime MorningSecondLate = checkIn.Date.Add(CheckInLate);
+        DateTime MorningSecondLate = checkIn.Date.AddHours(CheckInLate);
 
         int hourLate = 0;
         if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate)
@@ -256,12 +249,12 @@ public class DA_Attendance
         if (ComRuleOfficeEnd != null)
         {
             OfficeEndValue = ComRuleOfficeEnd.Value;
-            OfficeEnd = TimeSpan.Parse(OfficeEndValue);
+            OfficeEnd = Double.Parse(OfficeEndValue);
         }
 
         #endregion
 
-        DateTime officeEnd = checkIn.Date.Add(OfficeEnd);
+        DateTime officeEnd = checkIn.Date.AddHours(OfficeEnd);
 
         #region Office Acceptable Checkout
 
@@ -269,12 +262,12 @@ public class DA_Attendance
         if (ComRuleCheckoutAccept != null)
         {
             CheckoutAcceptValue = ComRuleCheckoutAccept.Value;
-            CheckoutAccept = TimeSpan.Parse(CheckoutAcceptValue);
+            CheckoutAccept = Double.Parse(CheckoutAcceptValue);
         }
 
         #endregion
 
-        DateTime eveningFirstLate = checkIn.Date.Add(CheckoutAccept);
+        DateTime eveningFirstLate = checkIn.Date.AddHours(CheckoutAccept);
 
         #region One Hour Late Checkout 
 
@@ -282,12 +275,12 @@ public class DA_Attendance
         if (ComRuleCheckoutLate != null)
         {
             CheckoutLateValue = ComRuleCheckoutLate.Value;
-            CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
+            CheckoutLate = Double.Parse(CheckoutLateValue);
         }
 
         #endregion
 
-        DateTime eveningSecondLate = checkIn.Date.Add(CheckoutLate);
+        DateTime eveningSecondLate = checkIn.Date.AddHours(CheckoutLate);
 
         if (checkOut < eveningFirstLate && checkOut >= eveningSecondLate)
             hourLate += 1;
@@ -299,9 +292,9 @@ public class DA_Attendance
     {
         int halfDayLate = 0;
         var CheckInLateValue = "";
-        TimeSpan CheckInLate = new System.TimeSpan();
+        double CheckInLate = 0.0;
         var CheckoutLateValue = "";
-        TimeSpan CheckoutLate = new System.TimeSpan();
+        double CheckoutLate = 0.0;
 
         //For Morning Part
         #region One Hour Late CheckIn
@@ -310,12 +303,12 @@ public class DA_Attendance
         if (ComRuleCheckinLate != null)
         {
             CheckInLateValue = ComRuleCheckinLate.Value;
-            CheckInLate = TimeSpan.Parse(CheckInLateValue);
+            CheckInLate = Double.Parse(CheckInLateValue);
         }
 
         #endregion
 
-        DateTime MorningLate = checkIn.Date.Add(CheckInLate);
+        DateTime MorningLate = checkIn.Date.AddHours(CheckInLate);
         if (checkIn > MorningLate)
             halfDayLate = 1;
 
@@ -326,12 +319,12 @@ public class DA_Attendance
         if (ComRuleCheckoutLate != null)
         {
             CheckoutLateValue = ComRuleCheckoutLate.Value;
-            CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
+            CheckoutLate = Double.Parse(CheckoutLateValue);
         }
 
         #endregion
 
-        DateTime eveningLate = checkIn.Date.Add(CheckoutLate);
+        DateTime eveningLate = checkIn.Date.AddHours(CheckoutLate);
 
         if (checkOut < eveningLate)
             halfDayLate += 1;
