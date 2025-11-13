@@ -94,6 +94,7 @@ public static class FeatureManager
             ServiceLifetime.Transient, 
             ServiceLifetime.Transient);*/
 
+
         builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
             new SqlConnection(mssqlConnection));
 
