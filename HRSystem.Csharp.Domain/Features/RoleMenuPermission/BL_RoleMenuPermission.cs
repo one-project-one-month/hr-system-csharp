@@ -47,7 +47,7 @@ public class BL_RoleMenuPermission
 
             if (!string.IsNullOrWhiteSpace(p.MenuItemCode))
             {
-                var menu = await _daMenuItem.GetMenuByCode(p.MenuGroupCode);
+                var menu = await _daMenuItem.GetMenuByCode(p.MenuItemCode);
 
                 if (menu == null)
                     return Result<CreateRoleMenuPermissionResponseModel>.Error(
