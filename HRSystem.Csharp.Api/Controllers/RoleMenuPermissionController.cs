@@ -35,7 +35,7 @@ public class RoleMenuPermissionController : ControllerBase
         }
     }
 
-    [HttpPost("permissions/list")]
+    [HttpGet("permissions/list")]
     public async Task<IActionResult> GetPermissions()
     {
         try
