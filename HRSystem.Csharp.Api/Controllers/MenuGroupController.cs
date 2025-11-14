@@ -21,9 +21,7 @@ public class MenuGroupController : ControllerBase
     {
         var response = await _blMenuGroup.GetAllMenuGroups(model);
         if (response.IsSuccess)
-        {
             return Ok(response);
-        }
 
         return BadRequest(response);
     }
@@ -39,9 +37,7 @@ public class MenuGroupController : ControllerBase
 
         var response = await _blMenuGroup.GetMenuGroup(menuGroupCode);
         if (response.IsSuccess)
-        {
             return Ok(response);
-        }
 
         return BadRequest(response);
     }
@@ -77,9 +73,7 @@ public class MenuGroupController : ControllerBase
 
         var result = await _blMenuGroup.CreateMenuGroupAsync(requestMenuGroup);
         if (result.IsSuccess)
-        {
             return Ok(result);
-        }
 
         return BadRequest(result);
     }
@@ -96,9 +90,7 @@ public class MenuGroupController : ControllerBase
 
         var result = await _blMenuGroup.DeleteMenuGroupAsync(menuGroupCode);
         if (result.IsSuccess)
-        {
             return Ok(result);
-        }
 
         return BadRequest(result);
     }

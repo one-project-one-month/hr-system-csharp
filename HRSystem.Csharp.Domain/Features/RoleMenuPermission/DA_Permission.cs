@@ -32,5 +32,18 @@ namespace HRSystem.Csharp.Domain.Features.RoleMenuPermission
             };
             return Result<PermissionModel>.Success(responseModel);
         }
+
+        public async Task<Result<List<PermissionModel>>> GetPermissions ()
+        {
+            var permissions = await _dbContext.TblPermissions.Select(p => new PermissionModel
+            {
+                PermissionId = p.PermissionId,
+                PermissionName = p.PermissionName,
+                PermissionCode = p.PermissionCode
+            }).AsNoTracking()
+              .ToListAsync();
+           
+            return Result<List<PermissionModel>>.Success(permissions);
+        }
     }
 }

@@ -73,4 +73,9 @@ public class BL_RoleMenuPermission
             ? Result<CreateRoleMenuPermissionResponseModel>.Error(result.Message)
             : Result<CreateRoleMenuPermissionResponseModel>.Success(result.Data);
     }
+
+    public async Task<Result<List<PermissionModel>>> GetAllPermissions()
+    {
+        return await _daPermission.GetPermissions();
+    }
 }
