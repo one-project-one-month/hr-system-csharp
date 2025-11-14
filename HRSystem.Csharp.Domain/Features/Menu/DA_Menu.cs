@@ -159,7 +159,7 @@ public class DA_Menu
                 Icon = menu.Icon,
                 SortOrder = menu.SortOrder,
                 CreatedAt = menu.CreatedAt,
-                //CreatedBy =loggined User,
+                CreatedBy = userId,
                 DeleteFlag = menu.DeleteFlag,
             };
             return Result<MenuModel>.Success(menuModel);
