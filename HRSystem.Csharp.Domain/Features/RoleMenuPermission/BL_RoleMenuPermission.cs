@@ -9,14 +9,16 @@ public class BL_RoleMenuPermission
     private readonly DA_Role _daRole;
     private readonly DA_MenuGroup _daMenuGroup;
     private readonly DA_Menu _daMenuItem;
+    private readonly DA_Permission _daPermission;
 
     public BL_RoleMenuPermission(DA_RoleMenuPermission daRoleMenuPermission, DA_Role daRole, DA_MenuGroup daMenuGroup,
-        DA_Menu daMenuItem)
+        DA_Menu daMenuItem, DA_Permission daPermission)
     {
         _daRoleMenuPermission = daRoleMenuPermission;
         _daRole = daRole;
         _daMenuGroup = daMenuGroup;
         _daMenuItem = daMenuItem;
+        _daPermission = daPermission;
     }
 
     public async Task<Result<MenuTreeResponseModel>> GetMenuTreeWithPermissionsAsync(MenuTreeRequestModel reqModel)
@@ -45,11 +47,18 @@ public class BL_RoleMenuPermission
 
             if (!string.IsNullOrWhiteSpace(p.MenuItemCode))
             {
-                var menu = await _daMenuItem.GetMenuByCode(p.MenuGroupCode);
+                var menu = await _daMenuItem.GetMenuByCode(p.MenuItemCode);
 
                 if (menu == null)
                     return Result<CreateRoleMenuPermissionResponseModel>.Error(
                         $"Invalid MenuCode '{p.MenuItemCode}' for group '{p.MenuGroupCode}'.");
+            }
+
+            if(!string.IsNullOrWhiteSpace(p.PermissionCode)) { 
+                var permission = await _daPermission.GetPermissionByCode(p.PermissionCode);
+                if(permission is null)
+                    return Result<CreateRoleMenuPermissionResponseModel>.Error(
+                        $"Invalid Permission Code '{p.PermissionCode}' for group '{p.MenuGroupCode}'.");
             }
 
             var menuGroup = await _daMenuGroup.GetMenuGroupByCode(p.MenuGroupCode);

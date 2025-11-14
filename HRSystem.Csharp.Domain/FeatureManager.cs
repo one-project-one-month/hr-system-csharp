@@ -4,12 +4,10 @@ using Microsoft.Data.SqlClient;
 using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Features.Verification;
-using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using System.Net.Mail;
 using DotNetEnv;
-
 
 namespace HRSystem.Csharp.Domain;
 
@@ -52,6 +50,7 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Sequence>();
         builder.Services.AddScoped<DA_CompanyRules>();
         builder.Services.AddScoped<DA_Verification>();
+        builder.Services.AddScoped<DA_Permission>();
 
         #endregion
 
@@ -88,14 +87,19 @@ public static class FeatureManager
         var mssqlConnection = $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(mssqlConnection,
-            sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null))
-              .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-        );
+            options.UseSqlServer(mssqlConnection));
+
+        //builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
+        //    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
+        //    ServiceLifetime.Transient, 
+        //    ServiceLifetime.Transient);
+
 
         builder.Services.AddScoped<IDbConnection>(sp =>
         {
-            return new SqlConnection(mssqlConnection); // connection will open lazily when Dapper executes
+            var conn = new SqlConnection(mssqlConnection);
+            conn.Open();
+            return conn;
         });
 
         builder.Services

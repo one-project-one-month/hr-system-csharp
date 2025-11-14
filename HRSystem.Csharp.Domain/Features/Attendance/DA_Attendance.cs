@@ -34,7 +34,15 @@ public class DA_Attendance
             var model = new AttendanceListResponseModel
             {
                 AttendanceList = attendanceList
-                    .Select(AttendanceListModel.FromTblAttendance)
+                    .Select(t =>
+                    {
+                        var attendance = AttendanceListModel.FromTblAttendance(t);
+                        attendance.EmployeeName = _db.TblEmployees
+                            .Where(e => e.EmployeeCode == t.EmployeeCode && e.DeleteFlag == false)
+                            .Select(e => e.Name)
+                            .FirstOrDefault();
+                        return attendance;
+                    })
                     .ToList()
             };
 

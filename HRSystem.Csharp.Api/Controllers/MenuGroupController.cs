@@ -17,7 +17,7 @@ public class MenuGroupController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> GetAll([FromQuery]PaginationRequestModel model)
+    public async Task<IActionResult> GetAll([FromQuery]MenuGroupPaginationModel model)
     {
         var response = await _blMenuGroup.GetAllMenuGroups(model);
         if (response.IsSuccess)

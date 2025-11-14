@@ -26,7 +26,7 @@ public class DA_Menu
                     (menu, menuGroup) => new { menu, menuGroup })
                 .Where(m => m.menu.DeleteFlag == false 
                        && m.menuGroup.DeleteFlag == false 
-                       && (string.IsNullOrEmpty(PaginationModel.MenuName) || m.menu.MenuName.StartsWith(PaginationModel.MenuName)))
+                       && (string.IsNullOrEmpty(PaginationModel.MenuName) || m.menu.MenuName.Contains(PaginationModel.MenuName)))
                 .Select(m => new MenuModel
                 {
                     MenuId = m.menu.MenuId,
@@ -159,7 +159,7 @@ public class DA_Menu
                 Icon = menu.Icon,
                 SortOrder = menu.SortOrder,
                 CreatedAt = menu.CreatedAt,
-                //CreatedBy =loggined User,
+                CreatedBy = userId,
                 DeleteFlag = menu.DeleteFlag,
             };
             return Result<MenuModel>.Success(menuModel);

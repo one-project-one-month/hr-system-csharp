@@ -11,7 +11,7 @@ public class BL_MenuGroup
         _daMenuGroup = daMenuGroup;
     }
 
-    public async Task<Result<List<MenuGroupModel>>> GetAllMenuGroups(PaginationRequestModel model)
+    public async Task<Result<List<MenuGroupModel>>> GetAllMenuGroups(MenuGroupPaginationModel model)
     {
         var response = await _daMenuGroup.GetAllMenuGroups(model);
         return Result<List<MenuGroupModel>>.Success(response);
@@ -20,14 +20,12 @@ public class BL_MenuGroup
     public async Task<Result<MenuGroupModel>> GetMenuGroup(string menuGroupId)
     {
         if (string.IsNullOrEmpty(menuGroupId))
-        {
             return Result<MenuGroupModel>.BadRequestError("MenuGroupId is required.");
-        }
+        
         var menuGroup = await _daMenuGroup.GetMenuGroupByCode(menuGroupId);
         if (menuGroup == null)
-        {
             return Result<MenuGroupModel>.Error("Menu group not found.");
-        }
+
         return Result<MenuGroupModel>.Success(menuGroup);
     }
 
@@ -45,9 +43,8 @@ public class BL_MenuGroup
     public async Task<Result<bool>> DeleteMenuGroupAsync(string menuGroupCode)
     {
         if (menuGroupCode is null)
-        {
             return Result<bool>.BadRequestError("Menu Group Code is required.");
-        }
+
         var response = await _daMenuGroup.DeleteMenuGroup(menuGroupCode);
         return response;
     }

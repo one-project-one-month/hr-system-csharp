@@ -1,4 +1,6 @@
-﻿namespace HRSystem.Csharp.Domain.Models.Employee;
+﻿using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+
+namespace HRSystem.Csharp.Domain.Models.Employee;
 
 public class EmployeeListResponseModel: PagedResult<EmployeeResponseModel>
 {
@@ -20,6 +22,7 @@ public class EmployeeResponseModel
 
     public string? PhoneNo { get; set; }
     public DateTime? CreatedAt { get; set; }
+    public MenuTreeResponseModel MenuTree { get; set; }
 }
 
 public class EmployeeEditResponseModel
