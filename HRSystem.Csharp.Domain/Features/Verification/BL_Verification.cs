@@ -144,7 +144,7 @@ public class BL_Verification : AuthorizationService
         }
     }
 
-    public async Task<Result<bool>> VerifyCode(VerificationRequestModel requestModel)
+    public async Task<Result<bool>> VerifyCode(VerifiyCodeRequestModel requestModel)
     {
         if (string.IsNullOrEmpty(requestModel.Email) || string.IsNullOrEmpty(requestModel.VerificationCode))
         {
