@@ -28,7 +28,7 @@ public class AttendanceController : ControllerBase
         return Ok(data);
     }
 
-    [HttpPut("update/{attendanceCode}")]
+    [HttpPut("AttendanceUpdate")]
     public async Task<IActionResult> AttendanceUpdate(AttendanceUpdateRequestModel requestModel)
     {
         var data = await _bL_Attendance.Update(requestModel);
