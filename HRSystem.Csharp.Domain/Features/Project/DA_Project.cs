@@ -53,7 +53,7 @@ public class DA_Project
 
             if (!string.IsNullOrWhiteSpace(reqModel.ProjectName))
             {
-                query = query.Where(r => r.ProjectName.ToLower() == reqModel.ProjectName.ToLower());
+                query = query.Where(r => r.ProjectName.ToLower().Contains(reqModel.ProjectName.ToLower()));
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);

@@ -45,7 +45,7 @@ public class DA_Location
 
             if (!string.IsNullOrWhiteSpace(reqModel.LocationName))
             {
-                query = query.Where(l => l.Name.ToLower() == reqModel.LocationName.ToLower());
+                query = query.Where(l => l.Name.ToLower().Contains(reqModel.LocationName.ToLower()));
             }
 
             query = query.OrderByDescending(l => l.CreatedAt);
