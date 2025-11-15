@@ -19,13 +19,11 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> Get([FromQuery] PaginationRequestModel model)
+    public async Task<IActionResult> Get([FromQuery] MenuPaginationModel model)
     {
         var result = await _blMenu.GetAllMenus(model);
         if (result.IsSuccess)
-        {
             return Ok(result);
-        }
 
         return BadRequest(result);
     }
@@ -78,9 +76,7 @@ public class MenuController : ControllerBase
         }
 
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -117,9 +113,7 @@ public class MenuController : ControllerBase
 
         var result = await _blMenu.DeleteMenuAsync(userId, menuCode);
         if (result.IsSuccess)
-        {
             return Ok(result);
-        }
 
         return BadRequest(result);
     }

@@ -50,6 +50,7 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Sequence>();
         builder.Services.AddScoped<DA_CompanyRules>();
         builder.Services.AddScoped<DA_Verification>();
+        builder.Services.AddScoped<DA_Permission>();
 
         #endregion
 
@@ -77,24 +78,29 @@ public static class FeatureManager
     {
         Env.Load(".env.development");
 
-        var host = Environment.GetEnvironmentVariable("DB_HOST");
+        var host = Environment.GetEnvironmentVariable("DB_HOST") ?? "127.0.0.1";
         //var port = Environment.GetEnvironmentVariable("DB_PORT");
         var db = Environment.GetEnvironmentVariable("DB_NAME");
         var user = Environment.GetEnvironmentVariable("DB_USER");
         var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-        var mssqlConnection = $"Server={host};Database={db};User Id={user};Password={password};TrustServerCertificate=True";
+        var mssqlConnection = $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(mssqlConnection));
-        
-        /*builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
-            ServiceLifetime.Transient, 
-            ServiceLifetime.Transient);*/
 
-        builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
-            new SqlConnection(mssqlConnection));
+        //builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
+        //    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
+        //    ServiceLifetime.Transient, 
+        //    ServiceLifetime.Transient);
+
+
+        builder.Services.AddScoped<IDbConnection>(sp =>
+        {
+            var conn = new SqlConnection(mssqlConnection);
+            conn.Open();
+            return conn;
+        });
 
         builder.Services
             .AddFluentEmail("hrsystem.opom@gmail.com")

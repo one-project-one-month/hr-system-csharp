@@ -13,19 +13,20 @@ public class DA_Menu
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<MenuModel>>> GetAllMenus(PaginationRequestModel PaginationModel)
+    public async Task<Result<List<MenuModel>>> GetAllMenus(MenuPaginationModel PaginationModel)
     {
         try
         {
             int pageNumber = PaginationModel.PageNo < 1 ? 1 : PaginationModel.PageNo;
             int pageSize = PaginationModel.PageSize <= 0 ? 10 : PaginationModel.PageSize;
-
             var menus = await _dbContext.TblMenus
                 .Join(_dbContext.TblMenuGroups,
                     menu => menu.MenuGroupCode,
                     menuGroup => menuGroup.MenuGroupCode,
                     (menu, menuGroup) => new { menu, menuGroup })
-                .Where(m => m.menu.DeleteFlag == false && m.menuGroup.DeleteFlag == false)
+                .Where(m => m.menu.DeleteFlag == false 
+                       && m.menuGroup.DeleteFlag == false 
+                       && (string.IsNullOrEmpty(PaginationModel.MenuName) || m.menu.MenuName.Contains(PaginationModel.MenuName)))
                 .Select(m => new MenuModel
                 {
                     MenuId = m.menu.MenuId,
@@ -158,7 +159,7 @@ public class DA_Menu
                 Icon = menu.Icon,
                 SortOrder = menu.SortOrder,
                 CreatedAt = menu.CreatedAt,
-                //CreatedBy =loggined User,
+                CreatedBy = userId,
                 DeleteFlag = menu.DeleteFlag,
             };
             return Result<MenuModel>.Success(menuModel);

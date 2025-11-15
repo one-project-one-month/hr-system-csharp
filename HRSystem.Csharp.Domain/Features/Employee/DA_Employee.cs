@@ -49,7 +49,7 @@ public class DA_Employee
             if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
             {
                 query = query.Where(r => r.Name != null
-                                         && r.Name.ToLower() == reqModel.EmployeeName.ToLower());
+                                         && r.Name.ToLower().Contains(reqModel.EmployeeName.ToLower()));
             }
 
 
@@ -152,7 +152,6 @@ public class DA_Employee
             var hashPassword = _jwtService.HashPassword(reqModel.Password);
 
             var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
-
             var newEmployee = new TblEmployee
             {
                 EmployeeId = DevCode.GenerateNewUlid(),
@@ -197,21 +196,18 @@ public class DA_Employee
             var existingEmp = await _appDbContext.TblEmployees
                 .FirstOrDefaultAsync(e => e.EmployeeCode == empCode && e.DeleteFlag != true);
 
-            if (existingEmp == null)
-            {
-                return Result<EmployeeUpdateResponseModel>.NotFoundError("Employee not found for update.");
-            }
+        if (existingEmp == null)
+            return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the role to be updated");
 
-            existingEmp.Name = emp.Name;
-            existingEmp.RoleCode = emp.RoleCode;
-            existingEmp.Email = emp.Email;
-            existingEmp.PhoneNo = emp.PhoneNo;
-            existingEmp.Salary = emp.Salary;
-            existingEmp.StartDate = emp.StartDate;
-            existingEmp.ResignDate = emp.ResignDate;
-            existingEmp.ModifiedAt = DateTime.UtcNow;
-            existingEmp.ModifiedBy = currentUser;
-
+        existingEmp.Name = emp.Name;
+        existingEmp.RoleCode = emp.RoleCode;
+        existingEmp.Email = emp.Email;
+        existingEmp.PhoneNo = emp.PhoneNo;
+        existingEmp.Salary = emp.Salary;
+        existingEmp.StartDate = emp.StartDate;
+        existingEmp.ResignDate = emp.ResignDate;
+        existingEmp.ModifiedAt = DateTime.UtcNow;
+        existingEmp.ModifiedBy = currentUser;
             var updated = await _appDbContext.SaveChangesAsync() > 0;
 
             return updated

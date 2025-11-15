@@ -2,6 +2,7 @@
 using HRSystem.Csharp.Domain.Models.Task;
 using HRSystem.Csharp.Shared.Enums;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HRSystem.Csharp.Domain.Features.Task;
 
@@ -16,11 +17,16 @@ public class DA_Task
         _daSequence = daSequence;
     }
 
-    public async Task<Result<TaskListResponseModel>> List(int pageNo, int PageSize)
+    public async Task<Result<TaskListResponseModel>> List(string TaskName, int pageNo, int PageSize)
     {
         try
         {
-            var tasks = await _db.TblTasks.Where(t => t.DeleteFlag == false)
+            var tasksQuery = _db.TblTasks.Where(t => t.DeleteFlag == false);
+            if (!string.IsNullOrWhiteSpace(TaskName))
+            {
+                tasksQuery = tasksQuery.Where(t => t.TaskName.ToLower().Contains(TaskName.ToLower()));
+            }
+            var tasks = await tasksQuery
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((pageNo - 1) * PageSize)
                 .Take(PageSize)

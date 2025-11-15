@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 
@@ -9,14 +10,16 @@ public class BL_RoleMenuPermission
     private readonly DA_Role _daRole;
     private readonly DA_MenuGroup _daMenuGroup;
     private readonly DA_Menu _daMenuItem;
+    private readonly DA_Permission _daPermission;
 
     public BL_RoleMenuPermission(DA_RoleMenuPermission daRoleMenuPermission, DA_Role daRole, DA_MenuGroup daMenuGroup,
-        DA_Menu daMenuItem)
+        DA_Menu daMenuItem, DA_Permission daPermission)
     {
         _daRoleMenuPermission = daRoleMenuPermission;
         _daRole = daRole;
         _daMenuGroup = daMenuGroup;
         _daMenuItem = daMenuItem;
+        _daPermission = daPermission;
     }
 
     public async Task<Result<MenuTreeResponseModel>> GetMenuTreeWithPermissionsAsync(MenuTreeRequestModel reqModel)
@@ -28,7 +31,7 @@ public class BL_RoleMenuPermission
     }
 
     public async Task<Result<CreateRoleMenuPermissionResponseModel>> CreateRoleMenuPermission
-        (CreateRoleMenuPermissionRequestModel reqModel)
+        ([FromBody] CreateRoleMenuPermissionRequestModel reqModel)
     {
         var roleResult = await _daRole.GetByRoleCode(reqModel.RoleCode);
         if (!roleResult.IsSuccess)
@@ -43,25 +46,41 @@ public class BL_RoleMenuPermission
                 return Result<CreateRoleMenuPermissionResponseModel>.Error("MenuGroupCode is required.");
             }
 
-            if (!string.IsNullOrWhiteSpace(p.MenuItemCode))
-            {
-                var menu = await _daMenuItem.GetMenuByCode(p.MenuGroupCode);
-
-                if (menu == null)
-                    return Result<CreateRoleMenuPermissionResponseModel>.Error(
-                        $"Invalid MenuCode '{p.MenuItemCode}' for group '{p.MenuGroupCode}'.");
-            }
-
             var menuGroup = await _daMenuGroup.GetMenuGroupByCode(p.MenuGroupCode);
+            
+            if (menuGroup is null)
+                return Result<CreateRoleMenuPermissionResponseModel>.Error($"MenuGroupCode '{p.MenuGroupCode}' does not exist.");
 
-            if (menuGroup == null)
-                return Result<CreateRoleMenuPermissionResponseModel>.Error(
-                    $"MenuGroupCode '{p.MenuGroupCode}' does not exist.");
+
+            if (menuGroup.HasMenuItem == true)
+            {
+                if (!string.IsNullOrWhiteSpace(p.MenuItemCode))
+                {
+                    var menu = await _daMenuItem.GetMenuByCode(p.MenuItemCode);
+
+                    if (menu == null)
+                        return Result<CreateRoleMenuPermissionResponseModel>.Error(
+                            $"Invalid MenuCode '{p.MenuItemCode}' for group '{p.MenuGroupCode}'.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(p.PermissionCode))
+                {
+                    var permission = await _daPermission.GetPermissionByCode(p.PermissionCode);
+                    if (permission is null)
+                        return Result<CreateRoleMenuPermissionResponseModel>.Error(
+                            $"Invalid Permission Code '{p.PermissionCode}' for group '{p.MenuGroupCode}'.");
+                }
+            }
         }
 
         var result = await _daRoleMenuPermission.SaveRoleMenuPermissionsAsync(reqModel);
         return result.IsError
             ? Result<CreateRoleMenuPermissionResponseModel>.Error(result.Message)
             : Result<CreateRoleMenuPermissionResponseModel>.Success(result.Data);
+    }
+
+    public async Task<Result<List<PermissionModel>>> GetAllPermissions()
+    {
+        return await _daPermission.GetPermissions();
     }
 }

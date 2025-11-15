@@ -13,12 +13,13 @@ public class DA_MenuGroup
         _context = context;
     }
 
-    public async Task<List<MenuGroupModel>> GetAllMenuGroups(PaginationRequestModel PaginationModel)
+    public async Task<List<MenuGroupModel>> GetAllMenuGroups(MenuGroupPaginationModel PaginationModel)
     {
         int pageNumber = PaginationModel.PageNo < 1 ? 1 : PaginationModel.PageNo;
         int pageSize = PaginationModel.PageSize <= 0 ? 10 : PaginationModel.PageSize;
         return await _context.TblMenuGroups
-            .Where(mg => mg.DeleteFlag == false)
+            .Where(mg => mg.DeleteFlag == false 
+                    && (string.IsNullOrEmpty(PaginationModel.MenuGroupName) || mg.MenuGroupName.Contains(PaginationModel.MenuGroupName)))
             .Select(mg => new MenuGroupModel
             {
                 MenuGroupId = mg.MenuGroupId,
