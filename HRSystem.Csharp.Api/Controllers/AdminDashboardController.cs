@@ -22,4 +22,18 @@ public class AdminDashboardController : Controller
 
                 return StatusCode(500, result);
         }
+
+        [HttpGet("attendances-histogram/{type}")]
+        public async Task<IActionResult> GetAttendanceHistogram(string type)
+        {
+                var result = await _blAdminDashboard.GetAttendanceHistogram(type);
+
+                if(result.IsSuccess) return Ok( result);
+
+                if(result.IsNotFound) return NotFound(result);
+
+                if(result.IsInvalidData) return BadRequest(result);
+
+                return StatusCode(500, result);
+        }
 }

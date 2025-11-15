@@ -15,4 +15,9 @@ public class BL_AdminDashboard
         {
                 return await _daAdminDashboard.GetStatsCards();
         }
+
+        public async Task<Result<List<AttendanceHistogramChart>>> GetAttendanceHistogram(string type)
+        {
+                return await _daAdminDashboard.GetAttendanceSummary(type);
+        }
 }
