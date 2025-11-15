@@ -4,8 +4,6 @@ public class AttendanceCreateRequestModel
 {
     public string? EmployeeCode { get; set; }
 
-    public DateTime? AttendanceDate { get; set; }
-
     public DateTime? CheckInTime { get; set; }
 
     public string? CheckInLocation { get; set; }

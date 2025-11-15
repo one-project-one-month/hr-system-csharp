@@ -61,11 +61,6 @@ public class DA_Attendance
             return Result<AttendanceCreateResponseModel>.ValidationError("Employee Code is required!");
         }
 
-        if (!requestModel.AttendanceDate.HasValue)
-        {
-            return Result<AttendanceCreateResponseModel>.ValidationError("Attendance Date is required!");
-        }
-
         if (!requestModel.CheckInTime.HasValue)
         {
             return Result<AttendanceCreateResponseModel>.ValidationError("CheckIn Time is required!");
@@ -93,17 +88,10 @@ public class DA_Attendance
 
             //Full Day late
             int FullDayFlag = 0;
-            if (HalfDayFlag == 2)
+            if (HalfDayFlag == 3)
             {
                 FullDayFlag = 1;
             }
-
-            //Status
-            if (HourLateFlag == 1)
-            {
-
-            }
-
 
             //Check Location
             bool IsSavedLocation = false;
@@ -121,7 +109,7 @@ public class DA_Attendance
                 AttendanceId = Guid.NewGuid().ToString(),
                 AttendanceCode = attendanceCode,
                 EmployeeCode = requestModel.EmployeeCode,
-                AttendanceDate = requestModel.AttendanceDate,
+                AttendanceDate = DateTime.UtcNow,
                 CheckInTime = requestModel.CheckInTime,
                 CheckInLocation = requestModel.CheckInLocation,
                 CheckOutTime = requestModel.CheckOutTime,
@@ -160,7 +148,15 @@ public class DA_Attendance
         if (ComRuleOfficeStart != null)
         {
             StartTimeValue = ComRuleOfficeStart.Value;
-            officeStartTime = TimeSpan.Parse(StartTimeValue);
+            if (StartTimeValue.Contains(":"))
+            {
+                officeStartTime = TimeSpan.Parse(StartTimeValue);
+            }
+            else
+            {
+                officeStartTime = TimeSpan.FromHours(int.Parse(StartTimeValue));
+            }
+
         }
 
         #endregion
@@ -173,7 +169,15 @@ public class DA_Attendance
         if (ComRuleOfficeEnd != null)
         {
             OfficeEndValue = ComRuleOfficeEnd.Value;
-            officeEndTime = TimeSpan.Parse(OfficeEndValue);
+            if (OfficeEndValue.Contains(":"))
+            {
+                officeEndTime = TimeSpan.Parse(OfficeEndValue);
+            }
+            else
+            {
+                officeEndTime = TimeSpan.FromHours(int.Parse(OfficeEndValue));
+            }
+
         }
 
         #endregion
@@ -212,7 +216,15 @@ public class DA_Attendance
         if (ComRuleOfficeStart != null)
         {
             StartTimeValue = ComRuleOfficeStart.Value;
-            StartTime = TimeSpan.Parse(StartTimeValue);
+            if (StartTimeValue.Contains(":"))
+            {
+                StartTime = TimeSpan.Parse(StartTimeValue);
+            }
+            else
+            {
+                StartTime = TimeSpan.FromHours(int.Parse(StartTimeValue));
+            }
+
         }
 
         #endregion
@@ -225,7 +237,15 @@ public class DA_Attendance
         if (ComRuleCheckinAccept != null)
         {
             CheckInAcceptValue = ComRuleCheckinAccept.Value;
-            CheckInAccept = TimeSpan.Parse(CheckInAcceptValue);
+            if (CheckInAcceptValue.Contains(":"))
+            {
+                CheckInAccept = TimeSpan.Parse(CheckInAcceptValue);
+            }
+            else
+            {
+                CheckInAccept = TimeSpan.FromHours(int.Parse(CheckInAcceptValue));
+            }
+
         }
 
         #endregion
@@ -238,7 +258,14 @@ public class DA_Attendance
         if (ComRuleCheckinLate != null)
         {
             CheckInLateValue = ComRuleCheckinLate.Value;
-            CheckInLate = TimeSpan.Parse(CheckInLateValue);
+            if (CheckInLateValue.Contains(":"))
+            {
+                CheckInLate = TimeSpan.Parse(CheckInLateValue);
+            }
+            else
+            {
+                CheckInLate = TimeSpan.FromHours(int.Parse(CheckInLateValue));
+            }
         }
 
         #endregion
@@ -249,6 +276,7 @@ public class DA_Attendance
         if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate)
             hourLate = 1;
 
+
         //For CheckOut Late
         #region Office End Time
 
@@ -256,7 +284,14 @@ public class DA_Attendance
         if (ComRuleOfficeEnd != null)
         {
             OfficeEndValue = ComRuleOfficeEnd.Value;
-            OfficeEnd = TimeSpan.Parse(OfficeEndValue);
+            if (OfficeEndValue.Contains(":"))
+            {
+                OfficeEnd = TimeSpan.Parse(OfficeEndValue);
+            }
+            else
+            {
+                OfficeEnd = TimeSpan.FromHours(int.Parse(OfficeEndValue));
+            }
         }
 
         #endregion
@@ -269,7 +304,14 @@ public class DA_Attendance
         if (ComRuleCheckoutAccept != null)
         {
             CheckoutAcceptValue = ComRuleCheckoutAccept.Value;
-            CheckoutAccept = TimeSpan.Parse(CheckoutAcceptValue);
+            if (CheckoutAcceptValue.Contains(":"))
+            {
+                CheckoutAccept = TimeSpan.Parse(CheckoutAcceptValue);
+            }
+            else
+            {
+                CheckoutAccept = TimeSpan.FromHours(int.Parse(CheckoutAcceptValue));
+            }
         }
 
         #endregion
@@ -282,7 +324,14 @@ public class DA_Attendance
         if (ComRuleCheckoutLate != null)
         {
             CheckoutLateValue = ComRuleCheckoutLate.Value;
-            CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
+            if (CheckoutLateValue.Contains(":"))
+            {
+                CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
+            }
+            else
+            {
+                CheckoutLate = TimeSpan.FromHours(int.Parse(CheckoutLateValue));
+            }
         }
 
         #endregion
@@ -290,7 +339,10 @@ public class DA_Attendance
         DateTime eveningSecondLate = checkIn.Date.Add(CheckoutLate);
 
         if (checkOut < eveningFirstLate && checkOut >= eveningSecondLate)
-            hourLate += 1;
+            hourLate = 2;  // Can assume Evening Late for 2
+
+        if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate && checkOut < eveningFirstLate && checkOut >= eveningSecondLate)
+            hourLate = 3;  // both late
 
         return hourLate;
     }
@@ -310,7 +362,14 @@ public class DA_Attendance
         if (ComRuleCheckinLate != null)
         {
             CheckInLateValue = ComRuleCheckinLate.Value;
-            CheckInLate = TimeSpan.Parse(CheckInLateValue);
+            if (CheckInLateValue.Contains(":"))
+            {
+                CheckInLate = TimeSpan.Parse(CheckInLateValue);
+            }
+            else
+            {
+                CheckInLate = TimeSpan.FromHours(int.Parse(CheckInLateValue));
+            }
         }
 
         #endregion
@@ -326,7 +385,14 @@ public class DA_Attendance
         if (ComRuleCheckoutLate != null)
         {
             CheckoutLateValue = ComRuleCheckoutLate.Value;
-            CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
+            if (CheckoutLateValue.Contains(":"))
+            {
+                CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
+            }
+            else
+            {
+                CheckoutLate = TimeSpan.FromHours(int.Parse(CheckoutLateValue));
+            }
         }
 
         #endregion
@@ -334,7 +400,11 @@ public class DA_Attendance
         DateTime eveningLate = checkIn.Date.Add(CheckoutLate);
 
         if (checkOut < eveningLate)
-            halfDayLate += 1;
+            halfDayLate = 2;
+
+
+        if (checkIn > MorningLate && checkOut < eveningLate)
+            halfDayLate = 3;
 
         return halfDayLate;
     }
@@ -366,7 +436,7 @@ public class DA_Attendance
 
             //Full Day late
             int FullDayFlag = 0;
-            if (HalfDayFlag == 2)
+            if (HalfDayFlag == 3)
             {
                 FullDayFlag = 1;
             }
