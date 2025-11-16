@@ -46,11 +46,11 @@ public class DA_Auth : AuthorizationService
             
 
             if(string.IsNullOrEmpty(user.RoleCode))
-                return Result<AuthResponseModel>.InvalidDataError("The user doen't have an assigned role!");
+                return Result<AuthResponseModel>.InvalidDataError("The user doesn't have an assigned role!");
 
             var role = await _role.GetByRoleCode(user.RoleCode);
             if (!role.IsSuccess)
-                return Result<AuthResponseModel>.InvalidDataError("The user doen't have an assigned role!");
+                return Result<AuthResponseModel>.InvalidDataError("The user doesn't have an assigned role!");
 
             if (user.IsFirstTimeLogin == true)
             {
