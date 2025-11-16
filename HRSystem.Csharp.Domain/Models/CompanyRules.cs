@@ -1,6 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Models.Common;
 
-namespace HRSystem.Csharp.Domain.Models.CompanyRules;
+namespace HRSystem.Csharp.Domain.Models;
 
 public class CompanyRuleListResponseModel : PagedResult<CompanyRules>
 {
