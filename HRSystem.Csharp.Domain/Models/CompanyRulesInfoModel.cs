@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HRSystem.Csharp.Domain.Models.CompanyRules
+namespace HRSystem.Csharp.Domain.Models
 {
     public class CompanyRulesInfoModel
     {

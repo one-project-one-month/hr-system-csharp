@@ -1,5 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Features.Rule;
-using HRSystem.Csharp.Domain.Models.CompanyRules;
+using HRSystem.Csharp.Domain.Models;
 
 namespace HRSystem.Csharp.Api.Controllers
 {
