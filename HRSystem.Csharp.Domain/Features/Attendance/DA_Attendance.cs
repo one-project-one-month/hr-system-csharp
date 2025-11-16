@@ -16,12 +16,24 @@ public class DA_Attendance
         _daSequence = daSequence;
     }
 
-    public async Task<Result<AttendanceListResponseModel>> List(int pageNo, int PageSize)
+    public async Task<Result<AttendanceListResponseModel>> List(DateTime startDate, DateTime endDate,int pageNo, int PageSize)
     {
         try
         {
-            var attendanceList = await _db.TblAttendances
-                    .Where(x => x.DeleteFlag == false)
+            var attQuery = _db.TblAttendances.Where(x => x.DeleteFlag == false);
+            if(startDate != DateTime.MinValue && endDate == DateTime.MinValue)
+            {
+                attQuery = attQuery.Where(x=> DateOnly.FromDateTime(x.AttendanceDate.Value) == DateOnly.FromDateTime(startDate));
+            }
+            else if (startDate == DateTime.MinValue && endDate != DateTime.MinValue)
+            {
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate.Value) == DateOnly.FromDateTime(endDate));
+            }
+            else if (startDate != DateTime.MinValue && endDate != DateTime.MinValue)
+            {
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate.Value) >= DateOnly.FromDateTime(startDate) && DateOnly.FromDateTime(x.AttendanceDate.Value) <= DateOnly.FromDateTime(endDate));
+            }
+            var attendanceList = await attQuery
                     .OrderByDescending(x => x.AttendanceDate)
                     .Skip((pageNo - 1) * PageSize)
                     .Take(PageSize)
