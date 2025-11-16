@@ -1,6 +1,6 @@
-﻿using HRSystem.Csharp.Domain.Models;
+﻿using HRSystem.Csharp.Domain.Models.CompanyRules;
 
-namespace HRSystem.Csharp.Domain.Features.Rule;
+namespace HRSystem.Csharp.Domain.Features.Rules;
 
 public class DA_CompanyRules
 {

@@ -87,6 +87,8 @@ public static class FeatureManager
         var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
 
+        var mssqlConnection = $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
+
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(mssqlConnection));
 
