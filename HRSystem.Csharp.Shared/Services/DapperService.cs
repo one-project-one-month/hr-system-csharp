@@ -27,7 +27,7 @@ public class DapperService
                 parameters,
                 commandType: CommandType.StoredProcedure
             );
-
+                
             // Read the single object from the first result set.
             // The output parameters are populated in the 'parameters' object after this call.
             var result = await multi.ReadSingleOrDefaultAsync<T>();
@@ -39,6 +39,27 @@ public class DapperService
             // Log the custom error and return a default value.
             _logger.LogError(ex.ToString());
             return default(T);
+        }
+    }
+
+    public async Task<IEnumerable<T>> QueryStoredProcedureWithMultipleResults<T>(string spName, DynamicParameters parameters)
+    {
+        try
+        {
+            if (_dbConnection.State != ConnectionState.Open)
+                _dbConnection.Open();
+            using var multi = await _dbConnection.QueryMultipleAsync(
+                spName,
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+            var results = await multi.ReadAsync<T>();
+            return results;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return Enumerable.Empty<T>();
         }
     }
 }

@@ -23,12 +23,6 @@ public class AttendanceEditModel
 
     public decimal? WorkingHour { get; set; }
 
-    public int? HourLateFlag { get; set; }
-
-    public int? HalfDayFlag { get; set; }
-
-    public int? FullDayFlag { get; set; }
-
     public string? Remark { get; set; }
 
     public bool? IsSavedLocation { get; set; }
@@ -45,9 +39,6 @@ public class AttendanceEditModel
             CheckOutTime = tblAttendance.CheckOutTime,
             CheckOutLocation = tblAttendance.CheckOutLocation,
             WorkingHour = tblAttendance.WorkingHour,
-            HourLateFlag = tblAttendance.HourLateFlag,
-            HalfDayFlag = tblAttendance.HalfDayFlag,
-            FullDayFlag = tblAttendance.FullDayFlag,
             Remark = tblAttendance.Remark,
             IsSavedLocation = tblAttendance.IsSavedLocation
         };

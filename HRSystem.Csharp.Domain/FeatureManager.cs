@@ -1,9 +1,11 @@
-﻿using HRSystem.Csharp.Domain.Features.Role;
-using HRSystem.Csharp.Domain.Features.Rule;
-using Microsoft.Data.SqlClient;
+﻿using DotNetEnv;
+using HRSystem.Csharp.Domain.Features.Reports;
+using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
+using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Features.Verification;
+using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using System.Net.Mail;
@@ -31,6 +33,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Verification>();
         builder.Services.AddScoped<BL_AdminDashboard>();
 
+        builder.Services.AddScoped<BL_AttendanceReports>();
         #endregion
 
         #region Main Nav Bar BL
@@ -54,6 +57,8 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Verification>();
         builder.Services.AddScoped<DA_AdminDashboard>();
 
+        builder.Services.AddScoped<DA_Permission>();
+        builder.Services.AddScoped<DA_AttendanceReports>();
         #endregion
 
         #region Main Nav Bar DA
@@ -80,7 +85,7 @@ public static class FeatureManager
     {
         Env.Load(".env.development");
 
-        var host = Environment.GetEnvironmentVariable("DB_HOST");
+        var host = Environment.GetEnvironmentVariable("DB_HOST") ?? "127.0.0.1";
         //var port = Environment.GetEnvironmentVariable("DB_PORT");
         var db = Environment.GetEnvironmentVariable("DB_NAME");
         var user = Environment.GetEnvironmentVariable("DB_USER");
@@ -90,14 +95,19 @@ public static class FeatureManager
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(mssqlConnection));
-        
-        /*builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
-            ServiceLifetime.Transient, 
-            ServiceLifetime.Transient);*/
 
-        builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
-            new SqlConnection(mssqlConnection));
+        //builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
+        //    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
+        //    ServiceLifetime.Transient, 
+        //    ServiceLifetime.Transient);
+
+
+        builder.Services.AddScoped<IDbConnection>(sp =>
+        {
+            var conn = new SqlConnection(mssqlConnection);
+            conn.Open();
+            return conn;
+        });
 
         builder.Services
             .AddFluentEmail("hrsystem.opom@gmail.com")

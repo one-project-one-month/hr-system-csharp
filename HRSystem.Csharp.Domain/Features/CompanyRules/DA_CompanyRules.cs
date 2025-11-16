@@ -23,7 +23,7 @@ public class DA_CompanyRules
             if (!string.IsNullOrWhiteSpace(reqModel.RuleDescription))
             {
                 query = query.Where(r => r.Description != null
-                                         && r.Description.ToLower().Contains(reqModel.RuleDescription.ToLower()));
+                                         && r.Description.ToLower() == reqModel.RuleDescription.ToLower());
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);

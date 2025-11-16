@@ -12,7 +12,7 @@ public class BL_Menu
         _daMenu = daMenu;
     }
 
-    public async Task<Result<List<MenuModel>>> GetAllMenus(PaginationRequestModel model)
+    public async Task<Result<List<MenuModel>>> GetAllMenus(MenuPaginationModel model)
     {
         return await _daMenu.GetAllMenus(model);
     }
@@ -21,9 +21,7 @@ public class BL_Menu
     {
         MenuModel? menu = await _daMenu.GetMenuByCode(menuCode);
         if (menu == null)
-        {
             return Result<MenuModel>.NotFoundError("Menu not found.");
-        }
 
         return Result<MenuModel>.Success(menu);
     }
@@ -31,24 +29,17 @@ public class BL_Menu
     public async Task<Result<bool>> UpdateMenu(string userId, TblMenu menu)
     {
         var existing = await _daMenu.GetMenuByCode(menu.MenuCode);
-        Console.WriteLine(existing);
-        Console.WriteLine(menu.MenuCode);
         if (existing == null)
-        {
             return Result<bool>.NotFoundError("Menu with this code doesn't exist!");
-        }
 
         bool menuGroupExist = await _daMenu.MenuGroupExists(menu.MenuGroupCode);
+
         if (!menuGroupExist)
-        {
             return Result<bool>.Error("Menu Group does not exist. Create Menu Group First!");
-        }
 
         var duplicateMenu = await _daMenu.MenuExists(menu);
         if (duplicateMenu)
-        {
             return Result<bool>.DuplicateRecordError("Menu with that MenuCode or MenuName already exists");
-        }
 
         TblMenu updating = new TblMenu
         {
@@ -73,16 +64,12 @@ public class BL_Menu
     {
         bool menuGroupExist = await _daMenu.MenuGroupExists(requestMenu.MenuGroupCode);
         if (!menuGroupExist)
-        {
             return Result<MenuModel>.Error("Menu Group does not exist. Create Menu Group First!");
-        }
-
+       
         bool duplicateMenu = await _daMenu.MenuCodeExists(requestMenu);
 
         if (duplicateMenu)
-        {
             return Result<MenuModel>.DuplicateRecordError("Menu with that MenuCode or MenuName already exists");
-        }
 
         var response = await _daMenu.CreateMenuAsync(userId, requestMenu);
         return response;
@@ -91,9 +78,7 @@ public class BL_Menu
     public async Task<Result<bool>> DeleteMenuAsync(string userId, string menuCode)
     {
         if (menuCode is null)
-        {
             return Result<bool>.BadRequestError("MenuCode is required.");
-        }
 
         var response = await _daMenu.DeleteMenuAsync(userId, menuCode);
         return response;
