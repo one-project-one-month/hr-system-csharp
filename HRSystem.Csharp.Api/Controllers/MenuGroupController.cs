@@ -2,11 +2,13 @@
 using HRSystem.Csharp.Domain.Models.Common;
 using HRSystem.Csharp.Domain.Models.MenuGroup;
 using HRSystem.Csharp.Shared;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class MenuGroupController : ControllerBase
 {
     private readonly BL_MenuGroup _blMenuGroup;
