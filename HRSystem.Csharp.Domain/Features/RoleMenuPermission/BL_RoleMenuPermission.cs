@@ -63,6 +63,8 @@ public class BL_RoleMenuPermission
                             $"Invalid MenuCode '{p.MenuItemCode}' for group '{p.MenuGroupCode}'.");
                 }
 
+                
+
                 if (!string.IsNullOrWhiteSpace(p.PermissionCode))
                 {
                     var permission = await _daPermission.GetPermissionByCode(p.PermissionCode);
