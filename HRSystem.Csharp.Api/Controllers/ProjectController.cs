@@ -42,7 +42,7 @@ public class ProjectController : ControllerBase
     [HttpGet("edit/{projectCode}")]
     public async Task<IActionResult> GetProject(string projectCode)
     {
-        var result = await _blProject.GetProject(new ProjectEditRequestModel
+        var result = await _blProject.GetProjectByCode(new ProjectEditRequestModel
         {
             ProjectCode = projectCode
         });
@@ -90,7 +90,8 @@ public class ProjectController : ControllerBase
     {
         if (reqModel.EmployeeCodes.Count == 0)
         {
-            var response = Result<AddEmployeeToProjectResponseModel>.BadRequestError("Employee Code is required!");
+            var response = Result<AddEmployeeToProjectResponseModel>
+                .BadRequestError("At least one employee is required!");
             return BadRequest(response);
         }
 

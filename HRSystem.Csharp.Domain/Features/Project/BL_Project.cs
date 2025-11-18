@@ -34,7 +34,7 @@ public class BL_Project
         return await _daProject.CreateProject(project);
     }
 
-    public async Task<Result<ProjectResponseModel>> GetProject(ProjectEditRequestModel reqModel)
+    public async Task<Result<ProjectResponseModel>> GetProjectByCode(ProjectEditRequestModel reqModel)
     {
         return await _daProject.GetProjectByCode(reqModel);
     }
@@ -65,16 +65,54 @@ public class BL_Project
     {
         try
         {
-            var project = await GetProject(new ProjectEditRequestModel
+            #region Validate Duplicate Employee Code
+
+            var normalized = reqModel?.EmployeeCodes
+                ?.Where(c => !string.IsNullOrWhiteSpace(c))
+                .Select(c => c.Trim())
+                .ToList() ?? new List<string>();
+
+            if (!normalized.Any())
+                return Result<AddEmployeeToProjectResponseModel>.ValidationError(
+                    "At least one employee code is required.",
+                    new AddEmployeeToProjectResponseModel { EmployeeCodes = new List<string>() });
+
+            // check duplicate code in request data
+            var duplicatesInRequest = normalized
+                .GroupBy(c => c, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicatesInRequest.Any())
+            {
+                return Result<AddEmployeeToProjectResponseModel>.ValidationError(
+                    $"Duplicate employee codes in request: {string.Join(", ", duplicatesInRequest)}",
+                    new AddEmployeeToProjectResponseModel { EmployeeCodes = duplicatesInRequest });
+            }
+            #endregion
+
+            #region Validate Project Exists
+
+            var project = await GetProjectByCode(new ProjectEditRequestModel
             {
                 ProjectCode = projectCode
             });
 
-            if (project.IsError || project?.Data is null)
+            if (project.IsError)
+            {
+                return Result<AddEmployeeToProjectResponseModel>.SystemError(project.Message);
+            }
+
+            if (project?.Data is null)
             {
                 return Result<AddEmployeeToProjectResponseModel>.NotFoundError(
                     $"Project - {projectCode} doesn't exist!");
             }
+
+            #endregion
+
+            #region Validate each employee exists and not have been added to the project
 
             // check employee exist in Tbl_Employee
             var invalidEmployeesResult = await _daEmployee.ValidateEmployeesExist(reqModel);
@@ -89,6 +127,8 @@ public class BL_Project
             {
                 return assignedEmpRes;
             }
+
+            #endregion
 
             var result = await _daProject.AddEmployee(projectCode, reqModel);
             return result;
