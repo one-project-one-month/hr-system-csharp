@@ -47,3 +47,18 @@ public class EmployeeUpdateResponseModel
 public class EmployeeDeleteResponseModel
 {
 }
+
+public class UserProfileResponseModel
+{
+    public string? ProfileImage { get; set; }
+    public string? EmployeeCode { get; set; }
+    public string? Username { get; set; }
+    public string? RoleName { get; set; }
+    public string? Name { get; set; }
+    public string? Email { get; set; }
+    public string? PhoneNo { get; set; }
+}
+
+public class EditUserProfileResponseModel
+{
+}

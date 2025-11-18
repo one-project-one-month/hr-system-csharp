@@ -25,9 +25,9 @@ public class BL_Employee
         return employees;
     }
 
-    public async Task<Result<UserProfileResponseModel>> getUserProfile(string employeeCode)
+    public async Task<Result<UserProfileResponseModel>> getUserProfile()
     {
-        var result = await _daEmployee.GetUserProfile(employeeCode);
+        var result = await _daEmployee.GetUserProfile();
         return result;
     }
 
@@ -199,5 +199,9 @@ public class BL_Employee
         return result;
     }
 
-
+    public async Task<Result<EditUserProfileResponseModel>> EditProfile(EditUserProfileRequestModel requestModel)
+    {
+        var result = await _daEmployee.EditProfile(requestModel);
+        return result;
+    }
 }

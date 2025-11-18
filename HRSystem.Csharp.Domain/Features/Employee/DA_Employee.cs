@@ -6,10 +6,10 @@ using HRSystem.Csharp.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-
+using Microsoft.AspNetCore.Http.Features;
 namespace HRSystem.Csharp.Domain.Features.Employee;
 
-public class DA_Employee
+public class DA_Employee : AuthorizationService
 {
     string currentUser = "Admin"; //for testing only
 
@@ -18,8 +18,8 @@ public class DA_Employee
     private readonly JwtService _jwtService;
     private readonly DA_Sequence _daSequence;
 
-    public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger, DA_Sequence daSequence,
-        JwtService jwtService)
+    public DA_Employee(IHttpContextAccessor contextAccessor, AppDbContext appDbContext, ILogger<DA_Employee> logger, DA_Sequence daSequence,
+        JwtService jwtService) : base(contextAccessor)
     {
         _appDbContext = appDbContext;
         _logger = logger;
@@ -43,9 +43,7 @@ public class DA_Employee
 
             query = query.OrderByDescending(e => e.CreatedAt);
 
-            var rules = query.Join(_appDbContext.TblRoles,
-                .AsNoTracking()
-                .Where(e => !e.DeleteFlag)
+            var rules = query
                 .Join(_appDbContext.TblRoles,
                     e => e.RoleCode,
                     r => r.RoleCode,
@@ -114,46 +112,11 @@ public class DA_Employee
         }
     }
 
-    public async Task<Result<UserProfileResponseModel>> GetUserProfile(string employeeCode)
-    {
-        try
-        {
-            var result = await _appDbContext.TblEmployees
-                .AsNoTracking()
-                .Where(e => e.EmployeeCode == employeeCode && e.DeleteFlag == false)
-                .Join(_appDbContext.TblRoles,
-                    e => e.RoleCode,
-                    r => r.RoleCode,
-                    (e, r) => new UserProfileResponseModel
-                    {
-                        EmployeeCode = e.EmployeeCode,
-                        ProfileImage = e.ProfileImage,
-                        Username = e.Username,
-                        Name = e.Name,
-                        RoleName = r.RoleName,
-                        Email = e.Email,
-                        PhoneNo = e.PhoneNo
-                    })
-                .FirstOrDefaultAsync();
-
-            if (result == null)
-            {
-                return Result<UserProfileResponseModel>.ValidationError("Employee doesn't exist!");
-            }
-
-            return Result<UserProfileResponseModel>.Success(result);
-        }
-        catch (Exception ex)
-        {
-            return Result<UserProfileResponseModel>.Error(
-                $"An error occurred while retrieving employees: {ex.Message}");
-        }
-    }
-
 
     public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(
         EmployeeCreateRequestModel reqModel)
     {
+        
         try
         {
             var hashPassword = _jwtService.HashPassword(reqModel.Password);
@@ -253,6 +216,85 @@ public class DA_Employee
             "Employee Deleted Successfully");
     }
 
+    #region Profile 
+    public async Task<Result<UserProfileResponseModel>> GetUserProfile()
+    {
+        try
+        {
+        
+            if (UserCode is null)
+            {
+                return Result<UserProfileResponseModel>.NotFoundError("Login First.");
+            }
+            var result = await _appDbContext.TblEmployees
+                .AsNoTracking()
+                .Where(e => e.EmployeeCode == UserCode && e.DeleteFlag == false)
+                .Join(_appDbContext.TblRoles,
+                    e => e.RoleCode,
+                    r => r.RoleCode,
+                    (e, r) => new UserProfileResponseModel
+                    {
+                        EmployeeCode = e.EmployeeCode,
+                        ProfileImage = e.ProfileImage,
+                        Username = e.Username,
+                        Name = e.Name,
+                        RoleName = r.RoleName,
+                        Email = e.Email,
+                        PhoneNo = e.PhoneNo
+                    })
+                .FirstOrDefaultAsync();
+
+            if (result == null)
+            {
+                return Result<UserProfileResponseModel>.ValidationError("Employee doesn't exist!");
+            }
+
+            return Result<UserProfileResponseModel>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result<UserProfileResponseModel>.Error(
+                $"An error occurred while retrieving employees: {ex.Message}");
+        }
+    }
+    public async Task<Result<EditUserProfileResponseModel>> EditProfile(EditUserProfileRequestModel requestModel)
+    {
+       
+        try
+        {
+          
+            if (UserCode is null)
+            {
+                return Result<EditUserProfileResponseModel>.NotFoundError("Login First.");
+            }
+            var employee = await _appDbContext.TblEmployees
+                          .FirstOrDefaultAsync(
+                              x => x.EmployeeCode == UserCode &&
+                              x.DeleteFlag == false
+                          );
+            var uploadResults = await EnumDirectory.ProfileImage.UploadFilesAsync(new List<IFormFile>() { requestModel.ProfileImage });
+            employee.ProfileImage = string.Join(",", uploadResults.Select(x => x.FilePath));
+            employee.Name = requestModel.Name;
+            employee.PhoneNo= requestModel.PhoneNumber;
+            employee.ModifiedBy = UserCode;
+            employee.ModifiedAt = DateTime.UtcNow;
+       
+            await _appDbContext.SaveChangesAsync();
+
+            return Result<EditUserProfileResponseModel>.Success("Profile updated successfully.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogExceptionError(ex);
+            return Result<EditUserProfileResponseModel>.SystemError(ex.Message);
+        }
+    }
+
+    #endregion
+
+
+
+    #region Helper functions
     public async Task<Result<TblEmployee>> GetEmployeeByUserName(string username)
     {
         try
@@ -405,4 +447,5 @@ public class DA_Employee
             return Result<bool>.SystemError("An error occurred while checking phone no duplication.");
         }
     }
+    #endregion
 }

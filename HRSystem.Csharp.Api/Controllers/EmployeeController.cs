@@ -38,18 +38,6 @@ public class EmployeeController : ControllerBase
         return BadRequest(result);
     }
 
-    [HttpGet("profile/{employeeCode}")]
-    public async Task<IActionResult> GetUserProfile(string employeeCode)
-    {
-        var result = await _blEmployee.getUserProfile(employeeCode);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Data);
-        }
-
-        return BadRequest(result);
-    }
-
     [HttpPost("create")]
     public async Task<IActionResult> CreateEmployee([FromBody] EmployeeCreateRequestModel req)
     {
@@ -83,6 +71,29 @@ public class EmployeeController : ControllerBase
             return Ok(result);
         }
 
+        return BadRequest(result);
+    }
+
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetUserProfile()
+    {
+        var result = await _blEmployee.getUserProfile();
+        if (result.IsSuccess)
+        {
+            return Ok(result.Data);
+        }
+
+        return BadRequest(result);
+    }
+
+    [HttpPut("profile/update")]
+    public async Task<IActionResult> UpdateUserProfile([FromForm] EditUserProfileRequestModel req)
+    {
+        var result = await _blEmployee.EditProfile(req);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
         return BadRequest(result);
     }
 }
