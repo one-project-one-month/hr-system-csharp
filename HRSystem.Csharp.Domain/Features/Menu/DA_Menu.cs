@@ -36,6 +36,7 @@ public class DA_Menu
                     Url = m.menu.Url,
                     Icon = m.menu.Icon,
                     CreatedAt = m.menu.CreatedAt,
+                    CreatedBy = m.menu.CreatedBy,
                     ModifiedAt = m.menu.ModifiedAt,
                     SortOrder = m.menu.SortOrder,
                 })
