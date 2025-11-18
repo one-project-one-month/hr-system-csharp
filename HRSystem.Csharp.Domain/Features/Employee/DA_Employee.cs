@@ -1,6 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Models.Employee;
 using System.Data;
 using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared.Enums;
 using Microsoft.Extensions.Logging;
 
@@ -107,6 +108,32 @@ public class DA_Employee
         }
     }
 
+    public async Task<Result<AddEmployeeToProjectResponseModel>> ValidateEmployeesExist(
+        AddEmployeeToProjectRequestModel reqModel)
+    {
+        var existingEmployees = await _appDbContext.TblEmployees
+            .AsNoTracking()
+            .Where(e => reqModel.EmployeeCodes.Contains(e.EmployeeCode) && !e.DeleteFlag)
+            .Select(e => e.EmployeeCode)
+            .ToListAsync();
+
+        var invalidEmployees = reqModel.EmployeeCodes.Except(existingEmployees).ToList();
+
+        if (invalidEmployees.Any())
+        {
+            return Result<AddEmployeeToProjectResponseModel>.ValidationError(
+                $"Employees not found: {string.Join(", ", invalidEmployees)}",
+                new AddEmployeeToProjectResponseModel
+                {
+                    EmployeeCodes = invalidEmployees
+                }
+            );
+        }
+
+        return Result<AddEmployeeToProjectResponseModel>.Success(new AddEmployeeToProjectResponseModel(),
+            "All employees exist!");
+    }
+
     public async Task<Result<UserProfileResponseModel>> GetUserProfile(string employeeCode)
     {
         try
@@ -142,8 +169,7 @@ public class DA_Employee
                 $"An error occurred while retrieving employees: {ex.Message}");
         }
     }
-
-
+    
     public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(
         EmployeeCreateRequestModel reqModel)
     {
@@ -196,18 +222,18 @@ public class DA_Employee
             var existingEmp = await _appDbContext.TblEmployees
                 .FirstOrDefaultAsync(e => e.EmployeeCode == empCode && e.DeleteFlag != true);
 
-        if (existingEmp == null)
-            return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the role to be updated");
+            if (existingEmp == null)
+                return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the role to be updated");
 
-        existingEmp.Name = emp.Name;
-        existingEmp.RoleCode = emp.RoleCode;
-        existingEmp.Email = emp.Email;
-        existingEmp.PhoneNo = emp.PhoneNo;
-        existingEmp.Salary = emp.Salary;
-        existingEmp.StartDate = emp.StartDate;
-        existingEmp.ResignDate = emp.ResignDate;
-        existingEmp.ModifiedAt = DateTime.UtcNow;
-        existingEmp.ModifiedBy = currentUser;
+            existingEmp.Name = emp.Name;
+            existingEmp.RoleCode = emp.RoleCode;
+            existingEmp.Email = emp.Email;
+            existingEmp.PhoneNo = emp.PhoneNo;
+            existingEmp.Salary = emp.Salary;
+            existingEmp.StartDate = emp.StartDate;
+            existingEmp.ResignDate = emp.ResignDate;
+            existingEmp.ModifiedAt = DateTime.UtcNow;
+            existingEmp.ModifiedBy = currentUser;
             var updated = await _appDbContext.SaveChangesAsync() > 0;
 
             return updated

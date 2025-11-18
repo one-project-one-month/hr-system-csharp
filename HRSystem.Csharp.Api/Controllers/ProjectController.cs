@@ -1,6 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Features.Project;
 using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared;
+using Sprache;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -82,5 +83,23 @@ public class ProjectController : ControllerBase
         if (result.IsNotFound) return NotFound(result);
 
         return StatusCode(500, result);
+    }
+
+    [HttpPost("add-employee/{projectCode}")]
+    public async Task<IActionResult> AddEmployee(string projectCode, AddEmployeeToProjectRequestModel reqModel)
+    {
+        if (reqModel.EmployeeCodes.Count == 0)
+        {
+            var response = Result<AddEmployeeToProjectResponseModel>.BadRequestError("Employee Code is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blProject.AddEmployee(projectCode, reqModel);
+        if (result.IsError)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 }

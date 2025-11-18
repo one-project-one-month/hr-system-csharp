@@ -1,6 +1,5 @@
 using HRSystem.Csharp.Domain.Features.Verification;
 using HRSystem.Csharp.Domain.Models.Verification;
-using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 

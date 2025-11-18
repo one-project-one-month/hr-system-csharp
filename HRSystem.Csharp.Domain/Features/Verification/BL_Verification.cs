@@ -112,6 +112,7 @@ public class BL_Verification : AuthorizationService
                 Email = requestModel.Email,
                 ExpiredTime = expiry,
                 CreatedBy = "UserCode",
+                // CreatedBy = UserCode,
                 CreatedAt = DateTime.Now,
                 DeleteFlag = false
             };
