@@ -34,6 +34,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_AdminDashboard>();
 
         builder.Services.AddScoped<BL_AttendanceReports>();
+
         #endregion
 
         #region Main Nav Bar BL
@@ -59,6 +60,7 @@ public static class FeatureManager
 
         builder.Services.AddScoped<DA_Permission>();
         builder.Services.AddScoped<DA_AttendanceReports>();
+
         #endregion
 
         #region Main Nav Bar DA
@@ -91,9 +93,8 @@ public static class FeatureManager
         var user = Environment.GetEnvironmentVariable("DB_USER");
         var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-       var mssqlConnection = $"Server={host};Database={db};User Id={user};Password={password};TrustServerCertificate=True";
-
-        var mssqlConnection = $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
+        var mssqlConnection =
+            $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(mssqlConnection));
@@ -117,8 +118,8 @@ public static class FeatureManager
             {
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(
-                        "hrsystem.opom@gmail.com",
-                        "rkjs utor bqqm diyw"),
+                    "hrsystem.opom@gmail.com",
+                    "rkjs utor bqqm diyw"),
                 EnableSsl = true,
                 Port = 587,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
