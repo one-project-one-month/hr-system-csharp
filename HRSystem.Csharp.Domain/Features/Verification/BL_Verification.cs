@@ -113,7 +113,6 @@ public class BL_Verification : AuthorizationService
                 VerificationCode = otp,
                 Email = requestModel.Email,
                 ExpiredTime = expiry,
-                // CreatedBy = "UserCode",
                 CreatedBy = UserCode,
                 CreatedAt = DateTime.Now,
                 DeleteFlag = false
