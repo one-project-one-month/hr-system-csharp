@@ -8,6 +8,7 @@ using System.Data;
 using System.Net;
 using System.Net.Mail;
 using DotNetEnv;
+using HRSystem.Csharp.Domain.Features.CheckInOut;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -28,6 +29,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Sequence>();
         builder.Services.AddScoped<BL_CompanyRules>();
         builder.Services.AddScoped<BL_Verification>();
+        builder.Services.AddScoped<BL_CheckInOut>();
 
         #endregion
 
@@ -50,6 +52,7 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Sequence>();
         builder.Services.AddScoped<DA_CompanyRules>();
         builder.Services.AddScoped<DA_Verification>();
+        builder.Services.AddScoped<DA_CheckInOut>();
 
         #endregion
 
@@ -83,6 +86,7 @@ public static class FeatureManager
         var user = Environment.GetEnvironmentVariable("DB_USER");
         var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
+        builder.Services.AddAuthorization(); 
         var mssqlConnection = $"Server={host};Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
