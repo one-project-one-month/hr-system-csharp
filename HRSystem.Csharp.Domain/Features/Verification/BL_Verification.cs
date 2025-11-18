@@ -7,9 +7,9 @@ public class BL_Verification : AuthorizationService
     private readonly ILogger<BL_Verification> _logger;
 
     public BL_Verification(IHttpContextAccessor httpContextAccessor,
-                           DA_Verification da,
-                           EmailService emailService,
-                           ILogger<BL_Verification> logger) : base(httpContextAccessor)
+        DA_Verification da,
+        EmailService emailService,
+        ILogger<BL_Verification> logger) : base(httpContextAccessor)
     {
         _da = da;
         _emailService = emailService;
@@ -111,7 +111,8 @@ public class BL_Verification : AuthorizationService
                 VerificationCode = otp,
                 Email = requestModel.Email,
                 ExpiredTime = expiry,
-                CreatedBy = UserCode,
+                CreatedBy = "UserCode",
+                // CreatedBy = UserCode,
                 CreatedAt = DateTime.Now,
                 DeleteFlag = false
             };

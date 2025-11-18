@@ -35,7 +35,7 @@ public class RoleMenuPermissionController : ControllerBase
         }
     }
 
-    [HttpPost("permissions/list")]
+    [HttpGet("permissions/list")]
     public async Task<IActionResult> GetPermissions()
     {
         try
@@ -55,6 +55,7 @@ public class RoleMenuPermissionController : ControllerBase
     {
         try
         {
+
             var result = await _blRoleMenuPermission.CreateRoleMenuPermission(reqModel);
             if (result.IsError)
                 return BadRequest(result);

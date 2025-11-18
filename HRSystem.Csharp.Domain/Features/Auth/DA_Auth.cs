@@ -46,11 +46,11 @@ public class DA_Auth : AuthorizationService
             
 
             if(string.IsNullOrEmpty(user.RoleCode))
-                return Result<AuthResponseModel>.InvalidDataError("The user doen't have an assigned role!");
+                return Result<AuthResponseModel>.InvalidDataError("The user doesn't have an assigned role!");
 
             var role = await _role.GetByRoleCode(user.RoleCode);
             if (!role.IsSuccess)
-                return Result<AuthResponseModel>.InvalidDataError("The user doen't have an assigned role!");
+                return Result<AuthResponseModel>.InvalidDataError("The user doesn't have an assigned role!");
 
             if (user.IsFirstTimeLogin == true)
             {
@@ -118,17 +118,6 @@ public class DA_Auth : AuthorizationService
     {
         try
         {
-            var principal = _jwtService.GetPrincipalFromToken(requestModel.AccessToken);
-            if (principal is null)
-            {
-                return Result<AuthResponseModel>.ValidationError("Invalid access token.");
-            }
-
-            var jwtId = principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            if (jwtId is null)
-            {
-                return Result<AuthResponseModel>.ValidationError("Invalid Jwtid.");
-            }
 
             var storedToken = _appDbContext.TblRefreshTokens.FirstOrDefault(x => x.Token == requestModel.RefreshToken);
 
@@ -147,11 +136,6 @@ public class DA_Auth : AuthorizationService
                 return Result<AuthResponseModel>.ValidationError("Refresh Token has been expired.");
             }
 
-            if (storedToken.JwtId != jwtId)
-            {
-                return Result<AuthResponseModel>.ValidationError("Access Token and Refresh Token are not matched.");
-            }
-
             storedToken.IsRevoked = true;
             storedToken.RevokedAt = DateTime.UtcNow;
 
@@ -165,7 +149,7 @@ public class DA_Auth : AuthorizationService
 
             var newToken = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
-            jwtId = _jwtService.getJwtIdFromToken(newToken);
+            var jwtId = _jwtService.getJwtIdFromToken(newToken);
 
             var refreshToken = new TblRefreshToken
             {

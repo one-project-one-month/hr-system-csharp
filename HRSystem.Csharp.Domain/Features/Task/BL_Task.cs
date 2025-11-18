@@ -11,9 +11,9 @@ public class BL_Task
         _daTask = daTask;
     }
 
-    public async Task<Result<TaskListResponseModel>> ListAsync(int pageNo, int PageSize)
+    public async Task<Result<TaskListResponseModel>> ListAsync(string TaskName, int pageNo, int PageSize)
     {
-        var result = await _daTask.List(pageNo, PageSize);
+        var result = await _daTask.List(TaskName, pageNo, PageSize);
         return result;
     }
 

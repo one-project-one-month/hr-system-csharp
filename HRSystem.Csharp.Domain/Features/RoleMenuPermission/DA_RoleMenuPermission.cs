@@ -117,8 +117,8 @@ public class DA_RoleMenuPermission
                     RoleAndMenuPermissionCode = generatedCode,
                     RoleCode = reqModel.RoleCode,
                     MenuGroupCode = p.MenuGroupCode,
-                    MenuCode = p.MenuItemCode,
-                    PermissionCode = p.PermissionCode,
+                    MenuCode = p.MenuItemCode ?? null,
+                    PermissionCode = p.PermissionCode ?? null,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "admin",
                     DeleteFlag = false
@@ -135,8 +135,8 @@ public class DA_RoleMenuPermission
                     RoleAndMenuPermissionCode = p.RoleAndMenuPermissionCode,
                     RoleCode = p.RoleCode,
                     MenuGroupCode = p.MenuGroupCode,
-                    MenuCode = p.MenuCode,
-                    PermissionCode = p.PermissionCode,
+                    MenuCode = p.MenuCode ?? null,
+                    PermissionCode = p.PermissionCode ?? null,
                     CreatedDateTime = p.CreatedAt,
                     CreatedUserId = p.CreatedBy
                 }).ToList();

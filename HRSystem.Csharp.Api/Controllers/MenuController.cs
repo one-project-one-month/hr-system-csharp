@@ -4,11 +4,13 @@ using HRSystem.Csharp.Domain.Models.Menu;
 using System.Security.Claims;
 using HRSystem.Csharp.Shared;
 using HRSystem.Csharp.Domain.Models.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class MenuController : ControllerBase
 {
     private readonly BL_Menu _blMenu;

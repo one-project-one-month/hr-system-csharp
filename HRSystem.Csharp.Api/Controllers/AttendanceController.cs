@@ -15,9 +15,9 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpGet("AttendanceList")]
-    public async Task<IActionResult> AttendanceLists(int pageNo=1, int PageSize=10)
+    public async Task<IActionResult> AttendanceLists(String? EmpName, DateTime startDate, DateTime endDate, int pageNo=1, int PageSize=10)
     {
-        var data = await _bL_Attendance.List(pageNo, PageSize);
+        var data = await _bL_Attendance.List(EmpName,startDate, endDate, pageNo, PageSize);
         return Ok(data);
     }
 
@@ -28,7 +28,7 @@ public class AttendanceController : ControllerBase
         return Ok(data);
     }
 
-    [HttpPut("update/{attendanceCode}")]
+    [HttpPut("AttendanceUpdate")]
     public async Task<IActionResult> AttendanceUpdate(AttendanceUpdateRequestModel requestModel)
     {
         var data = await _bL_Attendance.Update(requestModel);

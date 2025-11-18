@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 
@@ -30,7 +31,7 @@ public class BL_RoleMenuPermission
     }
 
     public async Task<Result<CreateRoleMenuPermissionResponseModel>> CreateRoleMenuPermission
-        (CreateRoleMenuPermissionRequestModel reqModel)
+        ([FromBody] CreateRoleMenuPermissionRequestModel reqModel)
     {
         var roleResult = await _daRole.GetByRoleCode(reqModel.RoleCode);
         if (!roleResult.IsSuccess)
@@ -61,6 +62,8 @@ public class BL_RoleMenuPermission
                         return Result<CreateRoleMenuPermissionResponseModel>.Error(
                             $"Invalid MenuCode '{p.MenuItemCode}' for group '{p.MenuGroupCode}'.");
                 }
+
+                
 
                 if (!string.IsNullOrWhiteSpace(p.PermissionCode))
                 {

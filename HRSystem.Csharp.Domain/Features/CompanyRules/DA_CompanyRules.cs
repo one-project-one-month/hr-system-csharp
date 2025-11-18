@@ -1,6 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Models.CompanyRules;
 
-namespace HRSystem.Csharp.Domain.Features.Rule;
+namespace HRSystem.Csharp.Domain.Features.Rules;
 
 public class DA_CompanyRules
 {
@@ -23,7 +23,7 @@ public class DA_CompanyRules
             if (!string.IsNullOrWhiteSpace(reqModel.RuleDescription))
             {
                 query = query.Where(r => r.Description != null
-                                         && r.Description.ToLower().Contains(reqModel.RuleDescription.ToLower()));
+                                         && r.Description.ToLower() == reqModel.RuleDescription.ToLower());
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);

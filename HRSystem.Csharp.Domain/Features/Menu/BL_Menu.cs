@@ -41,20 +41,16 @@ public class BL_Menu
         if (duplicateMenu)
             return Result<bool>.DuplicateRecordError("Menu with that MenuCode or MenuName already exists");
 
-        TblMenu updating = new TblMenu
-        {
-            MenuId = existing.MenuId,
-            MenuCode = existing.MenuCode,
-            MenuName = menu.MenuName,
-            MenuGroupCode = menu.MenuGroupCode,
-            Url = menu.Url,
-            Icon = menu.Icon,
-            SortOrder = menu.SortOrder,
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = userId,
-        };
+        existing.MenuName = menu.MenuName;
+        existing.MenuGroupCode = menu.MenuGroupCode;
+        existing.Url = menu.Url;
+        existing.SortOrder = menu.SortOrder;
+        existing.Icon = menu.Icon;
+        existing.ModifiedAt = DateTime.UtcNow;
+        existing.ModifiedBy = userId;
 
-        var updated = await _daMenu.UpdateMenu(updating);
+
+        var updated = await _daMenu.UpdateMenu(existing);
         return updated
             ? Result<bool>.Success("Menu updated successfully!")
             : Result<bool>.Error("Update Menu Failed");
@@ -69,7 +65,9 @@ public class BL_Menu
         bool duplicateMenu = await _daMenu.MenuCodeExists(requestMenu);
 
         if (duplicateMenu)
+        {
             return Result<MenuModel>.DuplicateRecordError("Menu with that MenuCode or MenuName already exists");
+        }
 
         var response = await _daMenu.CreateMenuAsync(userId, requestMenu);
         return response;

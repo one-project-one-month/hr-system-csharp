@@ -28,7 +28,7 @@ public class DA_Role
 
             if (!string.IsNullOrWhiteSpace(reqModel.RoleName))
             {
-                query = query.Where(r => r.RoleName.ToLower() == reqModel.RoleName.ToLower());
+                query = query.Where(r => r.RoleName.ToLower().Contains(reqModel.RoleName.ToLower()));
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);

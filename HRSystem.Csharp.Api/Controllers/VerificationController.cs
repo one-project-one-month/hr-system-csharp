@@ -51,6 +51,7 @@ public class VerificationController : ControllerBase
     }
 
     [HttpPost("send-verification-mail")]
+    // [Authorize]
     public async Task<IActionResult> Create([FromBody] VerificationRequestModel reqModel)
     {
         var result = await _blVerification.Create(reqModel);
