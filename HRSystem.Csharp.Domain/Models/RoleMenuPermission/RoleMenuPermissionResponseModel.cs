@@ -25,7 +25,7 @@ public class CreateRoleMenuPermissionRequestModel
 
 public class MenuPermissionRequestModel
 {
-    public string MenuGroupCode { get; set; } = null!; 
+    public string? MenuGroupCode { get; set; } 
     public string? MenuItemCode { get; set; }
     public string? PermissionCode { get; set; }
     public bool IsChecked { get; set; }

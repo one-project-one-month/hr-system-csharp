@@ -16,12 +16,24 @@ public class DA_Attendance
         _daSequence = daSequence;
     }
 
-    public async Task<Result<AttendanceListResponseModel>> List(int pageNo, int PageSize)
+    public async Task<Result<AttendanceListResponseModel>> List(DateTime startDate, DateTime endDate,int pageNo, int PageSize)
     {
         try
         {
-            var attendanceList = await _db.TblAttendances
-                    .Where(x => x.DeleteFlag == false)
+            var attQuery = _db.TblAttendances.Where(x => x.DeleteFlag == false);
+            if(startDate != DateTime.MinValue && endDate == DateTime.MinValue)
+            {
+                attQuery = attQuery.Where(x=> DateOnly.FromDateTime(x.AttendanceDate.Value) == DateOnly.FromDateTime(startDate));
+            }
+            else if (startDate == DateTime.MinValue && endDate != DateTime.MinValue)
+            {
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate.Value) == DateOnly.FromDateTime(endDate));
+            }
+            else if (startDate != DateTime.MinValue && endDate != DateTime.MinValue)
+            {
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate.Value) >= DateOnly.FromDateTime(startDate) && DateOnly.FromDateTime(x.AttendanceDate.Value) <= DateOnly.FromDateTime(endDate));
+            }
+            var attendanceList = await attQuery
                     .OrderByDescending(x => x.AttendanceDate)
                     .Skip((pageNo - 1) * PageSize)
                     .Take(PageSize)
@@ -144,7 +156,7 @@ public class DA_Attendance
 
         #region Office Start Time
 
-        var ComRuleOfficeStart = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "OFFICE_START_TIME" && x.DeleteFlag == false);
+        var ComRuleOfficeStart = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_START_TIME" && x.DeleteFlag == false);
         if (ComRuleOfficeStart != null)
         {
             StartTimeValue = ComRuleOfficeStart.Value;
@@ -165,7 +177,7 @@ public class DA_Attendance
 
         #region Office End Time
 
-        var ComRuleOfficeEnd = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "OFFICE_END_TIME" && x.DeleteFlag == false);
+        var ComRuleOfficeEnd = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_END_TIME" && x.DeleteFlag == false);
         if (ComRuleOfficeEnd != null)
         {
             OfficeEndValue = ComRuleOfficeEnd.Value;
@@ -212,7 +224,7 @@ public class DA_Attendance
 
         #region Office Start Time
 
-        var ComRuleOfficeStart = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "OFFICE_START_TIME" && x.DeleteFlag == false);
+        var ComRuleOfficeStart = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_START_TIME" && x.DeleteFlag == false);
         if (ComRuleOfficeStart != null)
         {
             StartTimeValue = ComRuleOfficeStart.Value;
@@ -233,7 +245,7 @@ public class DA_Attendance
 
         #region Office Acceptable CheckIn
 
-        var ComRuleCheckinAccept = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKIN_ACCEPTABLE" && x.DeleteFlag == false);
+        var ComRuleCheckinAccept = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKIN_ACCEPTABLE" && x.DeleteFlag == false);
         if (ComRuleCheckinAccept != null)
         {
             CheckInAcceptValue = ComRuleCheckinAccept.Value;
@@ -254,7 +266,7 @@ public class DA_Attendance
 
         #region One Hour Late CheckIn
 
-        var ComRuleCheckinLate = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
+        var ComRuleCheckinLate = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
         if (ComRuleCheckinLate != null)
         {
             CheckInLateValue = ComRuleCheckinLate.Value;
@@ -280,7 +292,7 @@ public class DA_Attendance
         //For CheckOut Late
         #region Office End Time
 
-        var ComRuleOfficeEnd = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "OFFICE_END_TIME" && x.DeleteFlag == false);
+        var ComRuleOfficeEnd = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_END_TIME" && x.DeleteFlag == false);
         if (ComRuleOfficeEnd != null)
         {
             OfficeEndValue = ComRuleOfficeEnd.Value;
@@ -300,7 +312,7 @@ public class DA_Attendance
 
         #region Office Acceptable Checkout
 
-        var ComRuleCheckoutAccept = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKOUT_ACCEPTABLE" && x.DeleteFlag == false);
+        var ComRuleCheckoutAccept = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_ACCEPTABLE" && x.DeleteFlag == false);
         if (ComRuleCheckoutAccept != null)
         {
             CheckoutAcceptValue = ComRuleCheckoutAccept.Value;
@@ -320,7 +332,7 @@ public class DA_Attendance
 
         #region One Hour Late Checkout 
 
-        var ComRuleCheckoutLate = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
+        var ComRuleCheckoutLate = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
         if (ComRuleCheckoutLate != null)
         {
             CheckoutLateValue = ComRuleCheckoutLate.Value;
@@ -358,7 +370,7 @@ public class DA_Attendance
         //For Morning Part
         #region One Hour Late CheckIn
 
-        var ComRuleCheckinLate = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
+        var ComRuleCheckinLate = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
         if (ComRuleCheckinLate != null)
         {
             CheckInLateValue = ComRuleCheckinLate.Value;
@@ -381,7 +393,7 @@ public class DA_Attendance
         //For Evening Part
         #region One Hour Late Checkout
 
-        var ComRuleCheckoutLate = _db.TblCompanyRules.FirstOrDefault(x => x.Description == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
+        var ComRuleCheckoutLate = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
         if (ComRuleCheckoutLate != null)
         {
             CheckoutLateValue = ComRuleCheckoutLate.Value;

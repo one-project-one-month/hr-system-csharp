@@ -15,9 +15,9 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpGet("AttendanceList")]
-    public async Task<IActionResult> AttendanceLists(int pageNo=1, int PageSize=10)
+    public async Task<IActionResult> AttendanceLists(DateTime startDate, DateTime endDate, int pageNo=1, int PageSize=10)
     {
-        var data = await _bL_Attendance.List(pageNo, PageSize);
+        var data = await _bL_Attendance.List(startDate, endDate, pageNo, PageSize);
         return Ok(data);
     }
 

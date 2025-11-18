@@ -1,4 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models;
+﻿using HRSystem.Csharp.Domain.Models.CompanyRules;
 
 namespace HRSystem.Csharp.Domain.Features.Rule;
 

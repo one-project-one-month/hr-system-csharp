@@ -30,6 +30,8 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RefreshToken(RefreshTokenRequestModel requestModel)
     {
         var response = await _bl_Auth.RefreshTokenAsync(requestModel);
+        if (!response.IsSuccess) return BadRequest(response);
+
         return Ok(response);
     }
 
