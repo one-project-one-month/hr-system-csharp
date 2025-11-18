@@ -109,9 +109,20 @@ public class DA_Menu
             .AnyAsync(m => m.MenuCode == menu.MenuCode || m.MenuName == menu.MenuName);
     }
 
-    public async Task<bool> UpdateMenu(TblMenu menu)
+    public async Task<bool> UpdateMenu(MenuModel menu)
     {
-        _dbContext.TblMenus.Update(menu);
+        var foundMenu = await _dbContext.TblMenus.FirstOrDefaultAsync(
+                x => x.MenuCode == menu.MenuCode);
+        if(foundMenu == null)
+            return false;
+        foundMenu.MenuGroupCode = menu.MenuGroupCode;
+        foundMenu.MenuName = menu.MenuName;
+        foundMenu.Url = menu.Url;
+        foundMenu.Icon = menu.Icon;
+        foundMenu.ModifiedAt = menu.ModifiedAt;
+        foundMenu.ModifiedBy = menu.ModifiedBy;
+        foundMenu.SortOrder = menu.SortOrder;
+        _dbContext.TblMenus.Update(foundMenu);
         int rows = await _dbContext.SaveChangesAsync();
         return rows > 0;
     }
