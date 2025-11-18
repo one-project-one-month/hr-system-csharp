@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.Common;
+﻿using HRSystem.Csharp.Database.AppDbContextModels;
+using HRSystem.Csharp.Domain.Models.Common;
 using HRSystem.Csharp.Domain.Models.Menu;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -93,20 +94,24 @@ public class DA_Menu
         if (groupExists)
             return true;
 
-        else return false;
+        return false;
     }
 
     public async Task<bool> MenuCodeExists(MenuRequestModel menu)
     {
-        return await _dbContext.TblMenus
+
+
+        var exists =  await _dbContext.TblMenus
             .Where(m => !m.DeleteFlag && m.MenuGroupCode == menu.MenuGroupCode)
             .Join(
                 _dbContext.TblMenuGroups.Where(g => !g.DeleteFlag),
                 m => m.MenuGroupCode,
                 g => g.MenuGroupCode,
-                (m, g) => m
+                (m, g) => new {m, g}
             )
-            .AnyAsync(m => m.MenuCode == menu.MenuCode || m.MenuName == menu.MenuName);
+            .AnyAsync(x => x.m.MenuCode == menu.MenuCode || x.m.MenuName == menu.MenuName);
+        return exists;
+  
     }
 
     public async Task<bool> UpdateMenu(MenuModel menu)
@@ -131,12 +136,6 @@ public class DA_Menu
     {
         try
         {
-            var foundMenu = await _dbContext.TblMenus.FirstOrDefaultAsync(
-                x => x.MenuCode == requestMenu.MenuCode && x.MenuGroupCode == requestMenu.MenuGroupCode);
-            if (foundMenu != null)
-            {
-                return Result<MenuModel>.DuplicateRecordError("Menu with that MenuCode or MenuGroupCode is existed");
-            }
 
             // create new
             var menu = new TblMenu
