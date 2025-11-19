@@ -89,6 +89,9 @@ public class DA_Auth : AuthorizationService
             
             var roleMenuPermission = await  _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
 
+            if(roleMenuPermission is null)
+                return Result<AuthResponseModel>.InvalidDataError("Employee needs permissions to access");
+
             var refreshToken = new TblRefreshToken
             {
                 JwtId = jwtId,

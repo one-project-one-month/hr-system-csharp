@@ -11,7 +11,5 @@ public class AuthResponseModel
 
     public EmployeeResponseModel User { get; set; } = null!;
 
-    public MenuTreeResponseModel RoleMenuPermission { get; set; } = null!;
-
     public DateTime ExpiresAt { get; set; } 
 }
