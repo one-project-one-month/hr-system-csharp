@@ -1,6 +1,8 @@
 ﻿using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 using HRSystem.Csharp.Domain.Models.Auth;
 using HRSystem.Csharp.Domain.Models.Employee;
+using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,12 +14,18 @@ public class DA_Auth : AuthorizationService
     private readonly AppDbContext _appDbContext;
     private readonly JwtService _jwtService;
     private readonly DA_Role _role;
+    private readonly DA_RoleMenuPermission _roleMenuPermission;
 
-    public DA_Auth(IHttpContextAccessor contextAccessor, JwtService jwtService, AppDbContext appDbContext, DA_Role role) : base(contextAccessor)
+    public DA_Auth(IHttpContextAccessor contextAccessor,
+            JwtService jwtService, 
+            AppDbContext appDbContext,
+            DA_Role role,
+            DA_RoleMenuPermission roleMenuPermission) : base(contextAccessor)
     {
         _jwtService = jwtService;
         _appDbContext = appDbContext;
         _role = role;
+        _roleMenuPermission = roleMenuPermission;
     }
 
     public async Task<Result<AuthResponseModel>> LoginAsync(LoginRequestModel requestModel)
@@ -63,8 +71,9 @@ public class DA_Auth : AuthorizationService
                             Username = user.Username,
                             Name = user.Name,
                             Email = user.Email,
-                            PhoneNo = user.PhoneNo
-                        } 
+                            PhoneNo = user.PhoneNo,
+                            RoleName = role.Data.RoleName,
+                        }
                     }, 
                     "User is First Time.");
             }
@@ -72,6 +81,8 @@ public class DA_Auth : AuthorizationService
             var token = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
             var jwtId = _jwtService.getJwtIdFromToken(token);
+
+            var roleMenuPermission = _roleMenuPermission.GetMenuTreeWithPermissionsAsync(MenuTreeRequestModel model);
 
             var refreshToken = new TblRefreshToken
             {
@@ -87,8 +98,6 @@ public class DA_Auth : AuthorizationService
 
             _appDbContext.TblRefreshTokens.Add(refreshToken);
             await _appDbContext.SaveChangesAsync();
-            Console.WriteLine("refresh token is ________________"+ refreshToken.ToString());
-            Console.WriteLine("jwtId is -------------" + jwtId);
             var response = new AuthResponseModel
             {
                 AccessToken = token,
