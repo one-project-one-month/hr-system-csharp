@@ -1,6 +1,8 @@
 ﻿using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 using HRSystem.Csharp.Domain.Models.Auth;
 using HRSystem.Csharp.Domain.Models.Employee;
+using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,13 +14,18 @@ public class DA_Auth : AuthorizationService
     private readonly AppDbContext _appDbContext;
     private readonly JwtService _jwtService;
     private readonly DA_Role _role;
+    private readonly DA_RoleMenuPermission _roleMenuPermission;
 
-    public DA_Auth(IHttpContextAccessor contextAccessor, JwtService jwtService, AppDbContext appDbContext,
-        DA_Role role) : base(contextAccessor)
+    public DA_Auth(IHttpContextAccessor contextAccessor,
+            JwtService jwtService, 
+            AppDbContext appDbContext,
+            DA_Role role,
+            DA_RoleMenuPermission roleMenuPermission) : base(contextAccessor)
     {
         _jwtService = jwtService;
         _appDbContext = appDbContext;
         _role = role;
+        _roleMenuPermission = roleMenuPermission;
     }
 
     public async Task<Result<AuthResponseModel>> LoginAsync(LoginRequestModel requestModel)
@@ -64,15 +71,26 @@ public class DA_Auth : AuthorizationService
                             Username = user.Username,
                             Name = user.Name,
                             Email = user.Email,
-                            PhoneNo = user.PhoneNo
+                            PhoneNo = user.PhoneNo,
+                            RoleName = role.Data.RoleName,
                         }
-                    },
+                    }, 
                     "User is First Time.");
             }
 
             var token = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
             var jwtId = _jwtService.getJwtIdFromToken(token);
+
+            var model = new MenuTreeRequestModel
+            {
+                RoleCode = role.Data.RoleCode
+            };
+            
+            var roleMenuPermission = await  _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
+
+            if(roleMenuPermission is null)
+                return Result<AuthResponseModel>.InvalidDataError("Employee needs permissions to access");
 
             var refreshToken = new TblRefreshToken
             {
@@ -83,7 +101,8 @@ public class DA_Auth : AuthorizationService
                 CreatedAt = DateTime.Now,
                 CreatedBy = user.EmployeeCode,
                 ExpiryDate = DateTime.Now.AddDays(7),
-                DeleteFlag = false
+                DeleteFlag = false,
+                
             };
 
             _appDbContext.TblRefreshTokens.Add(refreshToken);
@@ -102,7 +121,8 @@ public class DA_Auth : AuthorizationService
                     RoleName = role.Data.RoleName,
                     Name = user.Name,
                     Email = user.Email,
-                    PhoneNo = user.PhoneNo
+                    PhoneNo = user.PhoneNo,
+                    MenuTree = roleMenuPermission.Data,
                 },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo,
             };
