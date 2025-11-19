@@ -11,9 +11,9 @@ public class BL_Attendance
         _attendance = attendance;
     }
 
-    public async Task<Result<AttendanceListResponseModel>> List(DateTime startDate, DateTime endDate, int pageNo, int PageSize)
+    public async Task<Result<AttendanceListResponseModel>> List(String? EmpName, DateTime startDate, DateTime endDate, int pageNo, int PageSize)
     {
-        var data = await _attendance.List(startDate, endDate, pageNo, PageSize);
+        var data = await _attendance.List(EmpName, startDate, endDate, pageNo, PageSize);
         return data;
     }
 
