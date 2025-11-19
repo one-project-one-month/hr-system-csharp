@@ -2,6 +2,7 @@
 using HRSystem.Csharp.Domain.Models.Attendance;
 using HRSystem.Csharp.Shared.Enums;
 using Microsoft.IdentityModel.Tokens;
+using System.Linq;
 
 namespace HRSystem.Csharp.Domain.Features.Attendance;
 
@@ -16,12 +17,24 @@ public class DA_Attendance
         _daSequence = daSequence;
     }
 
-    public async Task<Result<AttendanceListResponseModel>> List(DateTime startDate, DateTime endDate,int pageNo, int PageSize)
+    public async Task<Result<AttendanceListResponseModel>> List(String? EmpName, DateTime startDate, DateTime endDate,int pageNo, int PageSize)
     {
         try
         {
             var attQuery = _db.TblAttendances.Where(x => x.DeleteFlag == false);
-            if(startDate != DateTime.MinValue && endDate == DateTime.MinValue)
+
+            if (!string.IsNullOrWhiteSpace(EmpName))
+            {
+                var employees = _db.TblEmployees
+                            .Where(e => e.Name.Contains(EmpName) && e.DeleteFlag == false)
+                            .Select(e => e.EmployeeCode);
+
+                attQuery = attQuery.Where(x => employees.Contains(x.EmployeeCode));
+
+            }
+
+
+            if (startDate != DateTime.MinValue && endDate == DateTime.MinValue)
             {
                 attQuery = attQuery.Where(x=> DateOnly.FromDateTime(x.AttendanceDate.Value) == DateOnly.FromDateTime(startDate));
             }

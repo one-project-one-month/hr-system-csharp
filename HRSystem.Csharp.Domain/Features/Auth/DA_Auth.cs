@@ -47,25 +47,25 @@ public class DA_Auth : AuthorizationService
 
             if (user is null)
                 return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
-            
+
 
             if (!_jwtService.VerifyPassword(requestModel.Password, user.Password))
                 return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
-            
 
-            if(string.IsNullOrEmpty(user.RoleCode))
+
+            if (string.IsNullOrEmpty(user.RoleCode))
                 return Result<AuthResponseModel>.InvalidDataError("The user doesn't have an assigned role!");
 
             var role = await _role.GetByRoleCode(user.RoleCode);
             if (!role.IsSuccess)
                 return Result<AuthResponseModel>.InvalidDataError("The user doesn't have an assigned role!");
 
-            if (user.IsFirstTimeLogin == true)
+            if (user.IsFirstTimeLogin)
             {
                 return Result<AuthResponseModel>.Success(
-                    new AuthResponseModel 
-                    { 
-                        User = new EmployeeResponseModel 
+                    new AuthResponseModel
+                    {
+                        User = new EmployeeResponseModel
                         {
                             EmployeeCode = user.EmployeeCode,
                             Username = user.Username,
@@ -107,6 +107,8 @@ public class DA_Auth : AuthorizationService
 
             _appDbContext.TblRefreshTokens.Add(refreshToken);
             await _appDbContext.SaveChangesAsync();
+            Console.WriteLine("refresh token is ________________" + refreshToken.ToString());
+            Console.WriteLine("jwtId is -------------" + jwtId);
             var response = new AuthResponseModel
             {
                 AccessToken = token,
@@ -137,7 +139,6 @@ public class DA_Auth : AuthorizationService
     {
         try
         {
-
             var storedToken = _appDbContext.TblRefreshTokens.FirstOrDefault(x => x.Token == requestModel.RefreshToken);
 
             if (storedToken is null)
@@ -158,7 +159,8 @@ public class DA_Auth : AuthorizationService
             storedToken.IsRevoked = true;
             storedToken.RevokedAt = DateTime.UtcNow;
 
-            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.EmployeeCode == storedToken.EmployeeCode && !x.DeleteFlag);
+            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x =>
+                x.EmployeeCode == storedToken.EmployeeCode && !x.DeleteFlag);
             if (user is null)
                 Result<AuthResponseModel>.NotFoundError("User not found");
 
@@ -215,8 +217,8 @@ public class DA_Auth : AuthorizationService
         try
         {
             var tokens = await _appDbContext.TblRefreshTokens
-                        .Where(x => x.EmployeeCode == UserCode && x.IsRevoked != true)
-                        .ToListAsync();
+                .Where(x => x.EmployeeCode == UserCode && x.IsRevoked != true)
+                .ToListAsync();
 
             foreach (var token in tokens)
             {
@@ -295,5 +297,4 @@ public class DA_Auth : AuthorizationService
             ? Result<bool>.Success(true, "Password updated. Please login again.")
             : Result<bool>.SystemError("Failed to update user.");
     }
-
 }

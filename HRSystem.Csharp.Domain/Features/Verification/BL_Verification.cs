@@ -95,6 +95,8 @@ public class BL_Verification : AuthorizationService
 
     public async Task<Result<VerificationResponseModel>> Create(VerificationRequestModel requestModel)
     {
+        var userCode = UserCode;
+
         if (string.IsNullOrEmpty(requestModel.Email) || !requestModel.Email.IsValidEmail())
         {
             return Result<VerificationResponseModel>.ValidationError("Invalid email.");
