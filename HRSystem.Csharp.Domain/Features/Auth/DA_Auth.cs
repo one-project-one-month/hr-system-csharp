@@ -82,7 +82,12 @@ public class DA_Auth : AuthorizationService
 
             var jwtId = _jwtService.getJwtIdFromToken(token);
 
-            var roleMenuPermission = _roleMenuPermission.GetMenuTreeWithPermissionsAsync(MenuTreeRequestModel model);
+            var model = new MenuTreeRequestModel
+            {
+                RoleCode = role.Data.RoleCode
+            };
+            
+            var roleMenuPermission = await  _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
 
             var refreshToken = new TblRefreshToken
             {
@@ -93,7 +98,8 @@ public class DA_Auth : AuthorizationService
                 CreatedAt = DateTime.Now,
                 CreatedBy = user.EmployeeCode,
                 ExpiryDate = DateTime.Now.AddDays(7),
-                DeleteFlag = false
+                DeleteFlag = false,
+                
             };
 
             _appDbContext.TblRefreshTokens.Add(refreshToken);
@@ -110,7 +116,8 @@ public class DA_Auth : AuthorizationService
                     RoleName = role.Data.RoleName,
                     Name = user.Name,
                     Email = user.Email,
-                    PhoneNo = user.PhoneNo
+                    PhoneNo = user.PhoneNo,
+                    MenuTree = roleMenuPermission.Data,
                 },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo,
             };
