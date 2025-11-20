@@ -1,8 +1,12 @@
 ﻿using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
+using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Models.Auth;
 using HRSystem.Csharp.Domain.Models.Employee;
 using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+using HRSystem.Csharp.Shared;
+using HRSystem.Csharp.Shared.Enums;
+using HRSystem.Csharp.Database.AppDbContextModels;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,17 +19,20 @@ public class DA_Auth : AuthorizationService
     private readonly JwtService _jwtService;
     private readonly DA_Role _role;
     private readonly DA_RoleMenuPermission _roleMenuPermission;
+    private readonly DA_Sequence _daSequence;
 
     public DA_Auth(IHttpContextAccessor contextAccessor,
             JwtService jwtService, 
             AppDbContext appDbContext,
             DA_Role role,
-            DA_RoleMenuPermission roleMenuPermission) : base(contextAccessor)
+            DA_RoleMenuPermission roleMenuPermission,
+            DA_Sequence daSequence) : base(contextAccessor)
     {
         _jwtService = jwtService;
         _appDbContext = appDbContext;
         _role = role;
         _roleMenuPermission = roleMenuPermission;
+        _daSequence = daSequence;
     }
 
     public async Task<Result<AuthResponseModel>> LoginAsync(LoginRequestModel requestModel)
@@ -296,5 +303,93 @@ public class DA_Auth : AuthorizationService
         return result > 0
             ? Result<bool>.Success(true, "Password updated. Please login again.")
             : Result<bool>.SystemError("Failed to update user.");
+    }
+
+    public async Task<Result<AuthResponseModel>> AutoLoginAsync()
+    {
+        try
+        {
+            const string adminUsername = "admin";
+            const string adminPassword = "Admin123!";
+            const string adminRoleCode = "RL001";
+            const string adminRoleName = "Administrator";
+
+            // Check if admin user exists
+            var adminUser = await _appDbContext.TblEmployees
+                .FirstOrDefaultAsync(x => x.Username == adminUsername && !x.DeleteFlag);
+
+            // If admin user doesn't exist, create it
+            if (adminUser == null)
+            {
+                // Check if admin role exists, if not create it
+                var adminRole = await _role.GetByRoleCode(adminRoleCode);
+                if (!adminRole.IsSuccess)
+                {
+                    // Create admin role
+                    var newRole = new TblRole
+                    {
+                        RoleId = DevCode.GenerateNewUlid(),
+                        RoleCode = adminRoleCode,
+                        RoleName = adminRoleName,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = "SYSTEM",
+                        DeleteFlag = false
+                    };
+
+                    _appDbContext.TblRoles.Add(newRole);
+                    await _appDbContext.SaveChangesAsync();
+                }
+
+                // Generate employee code
+                string employeeCode;
+                try
+                {
+                    employeeCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
+                }
+                catch
+                {
+                    // If sequence generation fails, use a default code
+                    employeeCode = "EMP001";
+                }
+
+                // Create admin user
+                var hashedPassword = _jwtService.HashPassword(adminPassword);
+                adminUser = new TblEmployee
+                {
+                    EmployeeId = DevCode.GenerateNewUlid(),
+                    EmployeeCode = employeeCode,
+                    RoleCode = adminRoleCode,
+                    Username = adminUsername,
+                    Name = "System Administrator",
+                    Email = "admin@hrsystem.com",
+                    Password = hashedPassword,
+                    PhoneNo = "+1234567890",
+                    ProfileImage = "Profile",
+                    StartDate = DateTime.UtcNow,
+                    ResignDate = null,
+                    Salary = 100000.00m,
+                    IsFirstTimeLogin = false,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = "SYSTEM",
+                    DeleteFlag = false
+                };
+
+                _appDbContext.TblEmployees.Add(adminUser);
+                await _appDbContext.SaveChangesAsync();
+            }
+
+            // Now perform login with admin credentials
+            var loginRequest = new LoginRequestModel
+            {
+                UserName = adminUsername,
+                Password = adminPassword
+            };
+
+            return await LoginAsync(loginRequest);
+        }
+        catch (Exception ex)
+        {
+            return Result<AuthResponseModel>.SystemError($"An error occurred during auto-login: {ex.Message}");
+        }
     }
 }
