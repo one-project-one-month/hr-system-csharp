@@ -17,7 +17,7 @@ public partial class TblVerification
 
     public DateTime CreatedAt { get; set; }
 
-    public string? CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = null!;
 
     public DateTime? ModifiedAt { get; set; }
 
