@@ -15,9 +15,9 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpGet("AttendanceList")]
-    public async Task<IActionResult> AttendanceLists(int pageNo=1, int PageSize=10)
+    public async Task<IActionResult> AttendanceLists(String? EmpName, DateTime startDate, DateTime endDate, int pageNo=1, int PageSize=10)
     {
-        var data = await _bL_Attendance.List(pageNo, PageSize);
+        var data = await _bL_Attendance.List(EmpName,startDate, endDate, pageNo, PageSize);
         return Ok(data);
     }
 
@@ -28,21 +28,21 @@ public class AttendanceController : ControllerBase
         return Ok(data);
     }
 
-    [HttpPost("AttendanceUpdate")]
+    [HttpPut("AttendanceUpdate")]
     public async Task<IActionResult> AttendanceUpdate(AttendanceUpdateRequestModel requestModel)
     {
         var data = await _bL_Attendance.Update(requestModel);
         return Ok(data);
     }
 
-    [HttpGet("AttendanceEdit")]
+    [HttpGet("edit/{attendanceCode}")]
     public async Task<IActionResult> AttendanceEdit(string attendanceCode)
     {
         var data = await _bL_Attendance.Edit(attendanceCode);
         return Ok(data);
     }
 
-    [HttpPost("AttendanceDelete")]
+    [HttpDelete("delete/{attendanceCode}")]
     public async Task<IActionResult> AttendanceDelete(string attendanceCode)
     {
         var data = await _bL_Attendance.Delete(attendanceCode);

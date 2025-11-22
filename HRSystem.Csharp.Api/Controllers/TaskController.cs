@@ -15,9 +15,9 @@ public class TaskController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> ListAsync(int pageNo, int PageSize)
+    public async Task<IActionResult> ListAsync(string? TaskName, int pageNo = 1, int PageSize = 10)
     {
-        var result = await _blTask.ListAsync(pageNo, PageSize);
+        var result = await _blTask.ListAsync(TaskName, pageNo, PageSize);
         return Ok(result);
     }
 
@@ -35,14 +35,14 @@ public class TaskController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("update")]
+    [HttpPut("update")]
     public async Task<IActionResult> UpdateAsync(TaskUpdateRequestModel requestModel)
     {
         var result = await _blTask.UpdateAsync(requestModel);
         return Ok(result);
     }
 
-    [HttpPost("delete")]
+    [HttpDelete("delete")]
     public async Task<IActionResult> DeleteAsync(string taskId)
     {
         var result = await _blTask.DeleteAsync(taskId);

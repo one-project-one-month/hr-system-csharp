@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.Common;
+﻿using HRSystem.Csharp.Database.AppDbContextModels;
+using HRSystem.Csharp.Domain.Models.Common;
 using HRSystem.Csharp.Domain.Models.Menu;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -13,19 +14,20 @@ public class DA_Menu
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<MenuModel>>> GetAllMenus(PaginationRequestModel PaginationModel)
+    public async Task<Result<List<MenuModel>>> GetAllMenus(MenuPaginationModel PaginationModel)
     {
         try
         {
             int pageNumber = PaginationModel.PageNo < 1 ? 1 : PaginationModel.PageNo;
             int pageSize = PaginationModel.PageSize <= 0 ? 10 : PaginationModel.PageSize;
-
             var menus = await _dbContext.TblMenus
                 .Join(_dbContext.TblMenuGroups,
                     menu => menu.MenuGroupCode,
                     menuGroup => menuGroup.MenuGroupCode,
                     (menu, menuGroup) => new { menu, menuGroup })
-                .Where(m => m.menu.DeleteFlag == false && m.menuGroup.DeleteFlag == false)
+                .Where(m => m.menu.DeleteFlag == false 
+                       && m.menuGroup.DeleteFlag == false 
+                       && (string.IsNullOrEmpty(PaginationModel.MenuName) || m.menu.MenuName.Contains(PaginationModel.MenuName)))
                 .Select(m => new MenuModel
                 {
                     MenuId = m.menu.MenuId,
@@ -35,6 +37,7 @@ public class DA_Menu
                     Url = m.menu.Url,
                     Icon = m.menu.Icon,
                     CreatedAt = m.menu.CreatedAt,
+                    CreatedBy = m.menu.CreatedBy,
                     ModifiedAt = m.menu.ModifiedAt,
                     SortOrder = m.menu.SortOrder,
                 })
@@ -91,25 +94,40 @@ public class DA_Menu
         if (groupExists)
             return true;
 
-        else return false;
+        return false;
     }
 
     public async Task<bool> MenuCodeExists(MenuRequestModel menu)
     {
-        return await _dbContext.TblMenus
+
+
+        var exists =  await _dbContext.TblMenus
             .Where(m => !m.DeleteFlag && m.MenuGroupCode == menu.MenuGroupCode)
             .Join(
                 _dbContext.TblMenuGroups.Where(g => !g.DeleteFlag),
                 m => m.MenuGroupCode,
                 g => g.MenuGroupCode,
-                (m, g) => m
+                (m, g) => new {m, g}
             )
-            .AnyAsync(m => m.MenuCode == menu.MenuCode || m.MenuName == menu.MenuName);
+            .AnyAsync(x => x.m.MenuCode == menu.MenuCode || x.m.MenuName == menu.MenuName);
+        return exists;
+  
     }
 
-    public async Task<bool> UpdateMenu(TblMenu menu)
+    public async Task<bool> UpdateMenu(MenuModel menu)
     {
-        _dbContext.TblMenus.Update(menu);
+        var foundMenu = await _dbContext.TblMenus.FirstOrDefaultAsync(
+                x => x.MenuCode == menu.MenuCode);
+        if(foundMenu == null)
+            return false;
+        foundMenu.MenuGroupCode = menu.MenuGroupCode;
+        foundMenu.MenuName = menu.MenuName;
+        foundMenu.Url = menu.Url;
+        foundMenu.Icon = menu.Icon;
+        foundMenu.ModifiedAt = menu.ModifiedAt;
+        foundMenu.ModifiedBy = menu.ModifiedBy;
+        foundMenu.SortOrder = menu.SortOrder;
+        _dbContext.TblMenus.Update(foundMenu);
         int rows = await _dbContext.SaveChangesAsync();
         return rows > 0;
     }
@@ -118,14 +136,7 @@ public class DA_Menu
     {
         try
         {
-            var foundMenu = await _dbContext.TblMenus.FirstOrDefaultAsync(
-                x => x.MenuCode == requestMenu.MenuCode && x.MenuGroupCode == requestMenu.MenuGroupCode);
-            if (foundMenu != null)
-            {
-                return Result<MenuModel>.DuplicateRecordError("Menu with that MenuCode or MenuGroupCode is existed");
-            }
 
-            // create new
             var menu = new TblMenu
             {
                 MenuId = Ulid.NewUlid().ToString(),
@@ -158,7 +169,7 @@ public class DA_Menu
                 Icon = menu.Icon,
                 SortOrder = menu.SortOrder,
                 CreatedAt = menu.CreatedAt,
-                //CreatedBy =loggined User,
+                CreatedBy = userId,
                 DeleteFlag = menu.DeleteFlag,
             };
             return Result<MenuModel>.Success(menuModel);

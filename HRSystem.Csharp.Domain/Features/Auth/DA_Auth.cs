@@ -1,6 +1,12 @@
 ﻿using HRSystem.Csharp.Domain.Features.Role;
+using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
+using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Models.Auth;
 using HRSystem.Csharp.Domain.Models.Employee;
+using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+using HRSystem.Csharp.Shared;
+using HRSystem.Csharp.Shared.Enums;
+using HRSystem.Csharp.Database.AppDbContextModels;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,12 +18,21 @@ public class DA_Auth : AuthorizationService
     private readonly AppDbContext _appDbContext;
     private readonly JwtService _jwtService;
     private readonly DA_Role _role;
+    private readonly DA_RoleMenuPermission _roleMenuPermission;
+    private readonly DA_Sequence _daSequence;
 
-    public DA_Auth(IHttpContextAccessor contextAccessor, JwtService jwtService, AppDbContext appDbContext, DA_Role role) : base(contextAccessor)
+    public DA_Auth(IHttpContextAccessor contextAccessor,
+            JwtService jwtService, 
+            AppDbContext appDbContext,
+            DA_Role role,
+            DA_RoleMenuPermission roleMenuPermission,
+            DA_Sequence daSequence) : base(contextAccessor)
     {
         _jwtService = jwtService;
         _appDbContext = appDbContext;
         _role = role;
+        _roleMenuPermission = roleMenuPermission;
+        _daSequence = daSequence;
     }
 
     public async Task<Result<AuthResponseModel>> LoginAsync(LoginRequestModel requestModel)
@@ -39,32 +54,33 @@ public class DA_Auth : AuthorizationService
 
             if (user is null)
                 return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
-            
+
 
             if (!_jwtService.VerifyPassword(requestModel.Password, user.Password))
                 return Result<AuthResponseModel>.InvalidDataError("Invalid Username or password");
-            
 
-            if(string.IsNullOrEmpty(user.RoleCode))
-                return Result<AuthResponseModel>.InvalidDataError("The user doen't have an assigned role!");
+
+            if (string.IsNullOrEmpty(user.RoleCode))
+                return Result<AuthResponseModel>.InvalidDataError("The user doesn't have an assigned role!");
 
             var role = await _role.GetByRoleCode(user.RoleCode);
             if (!role.IsSuccess)
-                return Result<AuthResponseModel>.InvalidDataError("The user doen't have an assigned role!");
+                return Result<AuthResponseModel>.InvalidDataError("The user doesn't have an assigned role!");
 
-            if (user.IsFirstTimeLogin == true)
+            if (user.IsFirstTimeLogin)
             {
                 return Result<AuthResponseModel>.Success(
-                    new AuthResponseModel 
-                    { 
-                        User = new EmployeeResponseModel 
+                    new AuthResponseModel
+                    {
+                        User = new EmployeeResponseModel
                         {
                             EmployeeCode = user.EmployeeCode,
                             Username = user.Username,
                             Name = user.Name,
                             Email = user.Email,
-                            PhoneNo = user.PhoneNo
-                        } 
+                            PhoneNo = user.PhoneNo,
+                            RoleName = role.Data.RoleName,
+                        }
                     }, 
                     "User is First Time.");
             }
@@ -72,6 +88,16 @@ public class DA_Auth : AuthorizationService
             var token = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
             var jwtId = _jwtService.getJwtIdFromToken(token);
+
+            var model = new MenuTreeRequestModel
+            {
+                RoleCode = role.Data.RoleCode
+            };
+            
+            var roleMenuPermission = await  _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
+
+            if(roleMenuPermission is null)
+                return Result<AuthResponseModel>.InvalidDataError("Employee needs permissions to access");
 
             var refreshToken = new TblRefreshToken
             {
@@ -82,12 +108,13 @@ public class DA_Auth : AuthorizationService
                 CreatedAt = DateTime.Now,
                 CreatedBy = user.EmployeeCode,
                 ExpiryDate = DateTime.Now.AddDays(7),
-                DeleteFlag = false
+                DeleteFlag = false,
+                
             };
 
             _appDbContext.TblRefreshTokens.Add(refreshToken);
             await _appDbContext.SaveChangesAsync();
-            Console.WriteLine("refresh token is ________________"+ refreshToken.ToString());
+            Console.WriteLine("refresh token is ________________" + refreshToken.ToString());
             Console.WriteLine("jwtId is -------------" + jwtId);
             var response = new AuthResponseModel
             {
@@ -101,7 +128,8 @@ public class DA_Auth : AuthorizationService
                     RoleName = role.Data.RoleName,
                     Name = user.Name,
                     Email = user.Email,
-                    PhoneNo = user.PhoneNo
+                    PhoneNo = user.PhoneNo,
+                    MenuTree = roleMenuPermission.Data,
                 },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo,
             };
@@ -118,18 +146,6 @@ public class DA_Auth : AuthorizationService
     {
         try
         {
-            var principal = _jwtService.GetPrincipalFromToken(requestModel.AccessToken);
-            if (principal is null)
-            {
-                return Result<AuthResponseModel>.ValidationError("Invalid access token.");
-            }
-
-            var jwtId = principal.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            if (jwtId is null)
-            {
-                return Result<AuthResponseModel>.ValidationError("Invalid Jwtid.");
-            }
-
             var storedToken = _appDbContext.TblRefreshTokens.FirstOrDefault(x => x.Token == requestModel.RefreshToken);
 
             if (storedToken is null)
@@ -147,15 +163,11 @@ public class DA_Auth : AuthorizationService
                 return Result<AuthResponseModel>.ValidationError("Refresh Token has been expired.");
             }
 
-            if (storedToken.JwtId != jwtId)
-            {
-                return Result<AuthResponseModel>.ValidationError("Access Token and Refresh Token are not matched.");
-            }
-
             storedToken.IsRevoked = true;
             storedToken.RevokedAt = DateTime.UtcNow;
 
-            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.EmployeeCode == storedToken.EmployeeCode && !x.DeleteFlag);
+            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x =>
+                x.EmployeeCode == storedToken.EmployeeCode && !x.DeleteFlag);
             if (user is null)
                 Result<AuthResponseModel>.NotFoundError("User not found");
 
@@ -165,7 +177,7 @@ public class DA_Auth : AuthorizationService
 
             var newToken = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
-            jwtId = _jwtService.getJwtIdFromToken(newToken);
+            var jwtId = _jwtService.getJwtIdFromToken(newToken);
 
             var refreshToken = new TblRefreshToken
             {
@@ -212,8 +224,8 @@ public class DA_Auth : AuthorizationService
         try
         {
             var tokens = await _appDbContext.TblRefreshTokens
-                        .Where(x => x.EmployeeCode == UserCode && x.IsRevoked != true)
-                        .ToListAsync();
+                .Where(x => x.EmployeeCode == UserCode && x.IsRevoked != true)
+                .ToListAsync();
 
             foreach (var token in tokens)
             {
@@ -293,4 +305,91 @@ public class DA_Auth : AuthorizationService
             : Result<bool>.SystemError("Failed to update user.");
     }
 
+    public async Task<Result<AuthResponseModel>> AutoLoginAsync()
+    {
+        try
+        {
+            const string adminUsername = "admin";
+            const string adminPassword = "Admin123!";
+            const string adminRoleCode = "RL001";
+            const string adminRoleName = "Administrator";
+
+            // Check if admin user exists
+            var adminUser = await _appDbContext.TblEmployees
+                .FirstOrDefaultAsync(x => x.Username == adminUsername && !x.DeleteFlag);
+
+            // If admin user doesn't exist, create it
+            if (adminUser == null)
+            {
+                // Check if admin role exists, if not create it
+                var adminRole = await _role.GetByRoleCode(adminRoleCode);
+                if (!adminRole.IsSuccess)
+                {
+                    // Create admin role
+                    var newRole = new TblRole
+                    {
+                        RoleId = DevCode.GenerateNewUlid(),
+                        RoleCode = adminRoleCode,
+                        RoleName = adminRoleName,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = "SYSTEM",
+                        DeleteFlag = false
+                    };
+
+                    _appDbContext.TblRoles.Add(newRole);
+                    await _appDbContext.SaveChangesAsync();
+                }
+
+                // Generate employee code
+                string employeeCode;
+                try
+                {
+                    employeeCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
+                }
+                catch
+                {
+                    // If sequence generation fails, use a default code
+                    employeeCode = "EMP001";
+                }
+
+                // Create admin user
+                var hashedPassword = _jwtService.HashPassword(adminPassword);
+                adminUser = new TblEmployee
+                {
+                    EmployeeId = DevCode.GenerateNewUlid(),
+                    EmployeeCode = employeeCode,
+                    RoleCode = adminRoleCode,
+                    Username = adminUsername,
+                    Name = "System Administrator",
+                    Email = "admin@hrsystem.com",
+                    Password = hashedPassword,
+                    PhoneNo = "+1234567890",
+                    ProfileImage = "Profile",
+                    StartDate = DateTime.UtcNow,
+                    ResignDate = null,
+                    Salary = 100000.00m,
+                    IsFirstTimeLogin = false,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = "SYSTEM",
+                    DeleteFlag = false
+                };
+
+                _appDbContext.TblEmployees.Add(adminUser);
+                await _appDbContext.SaveChangesAsync();
+            }
+
+            // Now perform login with admin credentials
+            var loginRequest = new LoginRequestModel
+            {
+                UserName = adminUsername,
+                Password = adminPassword
+            };
+
+            return await LoginAsync(loginRequest);
+        }
+        catch (Exception ex)
+        {
+            return Result<AuthResponseModel>.SystemError($"An error occurred during auto-login: {ex.Message}");
+        }
+    }
 }

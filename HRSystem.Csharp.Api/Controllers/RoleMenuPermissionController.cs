@@ -35,11 +35,27 @@ public class RoleMenuPermissionController : ControllerBase
         }
     }
 
+    [HttpGet("permissions/list")]
+    public async Task<IActionResult> GetPermissions()
+    {
+        try
+        {
+            var result = await _blRoleMenuPermission.GetAllPermissions();
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString());
+            return StatusCode(500, "Unexpeced error occurred");
+        }
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> CreateRoleMenuPermission(CreateRoleMenuPermissionRequestModel reqModel)
     {
         try
         {
+
             var result = await _blRoleMenuPermission.CreateRoleMenuPermission(reqModel);
             if (result.IsError)
                 return BadRequest(result);

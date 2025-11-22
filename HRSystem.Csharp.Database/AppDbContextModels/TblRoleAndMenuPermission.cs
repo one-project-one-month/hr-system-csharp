@@ -24,4 +24,6 @@ public partial class TblRoleAndMenuPermission
     public string? ModifiedBy { get; set; }
 
     public bool DeleteFlag { get; set; }
+
+    public string? PermissionCode { get; set; }
 }

@@ -1,25 +1,36 @@
-﻿using HRSystem.Csharp.Domain.Models.Task;
+﻿using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models.Task;
+using HRSystem.Csharp.Shared.Enums;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HRSystem.Csharp.Domain.Features.Task;
 
 public class DA_Task
 {
     private readonly AppDbContext _db;
+    private readonly DA_Sequence _daSequence;
 
-    public DA_Task(AppDbContext db)
+    public DA_Task(AppDbContext db, DA_Sequence daSequence)
     {
         _db = db;
+        _daSequence = daSequence;
     }
 
-    public async Task<Result<TaskListResponseModel>> List(int pageNo, int PageSize)
+    public async Task<Result<TaskListResponseModel>> List(string TaskName, int pageNo, int PageSize)
     {
         try
         {
-            var tasks = await _db.TblTasks.Where(t => t.DeleteFlag == false)
+            var tasksQuery = _db.TblTasks.Where(t => t.DeleteFlag == false);
+            if (!string.IsNullOrWhiteSpace(TaskName))
+            {
+                tasksQuery = tasksQuery.Where(t => t.TaskName.ToLower().Contains(TaskName.ToLower()));
+            }
+            var tasks = await tasksQuery
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((pageNo - 1) * PageSize)
                 .Take(PageSize)
+                .AsNoTracking()
                 .ToListAsync();
 
             if (!tasks.Any() || tasks is null)
@@ -56,7 +67,10 @@ public class DA_Task
     {
         try
         {
-            var taskCode = await GenerateSequenceCodeAsync("T");
+            //var taskCode = await GenerateSequenceCodeAsync("T");
+
+            var taskCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.TASK.ToString());
+
             var task = new TblTask()
             {
                 TaskId = Ulid.NewUlid().ToString(),
@@ -76,7 +90,7 @@ public class DA_Task
             await _db.TblTasks.AddAsync(task);
             await _db.SaveChangesAsync();
 
-            UpdateSequenceNoAsync("T", taskCode.Substring(1));
+            //UpdateSequenceNoAsync("T", taskCode.Substring(1));
 
             return Result<TaskCreateResponseModel>.Success(null, "Task created successfully.");
         }

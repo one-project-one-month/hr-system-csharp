@@ -2,11 +2,13 @@
 using HRSystem.Csharp.Domain.Models.Common;
 using HRSystem.Csharp.Domain.Models.MenuGroup;
 using HRSystem.Csharp.Shared;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class MenuGroupController : ControllerBase
 {
     private readonly BL_MenuGroup _blMenuGroup;
@@ -17,13 +19,11 @@ public class MenuGroupController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> GetAll([FromQuery]PaginationRequestModel model)
+    public async Task<IActionResult> GetAll([FromQuery]MenuGroupPaginationModel model)
     {
         var response = await _blMenuGroup.GetAllMenuGroups(model);
         if (response.IsSuccess)
-        {
             return Ok(response);
-        }
 
         return BadRequest(response);
     }
@@ -39,9 +39,7 @@ public class MenuGroupController : ControllerBase
 
         var response = await _blMenuGroup.GetMenuGroup(menuGroupCode);
         if (response.IsSuccess)
-        {
             return Ok(response);
-        }
 
         return BadRequest(response);
     }
@@ -77,9 +75,7 @@ public class MenuGroupController : ControllerBase
 
         var result = await _blMenuGroup.CreateMenuGroupAsync(requestMenuGroup);
         if (result.IsSuccess)
-        {
             return Ok(result);
-        }
 
         return BadRequest(result);
     }
@@ -96,9 +92,7 @@ public class MenuGroupController : ControllerBase
 
         var result = await _blMenuGroup.DeleteMenuGroupAsync(menuGroupCode);
         if (result.IsSuccess)
-        {
             return Ok(result);
-        }
 
         return BadRequest(result);
     }

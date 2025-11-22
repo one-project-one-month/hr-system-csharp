@@ -30,6 +30,8 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RefreshToken(RefreshTokenRequestModel requestModel)
     {
         var response = await _bl_Auth.RefreshTokenAsync(requestModel);
+        if (!response.IsSuccess) return BadRequest(response);
+
         return Ok(response);
     }
 
@@ -53,5 +55,14 @@ public class AuthController : ControllerBase
     {   
         var hashPassword = _jwtService.HashPassword(password);
         return Ok(hashPassword);
+    }
+
+    [HttpPost("AutoLogin")]
+    public async Task<IActionResult> AutoLogin()
+    {
+        var response = await _bl_Auth.AutoLoginAsync();
+        if (!response.IsSuccess)
+            return BadRequest(response);
+        return Ok(response);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Net.Mail;
 using HRSystem.Csharp.Domain.Models.Employee;
+using Sprache;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
 
@@ -24,9 +25,9 @@ public class BL_Employee
         return employees;
     }
 
-    public async Task<Result<UserProfileResponseModel>> getUserProfile(UserProfileRequestModel req)
+    public async Task<Result<UserProfileResponseModel>> getUserProfile(string employeeCode)
     {
-      var result = await _daEmployee.GetUserProfile(req);
+        var result = await _daEmployee.GetUserProfile(employeeCode);
         return result;
     }
 
@@ -86,15 +87,12 @@ public class BL_Employee
             return Result<EmployeeCreateResponseModel>.DuplicateRecordError("Email already exists!");
         }
 
-        try
-        {
-           var validEmail = new MailAddress(reqModel.Email);
-        }
-        catch
+        var validEmail = new MailAddress(reqModel.Email);
+        if (validEmail.Address != reqModel.Email)
         {
             return Result<EmployeeCreateResponseModel>.BadRequestError("Invalid email format.");
         }
-       
+
 
         var phoneExist = await _daEmployee.DuplicatePhoneNo(reqModel.PhoneNo);
         if (phoneExist.IsSuccess)

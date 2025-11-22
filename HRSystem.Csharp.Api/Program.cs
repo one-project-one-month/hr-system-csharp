@@ -1,4 +1,7 @@
-﻿using HRSystem.Csharp.Shared.Services;
+﻿using DotNetEnv;
+using HRSystem.Csharp.Database.AppDbContextModels;
+using HRSystem.Csharp.Shared.Services;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -12,7 +15,6 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Starting web application");
-
     var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddSerilog();
 
@@ -51,6 +53,8 @@ try
                 .AllowCredentials(); // if you send cookies or auth headers
         });
     });
+
+    
 
     builder.Services.AddAuthorization();
 
@@ -94,11 +98,14 @@ try
     app.UseCors("AllowFrontend");
 
     // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+    //if (app.Environment.IsDevelopment())
+    //{
+    //    app.UseSwagger();
+    //    app.UseSwaggerUI();
+    //}
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
     app.UseHttpsRedirection();
 

@@ -1,6 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Models.Employee;
 using System.Data;
 using HRSystem.Csharp.Domain.Features.Sequence;
+using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared.Enums;
 using Microsoft.Extensions.Logging;
 
@@ -16,26 +17,18 @@ public class DA_Employee
     private readonly DA_Sequence _daSequence;
 
     public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger, DA_Sequence daSequence,
-                      JwtService jwtService)
+        JwtService jwtService)
     {
         _appDbContext = appDbContext;
         _logger = logger;
         _daSequence = daSequence;
-       _jwtService = jwtService;
+        _jwtService = jwtService;
     }
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
     {
         try
         {
-            var employee = await _appDbContext.TblEmployees
-                .FirstOrDefaultAsync(r => r.Name != null
-                                         && r.Name.ToLower() == reqModel.EmployeeName.ToLower() && r.DeleteFlag == false);
-
-            if (employee == null)
-            {
-                return Result<EmployeeListResponseModel>.ValidationError("Employee doesn't exist!");
-            }
             var query = _appDbContext.TblEmployees
                 .AsNoTracking()
                 .Where(e => !e.DeleteFlag)
@@ -57,10 +50,9 @@ public class DA_Employee
             if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
             {
                 query = query.Where(r => r.Name != null
-                                         && r.Name.ToLower() == reqModel.EmployeeName.ToLower());
+                                         && r.Name.ToLower().Contains(reqModel.EmployeeName.ToLower()));
             }
 
-        
 
             query = query.OrderByDescending(r => r.CreatedAt);
 
@@ -116,13 +108,39 @@ public class DA_Employee
         }
     }
 
-    public async Task<Result<UserProfileResponseModel>> GetUserProfile(UserProfileRequestModel req)
+    public async Task<Result<AddEmployeeToProjectResponseModel>> ValidateEmployeesExist(
+        AddEmployeeToProjectRequestModel reqModel)
+    {
+        var existingEmployees = await _appDbContext.TblEmployees
+            .AsNoTracking()
+            .Where(e => reqModel.EmployeeCodes.Contains(e.EmployeeCode) && !e.DeleteFlag)
+            .Select(e => e.EmployeeCode)
+            .ToListAsync();
+
+        var invalidEmployees = reqModel.EmployeeCodes.Except(existingEmployees).ToList();
+
+        if (invalidEmployees.Any())
+        {
+            return Result<AddEmployeeToProjectResponseModel>.ValidationError(
+                $"Employees not found: {string.Join(", ", invalidEmployees)}",
+                new AddEmployeeToProjectResponseModel
+                {
+                    EmployeeCodes = invalidEmployees
+                }
+            );
+        }
+
+        return Result<AddEmployeeToProjectResponseModel>.Success(new AddEmployeeToProjectResponseModel(),
+            "All employees exist!");
+    }
+
+    public async Task<Result<UserProfileResponseModel>> GetUserProfile(string employeeCode)
     {
         try
         {
             var result = await _appDbContext.TblEmployees
                 .AsNoTracking()
-                .Where(e => e.EmployeeCode == req.EmployeeCode && e.DeleteFlag == false)
+                .Where(e => e.EmployeeCode == employeeCode && e.DeleteFlag == false)
                 .Join(_appDbContext.TblRoles,
                     e => e.RoleCode,
                     r => r.RoleCode,
@@ -151,17 +169,15 @@ public class DA_Employee
                 $"An error occurred while retrieving employees: {ex.Message}");
         }
     }
-
-
+    
     public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(
         EmployeeCreateRequestModel reqModel)
     {
         try
         {
-            var hashPassowrd = _jwtService.HashPassword(reqModel.Password);
-          
+            var hashPassword = _jwtService.HashPassword(reqModel.Password);
+
             var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
-            
             var newEmployee = new TblEmployee
             {
                 EmployeeId = DevCode.GenerateNewUlid(),
@@ -171,9 +187,9 @@ public class DA_Employee
                 Name = reqModel.Name,
                 Email = reqModel.Email,
                 PhoneNo = reqModel.PhoneNo,
-                Password = hashPassowrd,
+                Password = hashPassword,
                 IsFirstTimeLogin = true,
-                ProfileImage = null,
+                ProfileImage = "Profile",
                 Salary = reqModel.Salary,
                 StartDate = reqModel.StartDate,
                 ResignDate = reqModel.ResignDate,
@@ -189,8 +205,7 @@ public class DA_Employee
             await _appDbContext.TblEmployees.AddAsync(newEmployee);
             await _appDbContext.SaveChangesAsync();
 
-            return Result<EmployeeCreateResponseModel>.Success(new EmployeeCreateResponseModel(),
-                "Employee Created Successfully");
+            return Result<EmployeeCreateResponseModel>.Success("Employee Created Successfully");
         }
         catch (Exception ex)
         {
@@ -202,26 +217,34 @@ public class DA_Employee
     public async Task<Result<EmployeeUpdateResponseModel>> UpdateEmployee(string empCode,
         EmployeeUpdateRequestModel emp)
     {
-        var existingEmp = await _appDbContext.TblEmployees
-            .FirstOrDefaultAsync(e => e.EmployeeCode == empCode && e.DeleteFlag != true);
+        try
+        {
+            var existingEmp = await _appDbContext.TblEmployees
+                .FirstOrDefaultAsync(e => e.EmployeeCode == empCode && e.DeleteFlag != true);
 
-        if (existingEmp == null)
-            return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the role to be updated");
+            if (existingEmp == null)
+                return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the role to be updated");
 
-        existingEmp.Name = emp.Name;
-        existingEmp.RoleCode = emp.RoleCode;
-        existingEmp.Email = emp.Email;
-        existingEmp.PhoneNo = emp.PhoneNo;
-        existingEmp.Salary = emp.Salary;
-        existingEmp.StartDate = emp.StartDate;
-        existingEmp.ResignDate = emp.ResignDate;
-        existingEmp.ModifiedAt = DateTime.UtcNow;
-        existingEmp.ModifiedBy = currentUser;
+            existingEmp.Name = emp.Name;
+            existingEmp.RoleCode = emp.RoleCode;
+            existingEmp.Email = emp.Email;
+            existingEmp.PhoneNo = emp.PhoneNo;
+            existingEmp.Salary = emp.Salary;
+            existingEmp.StartDate = emp.StartDate;
+            existingEmp.ResignDate = emp.ResignDate;
+            existingEmp.ModifiedAt = DateTime.UtcNow;
+            existingEmp.ModifiedBy = currentUser;
+            var updated = await _appDbContext.SaveChangesAsync() > 0;
 
-        await _appDbContext.SaveChangesAsync();
-
-        return Result<EmployeeUpdateResponseModel>.Success(new EmployeeUpdateResponseModel(),
-            "Employee Updated Successfully");
+            return updated
+                ? Result<EmployeeUpdateResponseModel>.Success("Role updated successfully!")
+                : Result<EmployeeUpdateResponseModel>.Error("Failed to update role.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return Result<EmployeeUpdateResponseModel>.Error("Employee Update failed!");
+        }
     }
 
     public async Task<Result<EmployeeDeleteResponseModel>> DeleteEmployee(string employeeCode)

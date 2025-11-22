@@ -3,6 +3,7 @@ using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
 using HRSystem.Csharp.Shared.Enums;
 using Microsoft.Extensions.Logging;
+using System.Collections.Immutable;
 
 namespace HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 
@@ -38,6 +39,8 @@ public class DA_RoleMenuPermission
                 .OrderBy(m => m.SortOrder)
                 .ToListAsync();
 
+            var permissions = await _dbContext.TblPermissions.ToListAsync();
+           
             var grantedPermissions = string.IsNullOrEmpty(reqModel.RoleCode)
                 ? new List<TblRoleAndMenuPermission>()
                 : await _dbContext.TblRoleAndMenuPermissions
@@ -53,7 +56,7 @@ public class DA_RoleMenuPermission
                 IsChecked = !string.IsNullOrEmpty(reqModel.RoleCode) &&
                             grantedPermissions.Any(p =>
                                 p.MenuGroupCode == group.MenuGroupCode && string.IsNullOrEmpty(p.MenuCode)),
-
+                
                 ChildMenus = menuItems
                     .Where(m => m.MenuGroupCode == group.MenuGroupCode)
                     .Select(menu => new MenuItemResponseModel
@@ -63,9 +66,16 @@ public class DA_RoleMenuPermission
                         MenuItemIcon = menu.Icon,
                         MenuItemUrl = menu.Url,
                         IsChecked = !string.IsNullOrEmpty(reqModel.RoleCode) &&
-                                    grantedPermissions.Any(p => p.MenuCode == menu.MenuCode)
+                                    grantedPermissions.Any(p => p.MenuCode == menu.MenuCode),
+
+                        Permissions = grantedPermissions
+                                        .Where(p => p.MenuCode == menu.MenuCode)
+                                        .Select(p=> p.PermissionCode)
+                                        .ToList()
                     }).ToList()
-            }).ToList();
+
+            })
+            .ToList();
 
             var response = new MenuTreeResponseModel
             {
@@ -107,7 +117,8 @@ public class DA_RoleMenuPermission
                     RoleAndMenuPermissionCode = generatedCode,
                     RoleCode = reqModel.RoleCode,
                     MenuGroupCode = p.MenuGroupCode,
-                    MenuCode = p.MenuItemCode,
+                    MenuCode = p.MenuItemCode ?? null,
+                    PermissionCode = p.PermissionCode ?? null,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "admin",
                     DeleteFlag = false
@@ -124,7 +135,8 @@ public class DA_RoleMenuPermission
                     RoleAndMenuPermissionCode = p.RoleAndMenuPermissionCode,
                     RoleCode = p.RoleCode,
                     MenuGroupCode = p.MenuGroupCode,
-                    MenuCode = p.MenuCode,
+                    MenuCode = p.MenuCode ?? null,
+                    PermissionCode = p.PermissionCode ?? null,
                     CreatedDateTime = p.CreatedAt,
                     CreatedUserId = p.CreatedBy
                 }).ToList();

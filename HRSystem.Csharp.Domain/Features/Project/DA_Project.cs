@@ -1,6 +1,7 @@
 ﻿using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared.Enums;
+using Sprache;
 
 namespace HRSystem.Csharp.Domain.Features.Project;
 
@@ -9,12 +10,15 @@ public class DA_Project
     private readonly AppDbContext _appDbContext;
     private readonly Generator _generator;
     private readonly DA_Sequence _daSequence;
+    private readonly ILogger<DA_Project> _logger;
 
-    public DA_Project(AppDbContext appDbContext, Generator generator, DA_Sequence daSequence)
+    public DA_Project(AppDbContext appDbContext, Generator generator, DA_Sequence daSequence,
+        ILogger<DA_Project> logger)
     {
         _appDbContext = appDbContext;
         _generator = generator;
         _daSequence = daSequence;
+        _logger = logger;
     }
 
     public async Task<Result<bool>> CreateProject(ProjectRequestModel project)
@@ -53,7 +57,7 @@ public class DA_Project
 
             if (!string.IsNullOrWhiteSpace(reqModel.ProjectName))
             {
-                query = query.Where(r => r.ProjectName.ToLower() == reqModel.ProjectName.ToLower());
+                query = query.Where(r => r.ProjectName.ToLower().Contains(reqModel.ProjectName.ToLower()));
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);
@@ -180,6 +184,90 @@ public class DA_Project
         catch (Exception ex)
         {
             return Result<bool>.Error($"Error occured while deleting projects: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<AddEmployeeToProjectResponseModel>> CheckEmployeesAlreadyAssigned(
+        string projectCode,
+        AddEmployeeToProjectRequestModel reqModel)
+    {
+        var alreadyAddedEmployees = await _appDbContext.TblEmployeeProjects
+            .AsNoTracking()
+            .Where(e => e.DeleteFlag == false
+                        && e.ProjectCode == projectCode
+                        && reqModel.EmployeeCodes.Contains(e.EmployeeCode))
+            .Select(e => e.EmployeeCode)
+            .ToListAsync();
+
+        if (alreadyAddedEmployees.Count != 0)
+        {
+            return Result<AddEmployeeToProjectResponseModel>.ValidationError(
+                $"Employees with code(s): {string.Join(", ", alreadyAddedEmployees)} are already added to Project - {projectCode}",
+                new AddEmployeeToProjectResponseModel
+                {
+                    EmployeeCodes = alreadyAddedEmployees
+                }
+            );
+        }
+
+        return Result<AddEmployeeToProjectResponseModel>.Success(
+            new AddEmployeeToProjectResponseModel
+            {
+                EmployeeCodes = new List<string>()
+            },
+            $"No duplicate employees found for Project - {projectCode}"
+        );
+    }
+
+    public async Task<Result<AddEmployeeToProjectResponseModel>> AddEmployee(
+        string projectCode,
+        AddEmployeeToProjectRequestModel reqModel)
+    {
+        await using var tx = await _appDbContext.Database.BeginTransactionAsync();
+
+        try
+        {
+            var entries = new List<TblEmployeeProject>(reqModel.EmployeeCodes.Count);
+            foreach (var employeeCode in reqModel.EmployeeCodes)
+            {
+                var empPrjCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP_PRJ.ToString());
+
+                entries.Add(new TblEmployeeProject
+                {
+                    EmployeeProjectId = DevCode.GenerateNewUlid(),
+                    EmployeeProjectCode = empPrjCode,
+                    ProjectCode = projectCode,
+                    EmployeeCode = employeeCode,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = "admin",
+                    DeleteFlag = false
+                });
+            }
+
+            await _appDbContext.TblEmployeeProjects.AddRangeAsync(entries);
+            await _appDbContext.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return Result<AddEmployeeToProjectResponseModel>.Success(
+                new AddEmployeeToProjectResponseModel { EmployeeCodes = reqModel.EmployeeCodes },
+                $"Successfully added {reqModel.EmployeeCodes.Count} employee(s) to project {projectCode}."
+            );
+        }
+        catch (DbUpdateException ex)
+        {
+            await tx.RollbackAsync();
+            _logger.LogError(ex, $"Insert failed for project {projectCode}");
+            return Result<AddEmployeeToProjectResponseModel>.ValidationError(
+                $"Failed to add employees to project {projectCode}. No records were added."
+            );
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync();
+            _logger.LogError(ex, $"Unexpected error for adding employees to project {projectCode}");
+            return Result<AddEmployeeToProjectResponseModel>.SystemError(
+                "Unexpected error. No records were added."
+            );
         }
     }
 }

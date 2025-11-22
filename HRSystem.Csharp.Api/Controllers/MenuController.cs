@@ -4,11 +4,13 @@ using HRSystem.Csharp.Domain.Models.Menu;
 using System.Security.Claims;
 using HRSystem.Csharp.Shared;
 using HRSystem.Csharp.Domain.Models.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class MenuController : ControllerBase
 {
     private readonly BL_Menu _blMenu;
@@ -19,13 +21,11 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> Get([FromQuery] PaginationRequestModel model)
+    public async Task<IActionResult> Get([FromQuery] MenuPaginationModel model)
     {
         var result = await _blMenu.GetAllMenus(model);
         if (result.IsSuccess)
-        {
             return Ok(result);
-        }
 
         return BadRequest(result);
     }
@@ -78,9 +78,7 @@ public class MenuController : ControllerBase
         }
 
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -117,9 +115,7 @@ public class MenuController : ControllerBase
 
         var result = await _blMenu.DeleteMenuAsync(userId, menuCode);
         if (result.IsSuccess)
-        {
             return Ok(result);
-        }
 
         return BadRequest(result);
     }

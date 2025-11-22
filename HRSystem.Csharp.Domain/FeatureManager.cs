@@ -1,13 +1,16 @@
-﻿using HRSystem.Csharp.Domain.Features.Role;
-using HRSystem.Csharp.Domain.Features.Rule;
-using Microsoft.Data.SqlClient;
+﻿using DotNetEnv;
+using HRSystem.Csharp.Domain.Features.Reports;
+using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
+using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Features.Verification;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using System.Net.Mail;
+using DotNetEnv;
+using HRSystem.Csharp.Domain.Features.AdminDashboard;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -15,7 +18,7 @@ public static class FeatureManager
 {
     private static void AddServices(this WebApplicationBuilder builder)
     {
-        #region User Management BL
+        #region Business Logices
 
         builder.Services.AddScoped<BL_Role>();
         builder.Services.AddScoped<BL_Attendance>();
@@ -28,6 +31,9 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Sequence>();
         builder.Services.AddScoped<BL_CompanyRules>();
         builder.Services.AddScoped<BL_Verification>();
+        builder.Services.AddScoped<BL_AdminDashboard>();
+
+        builder.Services.AddScoped<BL_AttendanceReports>();
 
         #endregion
 
@@ -37,7 +43,7 @@ public static class FeatureManager
 
         #endregion
 
-        #region User Management DA
+        #region Data Accesses
 
         builder.Services.AddScoped<DA_Role>();
         builder.Services.AddScoped<DA_Attendance>();
@@ -50,6 +56,10 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Sequence>();
         builder.Services.AddScoped<DA_CompanyRules>();
         builder.Services.AddScoped<DA_Verification>();
+        builder.Services.AddScoped<DA_AdminDashboard>();
+
+        builder.Services.AddScoped<DA_Permission>();
+        builder.Services.AddScoped<DA_AttendanceReports>();
 
         #endregion
 
@@ -75,15 +85,32 @@ public static class FeatureManager
 
     public static void AddDomain(this WebApplicationBuilder builder)
     {
-        var mssqlConnection = builder.Configuration.GetConnectionString("DbConnection");
+        Env.Load(".env.development");
 
-        builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
-            ServiceLifetime.Transient, 
-            ServiceLifetime.Transient);
+        var host = Environment.GetEnvironmentVariable("DB_HOST") ?? "127.0.0.1";
+        //var port = Environment.GetEnvironmentVariable("DB_PORT");
+        var db = Environment.GetEnvironmentVariable("DB_NAME");
+        var user = Environment.GetEnvironmentVariable("DB_USER");
+        var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-        builder.Services.AddTransient<IDbConnection, SqlConnection>(n =>
-            new SqlConnection(mssqlConnection));
+        var mssqlConnection =
+            $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
+
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(mssqlConnection));
+
+        //builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
+        //    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
+        //    ServiceLifetime.Transient, 
+        //    ServiceLifetime.Transient);
+
+
+        builder.Services.AddScoped<IDbConnection>(sp =>
+        {
+            var conn = new SqlConnection(mssqlConnection);
+            conn.Open();
+            return conn;
+        });
 
         builder.Services
             .AddFluentEmail("hrsystem.opom@gmail.com")
@@ -91,8 +118,8 @@ public static class FeatureManager
             {
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(
-                        "hrsystem.opom@gmail.com",
-                        "rkjs utor bqqm diyw"),
+                    "hrsystem.opom@gmail.com",
+                    "rkjs utor bqqm diyw"),
                 EnableSsl = true,
                 Port = 587,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
