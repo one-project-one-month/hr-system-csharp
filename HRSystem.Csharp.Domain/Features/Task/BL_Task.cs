@@ -17,9 +17,9 @@ public class BL_Task
         return result;
     }
 
-    public async Task<Result<TaskCreateResponseModel>> CreateAsync(TaskCreateRequestModel requestModel)
+    public async Task<Result<TaskCreateResponseModel>> CreateAsync(string userId, TaskCreateRequestModel requestModel)
     {
-        var result = await _daTask.Create(requestModel);
+        var result = await _daTask.Create(userId, requestModel);
         return result;
     }
 
@@ -29,9 +29,9 @@ public class BL_Task
         return result;
     }
 
-    public async Task<Result<TaskUpdateResponseModel>> UpdateAsync(TaskUpdateRequestModel requestModel)
+    public async Task<Result<TaskUpdateResponseModel>> UpdateAsync(string userId, TaskUpdateRequestModel requestModel)
     {
-        var result = await _daTask.Update(requestModel);
+        var result = await _daTask.Update(userId,requestModel);
         return result;
     }
 
