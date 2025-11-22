@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.Attendance;
 using HRSystem.Csharp.Domain.Models.Attendance;
+using System.Security.Claims;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
@@ -24,14 +25,19 @@ public class AttendanceController : ControllerBase
     [HttpPost("AttendanceCreate")]
     public async Task<IActionResult> AttendanceCreate(AttendanceCreateRequestModel requestModel)
     {
-        var data = await _bL_Attendance.Create(requestModel);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+            return Unauthorized("Invalid user token.");
+
+        var data = await _bL_Attendance.Create(userId,requestModel);
         return Ok(data);
     }
 
     [HttpPut("AttendanceUpdate")]
-    public async Task<IActionResult> AttendanceUpdate(AttendanceUpdateRequestModel requestModel)
+    public async Task<IActionResult> AttendanceUpdate(string userId, AttendanceUpdateRequestModel requestModel)
     {
-        var data = await _bL_Attendance.Update(requestModel);
+        var data = await _bL_Attendance.Update(userId, requestModel);
         return Ok(data);
     }
 
