@@ -35,8 +35,13 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpPut("AttendanceUpdate")]
-    public async Task<IActionResult> AttendanceUpdate(string userId, AttendanceUpdateRequestModel requestModel)
+    public async Task<IActionResult> AttendanceUpdate(AttendanceUpdateRequestModel requestModel)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+            return Unauthorized("Invalid user token.");
+
         var data = await _bL_Attendance.Update(userId, requestModel);
         return Ok(data);
     }
