@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Mail;
 using DotNetEnv;
 using HRSystem.Csharp.Domain.Features.AdminDashboard;
+using HRSystem.Csharp.Domain.Features.Payroll;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -33,6 +34,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Verification>();
         builder.Services.AddScoped<BL_AdminDashboard>();
 
+        builder.Services.AddScoped<BL_Payroll>();
         builder.Services.AddScoped<BL_AttendanceReports>();
 
         #endregion
@@ -59,6 +61,7 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_AdminDashboard>();
 
         builder.Services.AddScoped<DA_Permission>();
+        builder.Services.AddScoped<DA_Payroll>();
         builder.Services.AddScoped<DA_AttendanceReports>();
 
         #endregion
