@@ -79,7 +79,7 @@ public class DA_Attendance
         }
     }
 
-    public async Task<Result<AttendanceCreateResponseModel>> Create(AttendanceCreateRequestModel requestModel)
+    public async Task<Result<AttendanceCreateResponseModel>> Create(string userId, AttendanceCreateRequestModel requestModel)
     {
         if (requestModel.EmployeeCode.IsNullOrEmpty())
         {
@@ -145,7 +145,7 @@ public class DA_Attendance
                 FullDayFlag = FullDayFlag,
                 Remark = requestModel.Remark,
                 IsSavedLocation = IsSavedLocation,
-                CreatedBy = null,
+                CreatedBy = userId,
                 CreatedAt = DateTime.UtcNow,
                 DeleteFlag = false
             };
@@ -434,7 +434,7 @@ public class DA_Attendance
         return halfDayLate;
     }
 
-    public async Task<Result<AttendanceUpdateResponseModel>> Update(AttendanceUpdateRequestModel requestModel)
+    public async Task<Result<AttendanceUpdateResponseModel>> Update(string userId, AttendanceUpdateRequestModel requestModel)
     {
         try
         {
@@ -489,7 +489,7 @@ public class DA_Attendance
             item.FullDayFlag = FullDayFlag;
             item.IsSavedLocation = IsSavedLocation;
             item.Remark = requestModel.Remark;
-            item.ModifiedBy = "";
+            item.ModifiedBy = userId;
             item.ModifiedAt = DateTime.UtcNow;
             _db.Entry(item).State = EntityState.Modified;
             var res = await _db.SaveChangesAsync();

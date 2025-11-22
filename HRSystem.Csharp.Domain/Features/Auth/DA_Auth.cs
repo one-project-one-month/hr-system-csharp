@@ -34,7 +34,7 @@ public class DA_Auth : AuthorizationService
                 return Result<AuthResponseModel>.ValidationError("Password cannot be blank or empty.");
             }
 
-            _jwtService.HashPassword(requestModel.Password);
+            var hashPass = _jwtService.HashPassword(requestModel.Password);
             var user = _appDbContext.TblEmployees.FirstOrDefault(x => x.Username == requestModel.UserName);
 
             if (user is null)
