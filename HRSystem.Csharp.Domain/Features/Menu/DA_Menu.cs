@@ -137,7 +137,6 @@ public class DA_Menu
         try
         {
 
-            // create new
             var menu = new TblMenu
             {
                 MenuId = Ulid.NewUlid().ToString(),

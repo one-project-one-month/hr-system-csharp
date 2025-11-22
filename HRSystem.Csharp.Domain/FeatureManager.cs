@@ -10,6 +10,7 @@ using System.Data;
 using System.Net;
 using System.Net.Mail;
 using DotNetEnv;
+using HRSystem.Csharp.Domain.Features.AdminDashboard;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -17,7 +18,7 @@ public static class FeatureManager
 {
     private static void AddServices(this WebApplicationBuilder builder)
     {
-        #region User Management BL
+        #region Business Logices
 
         builder.Services.AddScoped<BL_Role>();
         builder.Services.AddScoped<BL_Attendance>();
@@ -30,7 +31,10 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Sequence>();
         builder.Services.AddScoped<BL_CompanyRules>();
         builder.Services.AddScoped<BL_Verification>();
+        builder.Services.AddScoped<BL_AdminDashboard>();
+
         builder.Services.AddScoped<BL_AttendanceReports>();
+
         #endregion
 
         #region Main Nav Bar BL
@@ -39,7 +43,7 @@ public static class FeatureManager
 
         #endregion
 
-        #region User Management DA
+        #region Data Accesses
 
         builder.Services.AddScoped<DA_Role>();
         builder.Services.AddScoped<DA_Attendance>();
@@ -52,8 +56,11 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Sequence>();
         builder.Services.AddScoped<DA_CompanyRules>();
         builder.Services.AddScoped<DA_Verification>();
+        builder.Services.AddScoped<DA_AdminDashboard>();
+
         builder.Services.AddScoped<DA_Permission>();
         builder.Services.AddScoped<DA_AttendanceReports>();
+
         #endregion
 
         #region Main Nav Bar DA
@@ -86,8 +93,8 @@ public static class FeatureManager
         var user = Environment.GetEnvironmentVariable("DB_USER");
         var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-
-        var mssqlConnection = $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
+        var mssqlConnection =
+            $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(mssqlConnection));
@@ -111,8 +118,8 @@ public static class FeatureManager
             {
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(
-                        "hrsystem.opom@gmail.com",
-                        "rkjs utor bqqm diyw"),
+                    "hrsystem.opom@gmail.com",
+                    "rkjs utor bqqm diyw"),
                 EnableSsl = true,
                 Port = 587,
                 DeliveryMethod = SmtpDeliveryMethod.Network,

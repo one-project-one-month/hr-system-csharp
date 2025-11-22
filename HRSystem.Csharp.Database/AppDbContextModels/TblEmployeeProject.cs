@@ -21,5 +21,5 @@ public partial class TblEmployeeProject
 
     public string? ModifiedBy { get; set; }
 
-    public bool DeleteFlag { get; set; }
+    public bool? DeleteFlag { get; set; }
 }
