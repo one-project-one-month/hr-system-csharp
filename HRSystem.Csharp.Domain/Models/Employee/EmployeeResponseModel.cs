@@ -22,7 +22,7 @@ public class EmployeeResponseModel
 
     public string? PhoneNo { get; set; }
     public DateTime? CreatedAt { get; set; }
-    public MenuTreeResponseModel MenuTree { get; set; }
+    public MenuTreeResponseModel MenuTree { get; set; } = null!;
 }
 
 public class EmployeeEditResponseModel

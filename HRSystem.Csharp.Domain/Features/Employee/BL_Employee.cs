@@ -1,5 +1,6 @@
 ﻿using System.Net.Mail;
 using HRSystem.Csharp.Domain.Models.Employee;
+using Sprache;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
 

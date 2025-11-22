@@ -6,4 +6,5 @@ public enum EnumProjectStatus
     Active,
     Completed,
     Cancelled,
+    InProgress
 }
