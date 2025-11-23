@@ -9,17 +9,21 @@ namespace HRSystem.Csharp.Domain.Models.Payroll
 {
     public class PayrollResponseModel
     {
-        public string PayrollId { get; set; } = null!;
-        public string EmployeeCode { get; set; } = null!;
-        public DateOnly PayrollDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-        public string Status { get; set; } = null!;
-        public int? TotalWorkingHour { get; set; } = 0;
-        public decimal? LeaveHour { get; set; } = 0;
-        public decimal? GrossPay { get; set; } = 0;
-        public decimal? NetPay { get; set; } = 0;
-        public decimal? BaseSalary { get; set; } = 0;
-        public string? EmployeeName { get; set; } = null!;
-        public decimal? Deduction { get; set; }
+        public string PayrollId { get; set; }
+        public string PayrollCode { get; set; }
+        public string EmployeeCode { get; set; }
+        public DateTime? PayrollDate { get; set; } // Use DateTime, not DateOnly
+        public int? TotalWorkingHour { get; set; }
+        public int? LeaveHour { get; set; }
+        public int? ActualWorkingHour { get; set; }
+        public decimal? BaseSalary { get; set; }
+        public decimal? Bonus { get; set; }
+        public decimal? GrossPay { get; set; }
+        public  decimal? Deduction { get; set; }
+        public decimal? Tax { get; set; }
+        public decimal? NetPay { get; set; }
+        public string? Status { get; set; }
+        public string EmployeeName { get; set; }
     }
 
     public class PayrollListResponseModel : PagedResult<PayrollResponseModel>
