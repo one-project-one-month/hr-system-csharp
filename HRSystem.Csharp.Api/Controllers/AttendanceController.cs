@@ -1,11 +1,13 @@
 ﻿using HRSystem.Csharp.Domain.Features.Attendance;
 using HRSystem.Csharp.Domain.Models.Attendance;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class AttendanceController : ControllerBase
 {
     private readonly BL_Attendance _bL_Attendance;

@@ -1,10 +1,12 @@
 ﻿using HRSystem.Csharp.Domain.Features.Employee;
 using HRSystem.Csharp.Domain.Models.Employee;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class EmployeeController : ControllerBase
 {
     private readonly BL_Employee _blEmployee;

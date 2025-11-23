@@ -1,10 +1,12 @@
 ﻿using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models.CompanyRules;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CompanyRulesController : Controller
     {
         private readonly BL_CompanyRules _blCompanyRules;
