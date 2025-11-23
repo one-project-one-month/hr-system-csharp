@@ -63,7 +63,7 @@ public class DA_Task
         }
     }
 
-    public async Task<Result<TaskCreateResponseModel>> Create(TaskCreateRequestModel requestModel)
+    public async Task<Result<TaskCreateResponseModel>> Create(string userId, TaskCreateRequestModel requestModel)
     {
         try
         {
@@ -85,6 +85,7 @@ public class DA_Task
                 WorkingHour = requestModel.WorkingHour,
                 DeleteFlag = false,
                 CreatedAt = DateTime.UtcNow,
+                CreatedBy = userId
             };
 
             await _db.TblTasks.AddAsync(task);
@@ -140,7 +141,7 @@ public class DA_Task
         }
     }
 
-    public async Task<Result<TaskUpdateResponseModel>> Update(TaskUpdateRequestModel requestModel)
+    public async Task<Result<TaskUpdateResponseModel>> Update(string userId, TaskUpdateRequestModel requestModel)
     {
         try
         {
@@ -162,6 +163,7 @@ public class DA_Task
             task.TaskStatus = requestModel.TaskStatus;
             task.WorkingHour = requestModel.WorkingHour;
             task.ModifiedAt = DateTime.UtcNow;
+            task.ModifiedBy = userId;
 
             _db.Entry(task).State = EntityState.Modified;
             await _db.SaveChangesAsync();
