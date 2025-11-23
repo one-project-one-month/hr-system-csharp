@@ -1,10 +1,12 @@
 ﻿using HRSystem.Csharp.Domain.Features.AdminDashboard;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class AdminDashboardController : Controller
 {
         private readonly BL_AdminDashboard _blAdminDashboard;
