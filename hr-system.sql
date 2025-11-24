@@ -693,6 +693,37 @@ VALUES
 GO
 
 
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+    -- ================================================
+    -- Template generated from Template Explorer using:
+    ALTER FUNCTION [dbo].[fn_GetWorkingDates] 
+    (	
+	    @StartDate Date, @EndDate Date
+    )
+    RETURNS TABLE 
+    AS
+    RETURN 
+    (
+	    WITH N AS (
+        SELECT TOP (DATEDIFF(DAY, @StartDate, @EndDate) + 1)
+               ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1 AS n
+        FROM sys.all_objects
+    )
+        SELECT DATEADD(DAY, n, @StartDate) AS WorkingDay
+        FROM N
+        WHERE DATEPART(WEEKDAY, DATEADD(DAY, n, @StartDate)) NOT IN (1, 7)
+          AND DATEADD(DAY, n, @StartDate) NOT IN (
+                SELECT HolidayDate 
+                FROM Tbl_Holiday 
+                WHERE ISNULL(IsWorkingHoliday,0) = 0
+      )
+    )
+GO
+
+
 /****** Object:  StoredProcedure [dbo].[sp_HRAttendanceDashboard]    Script Date: 16/11/2025 7:26:02 PM ******/
 SET ANSI_NULLS ON
 GO
@@ -704,10 +735,7 @@ ALTER PROCEDURE [dbo].[sp_HRAttendanceDashboard]
 AS
 BEGIN
 	SET NOCOUNT ON;
-	CREATE TABLE #WorkingDays (
-    DayDate DATE NOT NULL,
-);
-
+	
 DECLARE 
     @StartDate DATE, @EndDate DATE, @EmpCount INT = 0;
 
@@ -717,7 +745,7 @@ DECLARE
     IF @DataView = 0 -- Current Day
     Begin
         Set @StartDate = @Date;
-        Set @EndDate = DATEADD(dd, -1, @Date);
+        Set @EndDate = @Date;
     End
     ELSE IF @DataView = 1 -- Weekly
     Begin
@@ -735,32 +763,18 @@ DECLARE
         Set @EndDate = CAST(CONCAT('12/31/', YEAR(@Date)) as Date);
     End;
 
-
-    WITH DateSequence AS (
-        SELECT @StartDate AS CurrentDate
-        UNION ALL
-        SELECT DATEADD(DAY, 1, CurrentDate)
-        FROM DateSequence
-        WHERE CurrentDate <= @EndDate
-    )
-    INSERT INTO #WorkingDays (DayDate)
-    SELECT
-        CurrentDate AS FullDate
-    FROM DateSequence
-    WHERE DATEPART(WEEKDAY, CurrentDate) NOT IN (1, 7)
-    OPTION (MAXRECURSION 0);
+    Select WorkingDay as DayDate Into #WorkingDays From fn_GetWorkingDates(@StartDate, @EndDate);
 
     Select @EmpCount = Count(1) From Tbl_Employee 
         Where Isnull(DeleteFlag, 0) = 0;
 
-
     Insert Into #TmpResult
-    Select Sum(Isnull(FullDayFlag, 0)) as Present, Sum(IIF(Isnull(HourLateFlag, 0) = 0,0,1)) as Late, 
+    Select Isnull(Sum(Isnull(FullDayFlag, 0)), 0) as Present, 
+    Isnull(Sum(IIF(Isnull(HourLateFlag, 0) = 0,0,1)), 0) as Late, 
         (@EmpCount - Sum(Isnull(FullDayFlag, 0)) - Sum(Isnull(HalfDayFlag, 0))) as Absent, @EmpCount    
     From Tbl_Attendance ta
     Right Join #WorkingDays wd on wd.DayDate = CAST(AttendanceDate AS DATE)
     Group By CAST(AttendanceDate AS DATE), wd.DayDate;
-
 
     Select SUM(ISNULL(Present, 0)) Present, SUM(ISNULL(Late, 0)) Late, 
         SUM(ISNULL(Absent, 0)) Absent, MAX(EmpCount) EmpCount
@@ -782,31 +796,14 @@ ALTER PROCEDURE [dbo].[sp_EmpAttendanceDashboard]
 AS
 BEGIN
 	SET NOCOUNT ON;
-	CREATE TABLE #WorkingDays (
-    DayDate DATE NOT NULL,
-);
-
+	
 DECLARE 
     @StartDate DATE, @EndDate DATE;
-
-   
+	   
     Set @StartDate = CAST(CONCAT('1/1/', @Year) as Date);
     Set @EndDate = CAST(CONCAT('12/31/', @Year) as Date);
 
-
-    WITH DateSequence AS (
-        SELECT @StartDate AS CurrentDate
-        UNION ALL
-        SELECT DATEADD(DAY, 1, CurrentDate)
-        FROM DateSequence
-        WHERE CurrentDate <= @EndDate
-    )
-    INSERT INTO #WorkingDays (DayDate)
-    SELECT
-        CurrentDate AS FullDate
-    FROM DateSequence
-    WHERE DATEPART(WEEKDAY, CurrentDate) NOT IN (1, 7)
-    OPTION (MAXRECURSION 0);
+    Select WorkingDay as DayDate Into #WorkingDays From fn_GetWorkingDates(@StartDate, @EndDate);
 
     Select wd.DayDate AttendanceDate,
         Sum(Isnull(FullDayFlag, 0)) as Present, Sum(Isnull(HourLateFlag, 0)) as Late
