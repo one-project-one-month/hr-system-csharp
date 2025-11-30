@@ -23,7 +23,7 @@ namespace HRSystem.Csharp.Domain.Features.Reports
 
         public async Task<StaffAttendanceOverviewReport> GetStaffAttendanceOverviewReport(int Year, String empCode)
         {
-            var result = await _daAttendanceReports.GetStaffAttendanceOverviewReporttAsync(Year, empCode);
+            var result = await _daAttendanceReports.GetStaffAttendanceOverviewReportAsync(Year, empCode);
             return result;
         }
     }
