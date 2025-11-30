@@ -34,4 +34,10 @@ public class BL_Auth
         var response = await _da_Auth.ChangePassword(requestModel);
         return response;
     }
+
+    public async Task<Result<AuthResponseModel>> AutoLoginAsync()
+    {
+        var response = await _da_Auth.AutoLoginAsync();
+        return response;
+    }
 }

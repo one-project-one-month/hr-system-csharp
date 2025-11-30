@@ -193,7 +193,7 @@ public class DA_Project
     {
         var alreadyAddedEmployees = await _appDbContext.TblEmployeeProjects
             .AsNoTracking()
-            .Where(e => !e.DeleteFlag
+            .Where(e => e.DeleteFlag == false
                         && e.ProjectCode == projectCode
                         && reqModel.EmployeeCodes.Contains(e.EmployeeCode))
             .Select(e => e.EmployeeCode)

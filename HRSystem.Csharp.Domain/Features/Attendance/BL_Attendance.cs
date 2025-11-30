@@ -17,15 +17,15 @@ public class BL_Attendance
         return data;
     }
 
-    public async Task<Result<AttendanceCreateResponseModel>> Create(AttendanceCreateRequestModel requestModel)
+    public async Task<Result<AttendanceCreateResponseModel>> Create(string userId,AttendanceCreateRequestModel requestModel)
     {
-        var data = await _attendance.Create(requestModel);
+        var data = await _attendance.Create(userId,requestModel);
         return data;
     }
 
-    public async Task<Result<AttendanceUpdateResponseModel>> Update(AttendanceUpdateRequestModel requestModel)
+    public async Task<Result<AttendanceUpdateResponseModel>> Update(string userId, AttendanceUpdateRequestModel requestModel)
     {
-        var data = await _attendance.Update(requestModel);
+        var data = await _attendance.Update(userId,requestModel);
         return data;
     }
 

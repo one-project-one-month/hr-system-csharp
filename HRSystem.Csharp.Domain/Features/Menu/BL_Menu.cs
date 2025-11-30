@@ -65,9 +65,7 @@ public class BL_Menu
         bool duplicateMenu = await _daMenu.MenuCodeExists(requestMenu);
 
         if (duplicateMenu)
-        {
             return Result<MenuModel>.DuplicateRecordError("Menu with that MenuCode or MenuName already exists");
-        }
 
         var response = await _daMenu.CreateMenuAsync(userId, requestMenu);
         return response;
