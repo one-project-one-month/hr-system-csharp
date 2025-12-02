@@ -1,11 +1,13 @@
 ﻿using HRSystem.Csharp.Domain.Features.Task;
 using HRSystem.Csharp.Domain.Models.Task;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class TaskController : ControllerBase
 {
     private readonly BL_Task _blTask;

@@ -25,13 +25,24 @@ namespace HRSystem.Csharp.Domain.Features.Payroll
         public async Task<PayrollListResponseModel> GetPayrollList(PayrollRequestModel requestModel)
         {
 
-            var parameters = new DynamicParameters();
-            parameters.Add("@EmployeeCode", requestModel.EmployeeCode);
-
-            var allPayrolls = (await _dapperService.QueryStoredProcedureWithMultipleResults<PayrollResponseModel>(
-                "GetPayrollList",
-                parameters
-            )).ToList();
+            var allPayrolls = await _appDbContext.TblPayrolls
+                .Where(p => p.EmployeeCode == requestModel.EmployeeCode)
+                .Select(p => 
+                new PayrollResponseModel
+                {
+                    PayrollId = p.PayrollId,
+                    PayrollCode = p.PayrollCode,
+                    EmployeeCode = p.EmployeeCode,
+                    PayrollDate = p.PayrollDate,
+                    TotalWorkingHour = p.TotalWorkingHour,
+                    BaseSalary = p.BaseSalary,
+                    Bonus = p.Bonus,
+                    GrossPay = p.GrossPay,
+                    Deduction = p.Deduction,
+                    Tax = p.Tax,
+                    NetPay = p.NetPay,
+                }
+                ).ToListAsync();
 
             // Optional filtering and pagination in memory
             var filtered = allPayrolls
