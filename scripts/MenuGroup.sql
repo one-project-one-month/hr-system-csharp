@@ -33,12 +33,3 @@ VALUES
 
 -- 7. Payroll
 (NEWID(), 'PAYROLL', 'Payroll', 0, '/payroll', 'fa-money-check-alt', 7, GETDATE(), 'system', NULL, NULL, 0);
-
-
-
-
-
-
-
-
-
