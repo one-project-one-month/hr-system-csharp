@@ -9,7 +9,6 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using System.Net.Mail;
-using DotNetEnv;
 using HRSystem.Csharp.Domain.Features.AdminDashboard;
 using HRSystem.Csharp.Domain.Features.Payroll;
 

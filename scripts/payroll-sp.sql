@@ -1,7 +1,7 @@
 Use HRSystem;
 
 ------------------Role menu permission table fixed ---------------------------------
-ALTER TABLE Tbl_RoleAndMenuPermission DROP CONSTRAINT UQ__Tbl_Role__AB0007C896ABC595;
+ALTER TABLE Tbl_RoleAndMenuPermission DROP CONSTRAINT UQ__Tbl_Role__AB0007C8D0D3FC57;
 
 ALTER TABLE Tbl_RoleAndMenuPermission
 ADD CONSTRAINT UQ_RoleMenu_Group UNIQUE (RoleAndMenuPermissionCode, MenuGroupCode, MenuCode, PermissionCode);
@@ -165,30 +165,6 @@ BEGIN
 
 END;
 GO
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 INSERT INTO Tbl_Attendance
 (
