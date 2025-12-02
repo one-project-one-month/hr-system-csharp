@@ -1,7 +1,10 @@
-﻿namespace HRSystem.Csharp.Api.Controllers;
+﻿using Microsoft.AspNetCore.Authorization;
+
+namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class LocationController : ControllerBase
 {
     private readonly BL_Location _blLocation;

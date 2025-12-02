@@ -37,7 +37,7 @@ namespace HRSystem.Csharp.Domain.Features.Reports
             return overviewReport;
         }
 
-        public async Task<StaffAttendanceOverviewReport> GetStaffAttendanceOverviewReporttAsync(int Year, String empCode)
+        public async Task<StaffAttendanceOverviewReport> GetStaffAttendanceOverviewReportAsync(int Year, String empCode)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@Year", Year, DbType.Int32, ParameterDirection.Input);

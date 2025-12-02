@@ -1,11 +1,13 @@
 ﻿using HRSystem.Csharp.Domain.Features.Reports;
 using HRSystem.Csharp.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.Csharp.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReportsController : Controller
     {
         private readonly BL_AttendanceReports _bL_AttendanceReports;

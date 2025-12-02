@@ -2,11 +2,13 @@
 using System.Threading.Tasks;
 using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Shared;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class RoleController : ControllerBase
 {
     private readonly BL_Role _blRole;

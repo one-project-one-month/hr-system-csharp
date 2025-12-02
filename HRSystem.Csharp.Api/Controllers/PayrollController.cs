@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.Payroll;
 using HRSystem.Csharp.Domain.Models.Payroll;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,7 @@ namespace HRSystem.Csharp.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PayrollController : ControllerBase
     {
         private readonly BL_Payroll _blPayroll;

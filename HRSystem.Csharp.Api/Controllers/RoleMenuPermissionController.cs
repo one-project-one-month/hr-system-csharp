@@ -1,10 +1,12 @@
 using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/role-menu-permission")]
 [ApiController]
+[Authorize]
 public class RoleMenuPermissionController : ControllerBase
 {
     private readonly ILogger<RoleMenuPermissionController> _logger;
