@@ -440,8 +440,10 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 Go
-ADD [PermissionCode] NVARCHAR(50) NOT NULL;
+ALTER TABLE Tbl_RoleAndMenuPermission
+ADD [PermissionCode] NVARCHAR(50) NULL;
 GO
+Use HRSystem;
 GO
 INSERT INTO Tbl_Permission(PermissionId, PermissionCode,PermissionName)
 VALUES(NEWID(),'LIST', 'Listing');
@@ -454,6 +456,7 @@ VALUES(NEWID(),'UPDATE', 'Update');
 INSERT INTO Tbl_Permission(PermissionId, PermissionCode,PermissionName)
 VALUES(NEWID(),'DELETE', 'Delete');
 GO
+
 INSERT [dbo].[Tbl_Sequence] ([SequenceId], [UniqueName], [SequenceNo], [SequenceDate], [SequenceType], [DeleteFlag]) VALUES (N'019a060b-cb1c-7f6c-bf9a-09535b6a6d46', N'RL', N'0002', CAST(N'2025-11-01T22:02:27.697' AS DateTime), N'TABLE', 0)
 INSERT [dbo].[Tbl_Sequence] ([SequenceId], [UniqueName], [SequenceNo], [SequenceDate], [SequenceType], [DeleteFlag]) VALUES (N'019a060b-cb1d-7b04-bc11-8583b3210530', N'USR', N'0001', CAST(N'2025-10-25T18:57:45.840' AS DateTime), N'TABLE', 0)
 INSERT [dbo].[Tbl_Sequence] ([SequenceId], [UniqueName], [SequenceNo], [SequenceDate], [SequenceType], [DeleteFlag]) VALUES (N'019a060b-cb1e-7398-97ef-38d6a089783d', N'RL_MENU_PM', N'0001', CAST(N'2025-10-21T16:09:49.000' AS DateTime), N'PERMISSIONS', 0)
@@ -676,13 +679,13 @@ VALUES
 (NEWID(), 'CHECKOUT_HOURLATE', 'Checkout hour-late threshold', '16:00', 1, GETDATE(), 'SYSTEM', 0),
 
 -- Half Day / Morning Half Rules
-(NEWID(), 'MORNING_HALF_CHECKIN_ACCEPTABLE', 'Morning half allowable check-in', '13:30', 1, GETDATE(), 'SYSTEM', 0),
+(NEWID(), 'MORNING_HALF_CHECKIN_ACCEPTABLE', 'Morning half allowable check-in', '09:30', 1, GETDATE(), 'SYSTEM', 0),
 
-(NEWID(), 'MORNING_HALF_CHECKIN_HOURLATE', 'Morning half hour-late threshold', '14:00', 1, GETDATE(), 'SYSTEM', 0),
+(NEWID(), 'MORNING_HALF_CHECKIN_HOURLATE', 'Morning half hour-late threshold', '10:00', 1, GETDATE(), 'SYSTEM', 0),
 
-(NEWID(), 'EVENING_HALF_CHECKOUT_ACCEPTABLE', 'Evening half checkout acceptable', '12:30', 1, GETDATE(), 'SYSTEM', 0),
+(NEWID(), 'EVENING_HALF_CHECKOUT_ACCEPTABLE', 'Evening half checkout acceptable', '16:30', 1, GETDATE(), 'SYSTEM', 0),
 
-(NEWID(), 'EVENING_HALF_CHECKOUT_HOURLATE', 'Evening half hour-late checkout', '12:00', 1, GETDATE(), 'SYSTEM', 0),
+(NEWID(), 'EVENING_HALF_CHECKOUT_HOURLATE', 'Evening half hour-late checkout', '16:00', 1, GETDATE(), 'SYSTEM', 0),
 
 -- Deduction Rules
 (NEWID(), 'HOUR_LATE_FLAG_DEDUCTION', 'Hour late penalty (percentage or rule)', NULL, 1, GETDATE(), 'SYSTEM', 0),
@@ -820,3 +823,6 @@ DECLARE
     DROP Table #WorkingDays, #TmpResult;
 END
 GO
+
+ALTER TABLE Tbl_Permission
+ADD CONSTRAINT UQ_Permission_Code UNIQUE (PermissionCode);
