@@ -14,10 +14,10 @@ INSERT INTO Tbl_MenuGroup (
 )
 VALUES
 -- 1. Role
-(NEWID(), 'ROLE', 'Role', 0, '/role', 'fa-user-shield', 1, GETDATE(), 'system', NULL, NULL, 0),
+(NEWID(), 'ROLE', 'Role', 0, '/role', 'fa-user-shield', 2, GETDATE(), 'system', NULL, NULL, 0),
 
 -- 2. Dashboard
-(NEWID(), 'DASHBOARD', 'Dashboard', 0, '/dashboard', 'fa-chart-line', 2, GETDATE(), 'system', NULL, NULL, 0),
+(NEWID(), 'DASHBOARD', 'Dashboard', 0, '/dashboard', 'fa-chart-line', 1, GETDATE(), 'system', NULL, NULL, 0),
 
 -- 3. Employee
 (NEWID(), 'EMPLOYEE', 'Employee', 0, '/employee', 'fa-users', 3, GETDATE(), 'system', NULL, NULL, 0),
@@ -32,4 +32,8 @@ VALUES
 (NEWID(), 'ATTENDANCE', 'Attendance Management', 1, '/attendance', 'fa-calendar-check', 6, GETDATE(), 'system', NULL, NULL, 0),
 
 -- 7. Payroll
-(NEWID(), 'PAYROLL', 'Payroll', 0, '/payroll', 'fa-money-check-alt', 7, GETDATE(), 'system', NULL, NULL, 0);
+(NEWID(), 'PAYROLL', 'Payroll', 0, '/payroll', 'fa-money-check-alt', 7, GETDATE(), 'system', NULL, NULL, 0),
+
+(NEWID(), 'ROLE_MENU_PERMISSION', 'Role and Menu Permission', 0, '/role-and-menu-permissions', 'fa-money-check-alt', 8, GETDATE(), 'system', NULL, NULL, 0),
+(NEWID(), 'COMPANY_RULES', 'Company Rules', 0, '/company-rules', 'fa-money-check-alt', 9, GETDATE(), 'system', NULL, NULL, 0);
+
