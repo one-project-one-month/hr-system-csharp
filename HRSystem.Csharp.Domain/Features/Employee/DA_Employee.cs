@@ -53,6 +53,11 @@ public class DA_Employee
                                          && r.Name.ToLower().Contains(reqModel.EmployeeName.ToLower()));
             }
 
+            if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
+            {
+                query = query.Where(r => r.RoleName != null
+                                         && r.RoleName.ToLower() == reqModel.RoleName.ToLower());
+            }
 
             query = query.OrderByDescending(r => r.CreatedAt);
 

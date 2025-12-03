@@ -109,7 +109,6 @@ public class DA_Auth : AuthorizationService
                 CreatedBy = user.EmployeeCode,
                 ExpiryDate = DateTime.Now.AddDays(7),
                 DeleteFlag = false,
-                
             };
 
             _appDbContext.TblRefreshTokens.Add(refreshToken);
