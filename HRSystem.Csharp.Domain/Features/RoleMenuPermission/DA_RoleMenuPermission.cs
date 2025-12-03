@@ -40,7 +40,7 @@ public class DA_RoleMenuPermission
                 .ToListAsync();
 
             var permissions = await _dbContext.TblPermissions.ToListAsync();
-           
+
             var grantedPermissions = string.IsNullOrEmpty(reqModel.RoleCode)
                 ? new List<TblRoleAndMenuPermission>()
                 : await _dbContext.TblRoleAndMenuPermissions
@@ -55,7 +55,11 @@ public class DA_RoleMenuPermission
                 MenuGroupUrl = group.Url,
                 IsChecked = !string.IsNullOrEmpty(reqModel.RoleCode) &&
                             grantedPermissions.Any(p =>
-                                p.MenuGroupCode == group.MenuGroupCode && string.IsNullOrEmpty(p.MenuCode)),
+                                p.MenuGroupCode == group.MenuGroupCode &&
+                                // has menu item for menugroup
+                                (group.HasMenuItem == true && !string.IsNullOrEmpty(p.MenuCode)) ||
+                                // has no menu items
+                                group.HasMenuItem == false),
                 
                 ChildMenus = menuItems
                     .Where(m => m.MenuGroupCode == group.MenuGroupCode)

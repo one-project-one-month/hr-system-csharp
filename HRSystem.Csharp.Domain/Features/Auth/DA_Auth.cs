@@ -114,8 +114,6 @@ public class DA_Auth : AuthorizationService
 
             _appDbContext.TblRefreshTokens.Add(refreshToken);
             await _appDbContext.SaveChangesAsync();
-            Console.WriteLine("refresh token is ________________" + refreshToken.ToString());
-            Console.WriteLine("jwtId is -------------" + jwtId);
             var response = new AuthResponseModel
             {
                 AccessToken = token,
@@ -175,6 +173,16 @@ public class DA_Auth : AuthorizationService
             if (role is null)
                 Result<AuthResponseModel>.NotFoundError("Role with the user not found");
 
+            var model = new MenuTreeRequestModel
+            {
+                RoleCode = role.Data.RoleCode
+            };
+
+            var roleMenuPermission = await _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
+
+            if (roleMenuPermission is null)
+                return Result<AuthResponseModel>.InvalidDataError("Employee needs permissions to access");
+
             var newToken = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
             var jwtId = _jwtService.getJwtIdFromToken(newToken);
@@ -206,7 +214,8 @@ public class DA_Auth : AuthorizationService
                     RoleName = role.Data.RoleName,
                     Name = user.Name,
                     Email = user.Email,
-                    PhoneNo = user.PhoneNo
+                    PhoneNo = user.PhoneNo,
+                    MenuTree = roleMenuPermission.Data,
                 },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(newToken).ValidTo,
             };
