@@ -57,9 +57,9 @@ public class DA_RoleMenuPermission
                             grantedPermissions.Any(p =>
                                 p.MenuGroupCode == group.MenuGroupCode &&
                                 // has menu item for menugroup
-                                (group.HasMenuItem == true && !string.IsNullOrEmpty(p.MenuCode)) ||
+                                (group.HasMenuItem == true && !string.IsNullOrEmpty(p.MenuCode) ||
                                 // has no menu items
-                                group.HasMenuItem == false),
+                                group.HasMenuItem == false)),
                 
                 ChildMenus = menuItems
                     .Where(m => m.MenuGroupCode == group.MenuGroupCode)
