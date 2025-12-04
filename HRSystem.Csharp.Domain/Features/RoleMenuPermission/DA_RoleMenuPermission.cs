@@ -3,6 +3,7 @@ using HRSystem.Csharp.Domain.Features.Sequence;
 using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
 using HRSystem.Csharp.Shared.Enums;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace HRSystem.Csharp.Domain.Features.RoleMenuPermission;
@@ -47,39 +48,100 @@ public class DA_RoleMenuPermission
                     .Where(p => p.RoleCode == reqModel.RoleCode && !p.DeleteFlag)
                     .ToListAsync();
 
-            var tree = menuGroups.Select(group => new MenuGroupResponseModel
+            var tree = menuGroups.Select(group =>
             {
-                MenuGroupCode = group.MenuGroupCode,
-                MenuGroupName = group.MenuGroupName,
-                MenuGroupIcon = group.Icon,
-                MenuGroupUrl = group.Url,
-                IsChecked = !string.IsNullOrEmpty(reqModel.RoleCode) &&
-                            grantedPermissions.Any(p =>
-                                p.MenuGroupCode == group.MenuGroupCode &&
-                                // has menu item for menugroup
-                                (group.HasMenuItem == true && !string.IsNullOrEmpty(p.MenuCode) ||
-                                // has no menu items
-                                group.HasMenuItem == false)),
-                
-                ChildMenus = menuItems
-                    .Where(m => m.MenuGroupCode == group.MenuGroupCode)
-                    .Select(menu => new MenuItemResponseModel
+                // CASE 1: group has menu items
+                if (group.HasMenuItem == true)
+                {
+                    var childMenus = menuItems
+                        .Where(m => m.MenuGroupCode == group.MenuGroupCode)
+                        .Select(menu =>
+                        {
+                            var menuPermissions = grantedPermissions
+                                .Where(g => g.MenuCode == menu.MenuCode)
+                                .Select(g => g.PermissionCode)
+                                .Where(code => !string.IsNullOrWhiteSpace(code))
+                                .Distinct()
+                                .ToList();
+
+                            return new MenuItemResponseModel
+                            {
+                                MenuItemCode = menu.MenuCode,
+                                MenuItemName = menu.MenuName,
+                                MenuItemIcon = menu.Icon,
+                                MenuItemUrl = menu.Url,
+                                Permissions = menuPermissions,
+                                IsChecked = menuPermissions.Any()
+                            };
+                        })
+                        .Where(menu => menu.Permissions.Any())  // keep only menus with permissions
+                        .ToList();
+
+                    return new MenuGroupResponseModel
                     {
-                        MenuItemCode = menu.MenuCode,
-                        MenuItemName = menu.MenuName,
-                        MenuItemIcon = menu.Icon,
-                        MenuItemUrl = menu.Url,
+                        MenuGroupCode = group.MenuGroupCode,
+                        MenuGroupName = group.MenuGroupName,
+                        MenuGroupIcon = group.Icon,
+                        MenuGroupUrl = group.Url,
                         IsChecked = !string.IsNullOrEmpty(reqModel.RoleCode) &&
-                                    grantedPermissions.Any(p => p.MenuCode == menu.MenuCode),
+                                    grantedPermissions.Any(p =>
+                                        p.MenuGroupCode == group.MenuGroupCode &&
+                                        group.HasMenuItem == true && !string.IsNullOrEmpty(p.MenuCode)),
+                        ChildMenus = childMenus
+                    };
+                }
 
-                        Permissions = grantedPermissions
-                                        .Where(p => p.MenuCode == menu.MenuCode)
-                                        .Select(p=> p.PermissionCode)
-                                        .ToList()
-                    }).ToList()
 
-            })
-            .ToList();
+
+                // CASE 2: group has NO menu items - group-level permissions only
+                var groupPermissions = grantedPermissions
+                    .Where(g => g.MenuGroupCode == group.MenuGroupCode)
+                    .Select(g => g.PermissionCode)
+                    .Where(code => !string.IsNullOrWhiteSpace(code))
+                    .Distinct()
+                    .ToList();
+
+                if (!groupPermissions.Any())
+                {
+                    return new MenuGroupResponseModel
+                    {
+                        MenuGroupCode = group.MenuGroupCode,
+                        MenuGroupName = group.MenuGroupName,
+                        MenuGroupIcon = group.Icon,
+                        MenuGroupUrl = group.Url,
+                        IsChecked = !string.IsNullOrEmpty(reqModel.RoleCode) &&
+                                    grantedPermissions.Any(p =>
+                                        p.MenuGroupCode == group.MenuGroupCode &&
+                                         group.HasMenuItem == false),
+                        ChildMenus = []
+                    };
+                }
+
+                return new MenuGroupResponseModel
+                {
+                    MenuGroupCode = group.MenuGroupCode,
+                    MenuGroupName = group.MenuGroupName,
+                    MenuGroupIcon = group.Icon,
+                    MenuGroupUrl = group.Url,
+                    IsChecked = !string.IsNullOrEmpty(reqModel.RoleCode) &&
+                                    grantedPermissions.Any(p =>
+                                        p.MenuGroupCode == group.MenuGroupCode &&
+                                         group.HasMenuItem == false),
+                    ChildMenus = new List<MenuItemResponseModel>
+                        {
+                            new MenuItemResponseModel
+                            {
+                                MenuItemCode = null,
+                                MenuItemName = null,
+                                MenuItemIcon = null,
+                                MenuItemUrl = null,
+                                IsChecked = groupPermissions.Any(),
+                                Permissions = groupPermissions
+                            }
+                        }
+                };
+            }).ToList();
+
 
             var response = new MenuTreeResponseModel
             {
