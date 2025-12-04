@@ -53,7 +53,7 @@ public class DA_Employee
                                          && r.Name.ToLower().Contains(reqModel.EmployeeName.ToLower()));
             }
 
-            if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
+            if (!string.IsNullOrWhiteSpace(reqModel.RoleName))
             {
                 query = query.Where(r => r.RoleName != null
                                          && r.RoleName.ToLower() == reqModel.RoleName.ToLower());
