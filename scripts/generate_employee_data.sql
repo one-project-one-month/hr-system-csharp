@@ -62,7 +62,7 @@ INSERT INTO Tbl_Employee (
     'hr',
     'Jane HR Specialist',
     'hr@hrsystem.com',
-    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyY5Y5Y5Y5Y5',  -- Password: HR123! (BCrypt hash - REPLACE with actual hash)
+    '$2a$12$lGSt8Sx6OZ4661F1q/N5sOkVQCFhRBHXxIf52wgA3ncsmC1HF6s2G',  -- Password: HR123! (BCrypt hash - REPLACE with actual hash)
     '+1234567892',
     '',
     '2024-02-01',

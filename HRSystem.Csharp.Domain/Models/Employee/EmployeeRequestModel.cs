@@ -10,6 +10,7 @@ public class EmployeeRequestModel
 public class EmployeeListRequestModel: PaginationRequestModel
 {
     public string? EmployeeName { get; set; }
+    public string? RoleName { get; set; }
 }
 
 public class UserProfileRequestModel
