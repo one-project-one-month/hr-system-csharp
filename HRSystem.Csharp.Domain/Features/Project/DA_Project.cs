@@ -195,7 +195,7 @@ public class DA_Project
             .AsNoTracking()
             .Where(e => e.DeleteFlag == false
                         && e.ProjectCode == projectCode
-                        && reqModel.EmployeeCodes.Contains(e.EmployeeCode))
+                        && reqModel.EmployeeCodes.Contains(e.EmployeeCode!))
             .Select(e => e.EmployeeCode)
             .ToListAsync();
 
@@ -205,7 +205,7 @@ public class DA_Project
                 $"Employees with code(s): {string.Join(", ", alreadyAddedEmployees)} are already added to Project - {projectCode}",
                 new AddEmployeeToProjectResponseModel
                 {
-                    EmployeeCodes = alreadyAddedEmployees
+                    EmployeeCodes = alreadyAddedEmployees!
                 }
             );
         }

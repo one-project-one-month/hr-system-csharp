@@ -5,9 +5,9 @@ namespace HRSystem.Csharp.Domain.Models.Project;
 
 public class ProjectRequestModel
 {
-    public string ProjectName { get; set; }
+    public string ProjectName { get; set; } = string.Empty;
 
-    public string ProjectDescription { get; set; }
+    public string ProjectDescription { get; set; } = string.Empty;
 
     public DateTime? StartDate { get; set; }
 
@@ -18,7 +18,7 @@ public class ProjectRequestModel
 
 public class ProjectEditRequestModel
 {
-    public string ProjectCode { get; set; }
+    public string ProjectCode { get; set; } = string.Empty;
 }
 
 public class ProjectListRequestModel : PaginationRequestModel

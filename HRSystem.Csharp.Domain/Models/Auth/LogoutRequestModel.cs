@@ -2,5 +2,5 @@
 
 public class LogoutRequestModel
 {
-    public string RefrehToken { get; set; }
+    public string RefrehToken { get; set; } = string.Empty;
 }

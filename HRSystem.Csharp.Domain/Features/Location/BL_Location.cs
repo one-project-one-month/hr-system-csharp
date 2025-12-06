@@ -16,7 +16,7 @@ public class BL_Location
         if (!validationResult.IsSuccess)
             return Result<bool>.BadRequestError(validationResult.Message!);
 
-        var existing = await _daLocation.GetLocationByName(location.Name);
+        var existing = await _daLocation.GetLocationByName(location.Name!);
         if (existing is { IsSuccess: true, Data: not null })
         {
             return Result<bool>.DuplicateRecordError("Location name already exists!");

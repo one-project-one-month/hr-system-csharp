@@ -2,9 +2,9 @@
 
 public class PayrollResponseModel
 {
-    public string PayrollId { get; set; }
-    public string PayrollCode { get; set; }
-    public string EmployeeCode { get; set; }
+    public string PayrollId { get; set; } = string.Empty;
+    public string PayrollCode { get; set; } = string.Empty;
+    public string EmployeeCode { get; set; } = string.Empty;
     public DateTime? PayrollDate { get; set; } // Use DateTime, not DateOnly
     public int? TotalWorkingHour { get; set; }
     public int? LeaveHour { get; set; }
@@ -16,7 +16,7 @@ public class PayrollResponseModel
     public decimal? Tax { get; set; }
     public decimal? NetPay { get; set; }
     public string? Status { get; set; }
-    public string EmployeeName { get; set; }
+    public string EmployeeName { get; set; } = string.Empty;
 }
 
 public class PayrollListResponseModel : PagedResult<PayrollResponseModel>

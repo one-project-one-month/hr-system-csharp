@@ -1,15 +1,10 @@
-﻿using HRSystem.Csharp.Domain.Models.CompanyRules;
+﻿using HRSystem.Csharp.Domain.Models.CompanyRule;
 
 namespace HRSystem.Csharp.Domain.Features.Rule;
 
-public class DA_CompanyRules
+public class DA_CompanyRules(AppDbContext context)
 {
-    private readonly AppDbContext _context;
-
-    public DA_CompanyRules(AppDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AppDbContext _context = context;
 
     public async Task<Result<CompanyRuleListResponseModel>> GetAllCompanyRulesAsync(
         CompanyRuleListRequestModel reqModel)
@@ -23,30 +18,30 @@ public class DA_CompanyRules
             if (!string.IsNullOrWhiteSpace(reqModel.RuleDescription))
             {
                 query = query.Where(r => r.Description != null
-                                         && r.Description.ToLower().Contains(reqModel.RuleDescription.ToLower()));
+                                         && r.Description.Contains(reqModel.RuleDescription, StringComparison.CurrentCultureIgnoreCase));
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);
 
-            var rules = query.Select(cr => new CompanyRules
+            var rules = query.Select(cr => new CompanyRuleModel
             {
                 CompanyRuleId = cr.CompanyRuleId,
                 CompanyRuleCode = cr.CompanyRuleCode,
                 Description = cr.Description,
                 Value = cr.Value,
-                IsActive = cr.IsActive == null ? false : cr.IsActive,
+                IsActive = cr.IsActive != false && cr.IsActive,
                 CreatedAt = cr.CreatedAt,
                 CreatedBy = cr.CreatedBy,
                 ModifiedAt = cr.ModifiedAt,
                 ModifiedBy = cr.ModifiedBy,
-                DeleteFlag = cr.DeleteFlag == null ? false : cr.DeleteFlag
+                DeleteFlag = cr.DeleteFlag != false && cr.DeleteFlag
             });
 
             var pagedResult = await rules.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
 
             var result = new CompanyRuleListResponseModel()
             {
-                Items = pagedResult.Items ?? new List<CompanyRules>(),
+                Items = pagedResult.Items ?? [],
                 TotalCount = pagedResult.TotalCount,
                 PageNo = reqModel.PageNo,
                 PageSize = reqModel.PageSize

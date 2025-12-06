@@ -1,5 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Features.Rule;
-using HRSystem.Csharp.Domain.Models.CompanyRules;
+﻿using HRSystem.Csharp.Domain.Features.CompanyRule;
+using HRSystem.Csharp.Domain.Models.CompanyRule;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers
@@ -7,14 +7,9 @@ namespace HRSystem.Csharp.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class CompanyRulesController : Controller
+    public class CompanyRulesController(BL_CompanyRule blCompanyRules) : Controller
     {
-        private readonly BL_CompanyRules _blCompanyRules;
-
-        public CompanyRulesController(BL_CompanyRules blCompanyRules)
-        {
-            _blCompanyRules = blCompanyRules;
-        }
+        private readonly BL_CompanyRule _blCompanyRules = blCompanyRules;
 
         [HttpGet("list")]
         public async Task<IActionResult> GetAllCompanyRules([FromQuery] CompanyRuleListRequestModel reqModel)

@@ -75,7 +75,7 @@ public class BL_Project
             if (!normalized.Any())
                 return Result<AddEmployeeToProjectResponseModel>.ValidationError(
                     "At least one employee code is required.",
-                    new AddEmployeeToProjectResponseModel { EmployeeCodes = new List<string>() });
+                    new AddEmployeeToProjectResponseModel { EmployeeCodes = [] });
 
             // check duplicate code in request data
             var duplicatesInRequest = normalized
@@ -101,7 +101,7 @@ public class BL_Project
 
             if (project.IsError)
             {
-                return Result<AddEmployeeToProjectResponseModel>.SystemError(project.Message);
+                return Result<AddEmployeeToProjectResponseModel>.SystemError(project.Message!);
             }
 
             if (project?.Data is null)
@@ -115,14 +115,14 @@ public class BL_Project
             #region Validate each employee exists and not have been added to the project
 
             // check employee exist in Tbl_Employee
-            var invalidEmployeesResult = await _daEmployee.ValidateEmployeesExist(reqModel);
+            var invalidEmployeesResult = await _daEmployee.ValidateEmployeesExist(reqModel!);
             if (invalidEmployeesResult.IsError)
             {
                 return invalidEmployeesResult;
             }
 
             // check employees already added to the project
-            var assignedEmpRes = await _daProject.CheckEmployeesAlreadyAssigned(projectCode, reqModel);
+            var assignedEmpRes = await _daProject.CheckEmployeesAlreadyAssigned(projectCode, reqModel!);
             if (assignedEmpRes.IsError)
             {
                 return assignedEmpRes;
@@ -130,7 +130,7 @@ public class BL_Project
 
             #endregion
 
-            var result = await _daProject.AddEmployee(projectCode, reqModel);
+            var result = await _daProject.AddEmployee(projectCode, reqModel!);
             return result;
         }
         catch (Exception e)
@@ -154,7 +154,7 @@ public class BL_Project
 
             if (project.IsError)
             {
-                return Result<AddEmployeeToProjectResponseModel>.SystemError(project.Message);
+                return Result<AddEmployeeToProjectResponseModel>.SystemError(project.Message!);
             }
 
             if (project?.Data is null)

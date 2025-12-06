@@ -23,7 +23,7 @@ public class DA_Payroll
                 {
                     PayrollId = p.PayrollId,
                     PayrollCode = p.PayrollCode,
-                    EmployeeCode = p.EmployeeCode,
+                    EmployeeCode = p.EmployeeCode!,
                     PayrollDate = p.PayrollDate,
                     TotalWorkingHour = p.TotalWorkingHour,
                     BaseSalary = p.BaseSalary,

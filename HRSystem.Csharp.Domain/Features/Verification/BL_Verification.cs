@@ -95,8 +95,6 @@ public class BL_Verification : AuthorizationService
 
     public async Task<Result<VerificationResponseModel>> Create(VerificationRequestModel requestModel)
     {
-        var userCode = UserCode;
-
         if (string.IsNullOrEmpty(requestModel.Email) || !requestModel.Email.IsValidEmail())
         {
             return Result<VerificationResponseModel>.ValidationError("Invalid email.");
@@ -113,7 +111,7 @@ public class BL_Verification : AuthorizationService
                 VerificationCode = otp,
                 Email = requestModel.Email,
                 ExpiredTime = expiry,
-                CreatedBy = UserCode,
+                CreatedBy = UserCode!,
                 CreatedAt = DateTime.Now,
                 DeleteFlag = false
             };
@@ -166,7 +164,7 @@ public class BL_Verification : AuthorizationService
                 VerificationCode = otp,
                 Email = requestModel.Email,
                 ExpiredTime = expiry,
-                CreatedBy = UserCode,
+                CreatedBy = UserCode!,
                 CreatedAt = DateTime.Now,
                 DeleteFlag = false
             };

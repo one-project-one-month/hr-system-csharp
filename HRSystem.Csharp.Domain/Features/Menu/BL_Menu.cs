@@ -32,7 +32,7 @@ public class BL_Menu
         if (existing == null)
             return Result<bool>.NotFoundError("Menu with this code doesn't exist!");
 
-        bool menuGroupExist = await _daMenu.MenuGroupExists(menu.MenuGroupCode);
+        bool menuGroupExist = await _daMenu.MenuGroupExists(menu.MenuGroupCode!);
 
         if (!menuGroupExist)
             return Result<bool>.Error("Menu Group does not exist. Create Menu Group First!");
