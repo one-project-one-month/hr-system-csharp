@@ -25,7 +25,7 @@ public class DA_Employee
         _jwtService = jwtService;
     }
 
-    public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
+    public async Task<Result<EmployeeListResponseModel>> GetEmployeeList(EmployeeListRequestModel reqModel)
     {
         try
         {

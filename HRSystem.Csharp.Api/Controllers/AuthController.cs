@@ -52,8 +52,15 @@ public class AuthController : ControllerBase
 
     [HttpGet("HashPassword")]
     public IActionResult HashPassword(string password)
-    {   
+    {
         var hashPassword = _jwtService.HashPassword(password);
+        return Ok(hashPassword);
+    }
+
+    [HttpGet("change-password")]
+    public IActionResult ChangePassword(ChangePasswordRequestModel reqModel)
+    {
+        var hashPassword = _bl_Auth.ChangePassword(reqModel);
         return Ok(hashPassword);
     }
 
@@ -61,15 +68,6 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> AutoLogin()
     {
         var response = await _bl_Auth.AutoLoginAsync();
-        if (!response.IsSuccess)
-            return BadRequest(response);
-        return Ok(response);
-    }
-
-    [HttpPost("ChangePassword")]
-    public async Task<IActionResult> ChangePassword(ChangePasswordRequestModel requestModel)
-    {
-        var response = await _bl_Auth.ChangePassword(requestModel);
         if (!response.IsSuccess)
             return BadRequest(response);
         return Ok(response);

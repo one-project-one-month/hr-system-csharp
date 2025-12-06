@@ -15,7 +15,7 @@ public class BL_Employee
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
     {
-        var employees = await _daEmployee.GetAllEmployee(reqModel);
+        var employees = await _daEmployee.GetEmployeeList(reqModel);
         return employees;
     }
 
