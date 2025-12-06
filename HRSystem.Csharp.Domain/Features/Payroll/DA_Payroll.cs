@@ -7,6 +7,7 @@ public class DA_Payroll
 {
     private readonly AppDbContext _appDbContext;
     private readonly DapperService _dapperService;
+
     public DA_Payroll(AppDbContext appDbContext, DapperService dapperService)
     {
         _appDbContext = appDbContext;
@@ -15,10 +16,9 @@ public class DA_Payroll
 
     public async Task<PayrollListResponseModel> GetPayrollList(PayrollRequestModel requestModel)
     {
-
         var allPayrolls = await _appDbContext.TblPayrolls
             .Where(p => p.EmployeeCode == requestModel.EmployeeCode)
-            .Select(p => 
+            .Select(p =>
                 new PayrollResponseModel
                 {
                     PayrollId = p.PayrollId,
@@ -53,7 +53,5 @@ public class DA_Payroll
             PageNo = requestModel.PageNo,
             PageSize = requestModel.PageSize
         };
-
     }
-
 }

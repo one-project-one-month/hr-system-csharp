@@ -52,8 +52,15 @@ public class AuthController : ControllerBase
 
     [HttpGet("HashPassword")]
     public IActionResult HashPassword(string password)
-    {   
+    {
         var hashPassword = _jwtService.HashPassword(password);
+        return Ok(hashPassword);
+    }
+
+    [HttpGet("change-password")]
+    public IActionResult ChangePassword(ChangePasswordRequestModel reqModel)
+    {
+        var hashPassword = _bl_Auth.ChangePassword(reqModel);
         return Ok(hashPassword);
     }
 
