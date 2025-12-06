@@ -139,4 +139,47 @@ public class BL_Project
             throw;
         }
     }
+
+    public async Task<Result<AddEmployeeToProjectResponseModel>> RemoveEmployee(string projectCode,
+        AddEmployeeToProjectRequestModel reqModel)
+    {
+        try
+        {
+            #region Validate Project Exists
+
+            var project = await GetProjectByCode(new ProjectEditRequestModel
+            {
+                ProjectCode = projectCode
+            });
+
+            if (project.IsError)
+            {
+                return Result<AddEmployeeToProjectResponseModel>.SystemError(project.Message);
+            }
+
+            if (project?.Data is null)
+            {
+                return Result<AddEmployeeToProjectResponseModel>.NotFoundError(
+                    $"Project - {projectCode} doesn't exist!");
+            }
+
+            #endregion
+
+            #region Validate each employee exists and not have been added to the project
+
+            var invalidEmployeesResult = await _daEmployee.ValidateEmployeesExist(reqModel);
+            if (invalidEmployeesResult.IsError)
+            {
+                return invalidEmployeesResult;
+            }
+
+            #endregion
+
+            return await _daProject.RemoveEmployee(projectCode, reqModel);
+        }
+        catch (Exception ex)
+        {
+            return Result<AddEmployeeToProjectResponseModel>.SystemError(ex.Message);
+        }
+    }
 }

@@ -146,6 +146,59 @@ public class BL_Verification : AuthorizationService
         }
     }
 
+    public async Task<Result<VerificationResponseModel>> SendEmail(VerificationRequestModel requestModel)
+    {
+        var userCode = UserCode;
+
+        if (string.IsNullOrEmpty(requestModel.Email) || !requestModel.Email.IsValidEmail())
+        {
+            return Result<VerificationResponseModel>.ValidationError("Invalid email.");
+        }
+
+        try
+        {
+            string otp = new Random().Next(100000, 999999).ToString();
+            var expiry = DateTime.Now.AddMinutes(3);
+
+            var entity = new TblVerification
+            {
+                VerificationId = Ulid.NewUlid().ToString(),
+                VerificationCode = otp,
+                Email = requestModel.Email,
+                ExpiredTime = expiry,
+                CreatedBy = UserCode,
+                CreatedAt = DateTime.Now,
+                DeleteFlag = false
+            };
+
+            var added = await _da.AddAsync(entity);
+            if (!added)
+            {
+                return Result<VerificationResponseModel>.SystemError("Failed to save new passcode to database.");
+            }
+
+            var emailTemplate = new EmailModel
+            {
+                Email = requestModel.Email,
+                Subject = EmailSubjectTemplates.Verification,
+                Body = EmailBodyTemplates.ForgetPassword.Replace("(@otp)", otp)
+            };
+
+            var sent = await _emailService.SendEmailVerification(emailTemplate);
+            if (!sent)
+            {
+                return Result<VerificationResponseModel>.SystemError("Failed to send email.");
+            }
+
+            return Result<VerificationResponseModel>.Success("New Passcode sent to email successfully.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogExceptionError(ex);
+            return Result<VerificationResponseModel>.SystemError(ex.Message);
+        }
+    }
+
     public async Task<Result<bool>> VerifyCode(VerifiyCodeRequestModel requestModel)
     {
         if (string.IsNullOrEmpty(requestModel.Email) || string.IsNullOrEmpty(requestModel.VerificationCode))

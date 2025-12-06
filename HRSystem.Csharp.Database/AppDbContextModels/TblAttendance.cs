@@ -17,9 +17,13 @@ public partial class TblAttendance
 
     public string? CheckInLocation { get; set; }
 
+    public bool? IsCheckInLocationSaved { get; set; }
+
     public DateTime? CheckOutTime { get; set; }
 
     public string? CheckOutLocation { get; set; }
+
+    public bool? IsCheckOutLocationSaved { get; set; }
 
     public decimal? WorkingHour { get; set; }
 
@@ -30,8 +34,6 @@ public partial class TblAttendance
     public int? FullDayFlag { get; set; }
 
     public string? Remark { get; set; }
-
-    public bool? IsSavedLocation { get; set; }
 
     public string? CreatedBy { get; set; }
 

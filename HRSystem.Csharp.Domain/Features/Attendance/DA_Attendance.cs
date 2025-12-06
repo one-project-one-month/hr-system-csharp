@@ -1,8 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features.Sequence;
-using HRSystem.Csharp.Domain.Models.Attendance;
-using HRSystem.Csharp.Shared.Enums;
-using Microsoft.IdentityModel.Tokens;
-using System.Linq;
+﻿using HRSystem.Csharp.Domain.Models.Attendance;
 
 namespace HRSystem.Csharp.Domain.Features.Attendance;
 
@@ -144,7 +140,8 @@ public class DA_Attendance
                 HalfDayFlag = HalfDayFlag,
                 FullDayFlag = FullDayFlag,
                 Remark = requestModel.Remark,
-                IsSavedLocation = IsSavedLocation,
+                IsCheckInLocationSaved = IsSavedLocation,
+                IsCheckOutLocationSaved = IsSavedLocation,
                 CreatedBy = userId,
                 CreatedAt = DateTime.UtcNow,
                 DeleteFlag = false
@@ -487,7 +484,8 @@ public class DA_Attendance
             item.HourLateFlag = HourLateFlag;
             item.HalfDayFlag = HalfDayFlag;
             item.FullDayFlag = FullDayFlag;
-            item.IsSavedLocation = IsSavedLocation;
+            item.IsCheckInLocationSaved = IsSavedLocation;
+            item.IsCheckOutLocationSaved = IsSavedLocation;
             item.Remark = requestModel.Remark;
             item.ModifiedBy = userId;
             item.ModifiedAt = DateTime.UtcNow;

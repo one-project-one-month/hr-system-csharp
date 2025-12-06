@@ -99,13 +99,10 @@ public static class FeatureManager
             $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(mssqlConnection));
-
-        //builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
-        //    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
-        //    ServiceLifetime.Transient, 
-        //    ServiceLifetime.Transient);
-
+            options.UseSqlServer(mssqlConnection)
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking), 
+            ServiceLifetime.Transient, 
+            ServiceLifetime.Transient);
 
         builder.Services.AddScoped<IDbConnection>(sp =>
         {

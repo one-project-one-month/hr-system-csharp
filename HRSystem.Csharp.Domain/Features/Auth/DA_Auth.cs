@@ -1,17 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features.Role;
-using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
-using HRSystem.Csharp.Domain.Features.Sequence;
-using HRSystem.Csharp.Domain.Models.Auth;
-using HRSystem.Csharp.Domain.Models.Employee;
-using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
-using HRSystem.Csharp.Shared;
-using HRSystem.Csharp.Shared.Enums;
-using HRSystem.Csharp.Database.AppDbContextModels;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
-using System.IdentityModel.Tokens.Jwt;
-
-namespace HRSystem.Csharp.Domain.Features.Auth;
+﻿namespace HRSystem.Csharp.Domain.Features.Auth;
 
 public class DA_Auth : AuthorizationService
 {
@@ -20,19 +7,22 @@ public class DA_Auth : AuthorizationService
     private readonly DA_Role _role;
     private readonly DA_RoleMenuPermission _roleMenuPermission;
     private readonly DA_Sequence _daSequence;
+    private readonly BL_Verification _blVerification;
 
     public DA_Auth(IHttpContextAccessor contextAccessor,
-            JwtService jwtService, 
+            JwtService jwtService,
             AppDbContext appDbContext,
             DA_Role role,
             DA_RoleMenuPermission roleMenuPermission,
-            DA_Sequence daSequence) : base(contextAccessor)
+            DA_Sequence daSequence,
+            BL_Verification blVerification) : base(contextAccessor)
     {
         _jwtService = jwtService;
         _appDbContext = appDbContext;
         _role = role;
         _roleMenuPermission = roleMenuPermission;
         _daSequence = daSequence;
+        _blVerification = blVerification;
     }
 
     public async Task<Result<AuthResponseModel>> LoginAsync(LoginRequestModel requestModel)
@@ -81,7 +71,7 @@ public class DA_Auth : AuthorizationService
                             PhoneNo = user.PhoneNo,
                             RoleName = role.Data.RoleName,
                         }
-                    }, 
+                    },
                     "User is First Time.");
             }
 
@@ -93,10 +83,10 @@ public class DA_Auth : AuthorizationService
             {
                 RoleCode = role.Data.RoleCode
             };
-            
-            var roleMenuPermission = await  _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
 
-            if(roleMenuPermission is null)
+            var roleMenuPermission = await _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
+
+            if (roleMenuPermission is null)
                 return Result<AuthResponseModel>.InvalidDataError("Employee needs permissions to access");
 
             var refreshToken = new TblRefreshToken
@@ -290,7 +280,7 @@ public class DA_Auth : AuthorizationService
         }
 
         var user = await _appDbContext.TblEmployees
-            .FirstOrDefaultAsync(x => x.EmployeeCode == requestModel.EmployeeCode);
+            .FirstOrDefaultAsync(x => x.EmployeeCode == requestModel.EmployeeCode && x.DeleteFlag == false);
 
         if (user is null)
         {
@@ -398,6 +388,33 @@ public class DA_Auth : AuthorizationService
         catch (Exception ex)
         {
             return Result<AuthResponseModel>.SystemError($"An error occurred during auto-login: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<string>> ForgotPassword(string email)
+    {
+        try
+        {
+            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.Email == email && x.DeleteFlag == false);
+            if (user is null)
+            {
+                return Result<string>.NotFoundError("Email not found");
+            }
+            var emailRequest = new VerificationRequestModel()
+            {
+                Email = email
+            };
+            var emailResponse = await _blVerification.SendEmail(emailRequest);
+            if (!emailResponse.IsSuccess)
+            {
+                return Result<string>.Error("Failed to send password reset email.");
+            }
+
+            return Result<string>.Success("New Passcode has been sent to your email.");
+        }
+        catch (Exception ex)
+        {
+            return Result<string>.SystemError(ex.Message);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models.Auth;
-
-namespace HRSystem.Csharp.Domain.Features.Auth;
+﻿namespace HRSystem.Csharp.Domain.Features.Auth;
 
 public class BL_Auth
 {
@@ -38,6 +36,12 @@ public class BL_Auth
     public async Task<Result<AuthResponseModel>> AutoLoginAsync()
     {
         var response = await _da_Auth.AutoLoginAsync();
+        return response;
+    }
+
+    public async Task<Result<string>> ForgotPassword(string requestModel)
+    {
+        var response = await _da_Auth.ForgotPassword(requestModel);
         return response;
     }
 }

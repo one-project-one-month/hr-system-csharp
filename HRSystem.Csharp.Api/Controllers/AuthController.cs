@@ -65,4 +65,22 @@ public class AuthController : ControllerBase
             return BadRequest(response);
         return Ok(response);
     }
+
+    [HttpPost("ChangePassword")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequestModel requestModel)
+    {
+        var response = await _bl_Auth.ChangePassword(requestModel);
+        if (!response.IsSuccess)
+            return BadRequest(response);
+        return Ok(response);
+    }
+
+    [HttpPost("ForgotPassword")]
+    public async Task<IActionResult> ForgotPassword(string requestModel)
+    {
+        var response = await _bl_Auth.ForgotPassword(requestModel);
+        if (!response.IsSuccess)
+            return BadRequest(response);
+        return Ok(response);
+    }
 }

@@ -270,4 +270,48 @@ public class DA_Project
             );
         }
     }
+
+    public async Task<Result<AddEmployeeToProjectResponseModel>> RemoveEmployee(
+        string projectCode,
+        AddEmployeeToProjectRequestModel reqModel)
+    {
+        await using var transaction = await _appDbContext.Database.BeginTransactionAsync();
+
+        try
+        {
+            var entries = new List<TblEmployeeProject>(reqModel.EmployeeCodes.Count);
+            foreach (var employeeCode in reqModel.EmployeeCodes)
+            {
+                entries.Add(new TblEmployeeProject
+                {
+                    DeleteFlag = true
+                });
+            }
+
+            _appDbContext.TblEmployeeProjects.UpdateRange(entries);
+            await _appDbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return Result<AddEmployeeToProjectResponseModel>.Success(
+                new AddEmployeeToProjectResponseModel { EmployeeCodes = reqModel.EmployeeCodes },
+                $"Successfully remove {reqModel.EmployeeCodes.Count} employee(s) to project {projectCode}."
+            );
+        }
+        catch (DbUpdateException ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, $"Insert failed for project {projectCode}");
+            return Result<AddEmployeeToProjectResponseModel>.ValidationError(
+                $"Failed to remove employees to project {projectCode}. No records were added."
+            );
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, $"Unexpected error for removing employees to project {projectCode}");
+            return Result<AddEmployeeToProjectResponseModel>.SystemError(
+                "Unexpected error. No records were added."
+            );
+        }
+    }
 }
