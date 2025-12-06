@@ -90,16 +90,17 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblEmployee>(entity =>
         {
-            entity.HasKey(e => e.EmployeeId).HasName("PK__Tbl_Empl__7AD04F11DF07788B");
+            entity.HasKey(e => e.EmployeeId).HasName("PK__Tbl_Empl__7AD04F11DE946A13");
 
             entity.ToTable("Tbl_Employee");
 
-            entity.HasIndex(e => e.EmployeeCode, "UQ__Tbl_Empl__1F64254884CC03BD").IsUnique();
+            entity.HasIndex(e => e.EmployeeCode, "UQ__Tbl_Empl__1F6425484C4DB140").IsUnique();
 
             entity.Property(e => e.EmployeeId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
+            entity.Property(e => e.Gender).HasMaxLength(50);
             entity.Property(e => e.IsFirstTimeLogin).HasDefaultValue(true);
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.Name).HasMaxLength(200);

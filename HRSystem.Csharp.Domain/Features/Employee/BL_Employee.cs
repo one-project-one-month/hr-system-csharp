@@ -1,17 +1,10 @@
 ﻿using System.Net.Mail;
-using HRSystem.Csharp.Domain.Models.Employee;
-using Sprache;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
 
-public class BL_Employee
+public class BL_Employee(DA_Employee daEmployee)
 {
-    private readonly DA_Employee _daEmployee;
-
-    public BL_Employee(DA_Employee daEmployee)
-    {
-        _daEmployee = daEmployee;
-    }
+    private readonly DA_Employee _daEmployee = daEmployee;
 
     public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
     {
@@ -25,7 +18,7 @@ public class BL_Employee
         return employees;
     }
 
-    public async Task<Result<UserProfileResponseModel>> getUserProfile(string employeeCode)
+    public async Task<Result<UserProfileResponseModel>> GetUserProfile(string employeeCode)
     {
         var result = await _daEmployee.GetUserProfile(employeeCode);
         return result;
@@ -177,6 +170,12 @@ public class BL_Employee
     public async Task<Result<EmployeeDeleteResponseModel>> DeleteEmployee(string employeeCode)
     {
         var result = await _daEmployee.DeleteEmployee(employeeCode);
+        return result;
+    }
+
+    public async Task<Result<EmployeEditProfileResponseModel>> EditProfile(EmployeeEditProfileRequestModel requestModel)
+    {
+        var result = await _daEmployee.EditProfile(requestModel);
         return result;
     }
 }

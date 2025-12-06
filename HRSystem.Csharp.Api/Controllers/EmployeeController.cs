@@ -43,7 +43,7 @@ public class EmployeeController : ControllerBase
     [HttpGet("profile/{employeeCode}")]
     public async Task<IActionResult> GetUserProfile(string employeeCode)
     {
-        var result = await _blEmployee.getUserProfile(employeeCode);
+        var result = await _blEmployee.GetUserProfile(employeeCode);
         if (result.IsSuccess)
         {
             return Ok(result.Data);
@@ -87,5 +87,16 @@ public class EmployeeController : ControllerBase
 
         return BadRequest(result);
     }
-    
+
+    [HttpPost("EditProfile")]
+    public async Task<IActionResult> EditProfile(EmployeeEditProfileRequestModel requestModel)
+    {
+        var result = await _blEmployee.EditProfile(requestModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
 }

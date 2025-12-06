@@ -2,14 +2,9 @@
 
 namespace HRSystem.Csharp.Domain.Features.CompanyRule;
 
-public class DA_CompanyRule
+public class DA_CompanyRule(AppDbContext context)
 {
-    private readonly AppDbContext _context;
-
-    public DA_CompanyRule(AppDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AppDbContext _context = context;
 
     public async Task<Result<CompanyRuleListResponseModel>> GetAllCompanyRulesAsync(
         CompanyRuleListRequestModel reqModel)
@@ -23,7 +18,7 @@ public class DA_CompanyRule
             if (!string.IsNullOrWhiteSpace(reqModel.RuleDescription))
             {
                 query = query.Where(r => r.Description != null
-                                         && r.Description.ToLower() == reqModel.RuleDescription.ToLower());
+                                         && r.Description.Equals(reqModel.RuleDescription, StringComparison.CurrentCultureIgnoreCase));
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);
