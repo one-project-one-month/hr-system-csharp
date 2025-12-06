@@ -67,7 +67,7 @@ public class BL_EmployeeAttendance
             {
                 checkOut = DateTime.UtcNow;
                 checkInData = await _da.GetCheckInTime(requestModel.EmployeeCode!);
-                checkIn = DateTime.Parse(checkInData.Data.CheckInTime.ToString()!);
+                checkIn = DateTime.Parse(checkInData.Data!.CheckInTime.ToString()!);
 
                 // Working Hour
                 workingHours = _daAttendance.CalculateWorkingHours(checkIn, checkOut.Value);
@@ -136,7 +136,7 @@ public class BL_EmployeeAttendance
                 {
                     AttendanceCode = attendanceCode,
                     EmployeeCode = requestModel.EmployeeCode!,
-                    CheckInTime = (DateTime)checkInData.Data.CheckInTime!,
+                    CheckInTime = (DateTime)checkInData.Data!.CheckInTime!,
                     CheckInLocation = checkInData.Data.CheckInLocation!,
                     CheckOutTime = checkOut,
                     CheckOutLocation = checkOutLocation,

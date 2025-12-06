@@ -9,7 +9,7 @@ public class JwtService
     private readonly IConfiguration _configuration;
     private readonly AppDbContext _appDbContext;
 
-    public JwtService(IConfiguration configuration, AppDbContext appDbContext = null)
+    public JwtService(IConfiguration configuration, AppDbContext appDbContext = null!)
     {
         _configuration = configuration;
         _appDbContext = appDbContext;

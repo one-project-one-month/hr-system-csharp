@@ -118,7 +118,7 @@ public class DA_MenuGroup
             {
                 MenuGroupId = Ulid.NewUlid().ToString(),
                 MenuGroupCode = requestMenuGroup.MenuGroupCode,
-                MenuGroupName = requestMenuGroup.MenuGroupName,
+                MenuGroupName = requestMenuGroup.MenuGroupName!,
                 Url = requestMenuGroup.Url,
                 Icon = requestMenuGroup.Icon,
                 SortOrder = requestMenuGroup.SortOrder,

@@ -1,6 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features.Role;
-using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 
@@ -26,8 +24,8 @@ public class BL_RoleMenuPermission
     {
         var result = await _daRoleMenuPermission.GetMenuTreeWithPermissionsAsync(reqModel);
         return result.IsError
-            ? Result<MenuTreeResponseModel>.Error(result.Message)
-            : Result<MenuTreeResponseModel>.Success(result.Data);
+            ? Result<MenuTreeResponseModel>.Error(result.Message!)
+            : Result<MenuTreeResponseModel>.Success(result.Data!);
     }
 
     public async Task<Result<CreateRoleMenuPermissionResponseModel>> CreateRoleMenuPermission
@@ -77,8 +75,8 @@ public class BL_RoleMenuPermission
 
         var result = await _daRoleMenuPermission.SaveRoleMenuPermissionsAsync(reqModel);
         return result.IsError
-            ? Result<CreateRoleMenuPermissionResponseModel>.Error(result.Message)
-            : Result<CreateRoleMenuPermissionResponseModel>.Success(result.Data);
+            ? Result<CreateRoleMenuPermissionResponseModel>.Error(result.Message!)
+            : Result<CreateRoleMenuPermissionResponseModel>.Success(result.Data!);
     }
 
     public async Task<Result<List<PermissionModel>>> GetAllPermissions()

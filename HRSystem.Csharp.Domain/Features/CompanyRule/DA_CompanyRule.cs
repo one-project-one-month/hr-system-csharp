@@ -1,12 +1,12 @@
-﻿using HRSystem.Csharp.Domain.Models.CompanyRules;
+﻿using HRSystem.Csharp.Domain.Models.CompanyRule;
 
-namespace HRSystem.Csharp.Domain.Features.Rules;
+namespace HRSystem.Csharp.Domain.Features.CompanyRule;
 
-public class DA_CompanyRules
+public class DA_CompanyRule
 {
     private readonly AppDbContext _context;
 
-    public DA_CompanyRules(AppDbContext context)
+    public DA_CompanyRule(AppDbContext context)
     {
         _context = context;
     }
@@ -28,25 +28,25 @@ public class DA_CompanyRules
 
             query = query.OrderByDescending(r => r.CreatedAt);
 
-            var rules = query.Select(cr => new CompanyRules
+            var rules = query.Select(cr => new CompanyRuleModel
             {
                 CompanyRuleId = cr.CompanyRuleId,
                 CompanyRuleCode = cr.CompanyRuleCode,
                 Description = cr.Description,
                 Value = cr.Value,
-                IsActive = cr.IsActive == null ? false : cr.IsActive,
+                IsActive = cr.IsActive != false && cr.IsActive,
                 CreatedAt = cr.CreatedAt,
                 CreatedBy = cr.CreatedBy,
                 ModifiedAt = cr.ModifiedAt,
                 ModifiedBy = cr.ModifiedBy,
-                DeleteFlag = cr.DeleteFlag == null ? false : cr.DeleteFlag
+                DeleteFlag = cr.DeleteFlag != false && cr.DeleteFlag
             });
 
             var pagedResult = await rules.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
 
             var result = new CompanyRuleListResponseModel()
             {
-                Items = pagedResult.Items ?? new List<CompanyRules>(),
+                Items = pagedResult.Items ?? [],
                 TotalCount = pagedResult.TotalCount,
                 PageNo = reqModel.PageNo,
                 PageSize = reqModel.PageSize

@@ -1,5 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Models.Employee;
-using HRSystem.Csharp.Domain.Models.Payroll;
+﻿using HRSystem.Csharp.Domain.Models.Payroll;
 
 namespace HRSystem.Csharp.Domain.Features.Payroll;
 
@@ -18,8 +17,8 @@ public class BL_Payroll
     { 
         var reqModel = new EmployeeListRequestModel();
         var employees = await _daEmployee.GetEmployeeList(reqModel);
-        List<PayrollListResponseModel> payrollList = new List<PayrollListResponseModel>();
-        foreach(var employee in employees.Data.Items)
+        List<PayrollListResponseModel> payrollList = [];
+        foreach(var employee in employees.Data!.Items!)
         {
             requestModel.EmployeeCode = employee.EmployeeCode;
             var result = await _daPayroll.GetPayrollList(requestModel);

@@ -7,7 +7,7 @@ public class AttendanceListResponseModel
 
 public class AttendanceListModel
 {
-    public string AttendanceId { get; set; }
+    public string AttendanceId { get; set; } = string.Empty;
 
     public string? AttendanceCode { get; set; }
 

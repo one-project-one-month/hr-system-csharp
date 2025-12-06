@@ -1,11 +1,10 @@
-﻿using HRSystem.Csharp.Shared.Enums;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace HRSystem.Csharp.Domain.Models.Project;
 
 public class ProjectResponseModel
 {
-    public string ProjectCode { get; set; }
+    public string ProjectCode { get; set; } = string.Empty;
 
     public string? ProjectName { get; set; }
 

@@ -1,8 +1,8 @@
 ﻿using HRSystem.Csharp.Domain.Models.Common;
 
-namespace HRSystem.Csharp.Domain.Models.CompanyRules;
+namespace HRSystem.Csharp.Domain.Models.CompanyRule;
 
-public class CompanyRuleListResponseModel : PagedResult<CompanyRules>
+public class CompanyRuleListResponseModel : PagedResult<CompanyRuleModel>
 {
 }
 
@@ -11,7 +11,7 @@ public class CompanyRuleListRequestModel : PaginationRequestModel
     public string? RuleDescription { get; set; }
 }
 
-public class CompanyRules
+public class CompanyRuleModel
 {
     public string? CompanyRuleId { get; set; }
     public string? CompanyRuleCode { get; set; }

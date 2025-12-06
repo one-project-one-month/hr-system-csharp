@@ -15,7 +15,7 @@ public class EmployeeListRequestModel: PaginationRequestModel
 
 public class UserProfileRequestModel
 {
-    public string EmployeeCode { get; set; }
+    public string EmployeeCode { get; set; } = string.Empty;
 }
 public class EmployeeCreateRequestModel
 {
@@ -23,8 +23,8 @@ public class EmployeeCreateRequestModel
     public string Name { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string Password { get; set; } = null!;
-    public string RoleCode { get; set; }
-    public string PhoneNo { get; set; }
+    public string RoleCode { get; set; } = string.Empty;
+    public string PhoneNo { get; set; } = string.Empty;
     public decimal Salary { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime? ResignDate { get; set; }

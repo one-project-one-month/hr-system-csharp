@@ -1,16 +1,12 @@
 ﻿using DotNetEnv;
 using HRSystem.Csharp.Domain.Features.Reports;
-using HRSystem.Csharp.Domain.Features.Role;
-using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 using HRSystem.Csharp.Domain.Features.Rule;
-using HRSystem.Csharp.Domain.Features.Sequence;
-using HRSystem.Csharp.Domain.Features.Verification;
 using Microsoft.Data.SqlClient;
-using System.Data;
 using System.Net;
 using System.Net.Mail;
 using HRSystem.Csharp.Domain.Features.AdminDashboard;
 using HRSystem.Csharp.Domain.Features.Payroll;
+using HRSystem.Csharp.Domain.Features.CompanyRule;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -29,7 +25,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Employee>();
         builder.Services.AddScoped<BL_Auth>();
         builder.Services.AddScoped<BL_Sequence>();
-        builder.Services.AddScoped<BL_CompanyRules>();
+        builder.Services.AddScoped<BL_CompanyRule>();
         builder.Services.AddScoped<BL_Verification>();
         builder.Services.AddScoped<BL_AdminDashboard>();
 

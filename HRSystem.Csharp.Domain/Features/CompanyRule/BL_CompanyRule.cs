@@ -1,12 +1,12 @@
-﻿using HRSystem.Csharp.Domain.Models.CompanyRules;
+﻿using HRSystem.Csharp.Domain.Models.CompanyRule;
 
-namespace HRSystem.Csharp.Domain.Features.Rule;
+namespace HRSystem.Csharp.Domain.Features.CompanyRule;
 
-public class BL_CompanyRules
+public class BL_CompanyRule
 {
-    private readonly DA_CompanyRules _daCompanyRules;
+    private readonly DA_CompanyRule _daCompanyRules;
 
-    public BL_CompanyRules(DA_CompanyRules daCompanyRules)
+    public BL_CompanyRule(DA_CompanyRule daCompanyRules)
     {
         _daCompanyRules = daCompanyRules;
     }

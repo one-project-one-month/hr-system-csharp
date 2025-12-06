@@ -2,9 +2,8 @@
 
 public class AttendanceHistogramChart
 {
-        public string Label { get; set; }
+        public string Label { get; set; } =  string.Empty;
         public int Present { get; set; }
         public int Absent { get; set; }
         public int HalfDayAbsent { get; set; }
-        
 }

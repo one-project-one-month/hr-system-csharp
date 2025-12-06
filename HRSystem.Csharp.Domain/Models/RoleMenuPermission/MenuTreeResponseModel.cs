@@ -2,7 +2,7 @@
 
 public class MenuTreeResponseModel
 {
-    public List<MenuGroupResponseModel> MenuTree { get; set; }
+    public List<MenuGroupResponseModel> MenuTree { get; set; } = [];
 }
 
 public class MenuGroupResponseModel
@@ -23,7 +23,7 @@ public class MenuItemResponseModel
     public string? MenuItemIcon { get; set; }
     public string? MenuItemUrl { get; set; }
     public bool? IsChecked { get; set; }
-    public List<string>? Permissions { get; set; } = new List<string>();
+    public List<string>? Permissions { get; set; } = [];
 }
 
 public class MenuTreeRequestModel

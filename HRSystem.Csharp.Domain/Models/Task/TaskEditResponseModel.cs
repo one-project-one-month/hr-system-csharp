@@ -7,7 +7,7 @@ public class TaskEditResponseModel
 
 public class TaskEditModel
 {
-    public string TaskId { get; set; }
+    public string TaskId { get; set; } = string.Empty;
 
     public string? TaskCode { get; set; }
 

@@ -2,7 +2,7 @@
 
 public class LocationResponseModel
 {
-    public string LocationCode { get; set; }
+    public string LocationCode { get; set; } = string.Empty;
 
     public string? Name { get; set; }
 

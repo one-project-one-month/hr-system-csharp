@@ -13,8 +13,8 @@ public class Result<T>
     }
 
     private EnumRespType Type { get; set; }
-    public T Data { get; set; }
-    public string Message { get; set; }
+    public T? Data { get; set; }
+    public string? Message { get; set; }
 
     public static Result<T> Success(string message = "Success") { return new Result<T> { IsSuccess = true, Type = EnumRespType.Success, Message = message }; }
     public static Result<T> Success(T data, string message = "Success") => new Result<T> { IsSuccess = true, Type = EnumRespType.Success, Data = data, Message = message };

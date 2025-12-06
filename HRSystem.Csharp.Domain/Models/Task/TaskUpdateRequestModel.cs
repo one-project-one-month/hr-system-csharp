@@ -2,7 +2,7 @@
 
 public class TaskUpdateRequestModel
 {
-    public string TaskId { get; set; }
+    public string TaskId { get; set; } = string.Empty;
 
     public string? EmployeeCode { get; set; }
 

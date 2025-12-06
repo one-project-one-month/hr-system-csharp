@@ -7,7 +7,7 @@ public class TaskListResponseModel
 
 public class TaskModel
 {
-    public string TaskId { get; set; }
+    public string TaskId { get; set; } = string.Empty;
 
     public string? TaskCode { get; set; }
 

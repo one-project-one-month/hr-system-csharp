@@ -43,10 +43,10 @@ public static class Mapper
         return new TblLocation
         {
             LocationId = Ulid.NewUlid().ToString(),
-            Name = location.Name,
-            Latitude = location.Latitude,
-            Longitude = location.Longitude,
-            Radius = location.Radius,
+            Name = location.Name!,
+            Latitude = location.Latitude!,
+            Longitude = location.Longitude!,
+            Radius = location.Radius!,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = "system",
             DeleteFlag = false

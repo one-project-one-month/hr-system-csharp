@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HRSystem.Csharp.Domain.Models.CompanyRules
+namespace HRSystem.Csharp.Domain.Models.CompanyRule
 {
-    public class CompanyRulesInfoModel
+    public class CompanyRuleInfoModel
     {
 
         public string? OfficeStartTime { get; set; }
@@ -24,7 +24,7 @@ namespace HRSystem.Csharp.Domain.Models.CompanyRules
         public string? HalfDayFlagDeduction { get; set; }
         public string? FullDayFlagDeduction { get; set; }
 
-        public CompanyRulesInfoModel()
+        public CompanyRuleInfoModel()
         {
             OfficeStartTime = null;
             OfficeEndTime = null;

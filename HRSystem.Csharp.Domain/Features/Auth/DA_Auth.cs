@@ -69,7 +69,7 @@ public class DA_Auth : AuthorizationService
                             Name = user.Name,
                             Email = user.Email,
                             PhoneNo = user.PhoneNo,
-                            RoleName = role.Data.RoleName,
+                            RoleName = role.Data!.RoleName,
                         }
                     },
                     "User is First Time.");
@@ -81,7 +81,7 @@ public class DA_Auth : AuthorizationService
 
             var model = new MenuTreeRequestModel
             {
-                RoleCode = role.Data.RoleCode
+                RoleCode = role.Data!.RoleCode
             };
 
             var roleMenuPermission = await _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
@@ -116,7 +116,7 @@ public class DA_Auth : AuthorizationService
                     Name = user.Name,
                     Email = user.Email,
                     PhoneNo = user.PhoneNo,
-                    MenuTree = roleMenuPermission.Data,
+                    MenuTree = roleMenuPermission.Data!,
                 },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo,
             };
@@ -158,13 +158,13 @@ public class DA_Auth : AuthorizationService
             if (user is null)
                 Result<AuthResponseModel>.NotFoundError("User not found");
 
-            var role = await _role.GetByRoleCode(user.RoleCode);
+            var role = await _role.GetByRoleCode(user!.RoleCode);
             if (role is null)
                 Result<AuthResponseModel>.NotFoundError("Role with the user not found");
 
             var model = new MenuTreeRequestModel
             {
-                RoleCode = role.Data.RoleCode
+                RoleCode = role!.Data!.RoleCode
             };
 
             var roleMenuPermission = await _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
@@ -204,7 +204,7 @@ public class DA_Auth : AuthorizationService
                     Name = user.Name,
                     Email = user.Email,
                     PhoneNo = user.PhoneNo,
-                    MenuTree = roleMenuPermission.Data,
+                    MenuTree = roleMenuPermission.Data!,
                 },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(newToken).ValidTo,
             };
