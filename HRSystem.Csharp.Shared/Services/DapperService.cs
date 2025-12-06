@@ -32,13 +32,13 @@ public class DapperService
             // The output parameters are populated in the 'parameters' object after this call.
             var result = await multi.ReadSingleOrDefaultAsync<T>();
 
-            return result;
+            return result!;
         }
         catch (Exception ex)
         {
             // Log the custom error and return a default value.
             _logger.LogError(ex.ToString());
-            return default(T);
+            return default!;
         }
     }
 
