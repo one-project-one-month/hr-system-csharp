@@ -1,17 +1,38 @@
 ﻿using HRSystem.Csharp.Domain.Models.Payroll;
 using HRSystem.Csharp.Shared.Services;
+using Sprache;
 
 namespace HRSystem.Csharp.Domain.Features.Payroll;
 
-public class DA_Payroll
+public class DA_Payroll : AuthorizationService
 {
     private readonly AppDbContext _appDbContext;
     private readonly DapperService _dapperService;
 
-    public DA_Payroll(AppDbContext appDbContext, DapperService dapperService)
+    public DA_Payroll(IHttpContextAccessor httpContextAccessor,
+        AppDbContext appDbContext,
+        DapperService dapperService) : base(httpContextAccessor)
     {
         _appDbContext = appDbContext;
         _dapperService = dapperService;
+    }
+
+    public async Task<Result<bool>> ProcessPayroll(PayrollProcessRequestModel reqModel)
+    {
+        var parameters = new
+        {
+            PayrollMonth = "2025-12",
+            CreatedBy = UserCode
+        };
+
+        var result = await _dapperService.ExecuteAsync(
+            "sp_ProcessPayroll",
+            parameters,
+            CommandType.StoredProcedure);
+
+        return result > 0
+            ? Result<bool>.Success("Payroll processed successfully!")
+            : Result<bool>.SystemError("Payroll didn't process properly");
     }
 
     public async Task<PayrollListResponseModel> GetPayrollList(PayrollRequestModel requestModel)

@@ -7,6 +7,7 @@ using System.Net.Mail;
 using HRSystem.Csharp.Domain.Features.AdminDashboard;
 using HRSystem.Csharp.Domain.Features.Payroll;
 using HRSystem.Csharp.Domain.Features.CompanyRule;
+using HRSystem.Csharp.Shared.Services;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -95,9 +96,9 @@ public static class FeatureManager
             $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(mssqlConnection)
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking), 
-            ServiceLifetime.Transient, 
+                options.UseSqlServer(mssqlConnection)
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking),
+            ServiceLifetime.Transient,
             ServiceLifetime.Transient);
 
         builder.Services.AddScoped<IDbConnection>(sp =>
@@ -106,6 +107,8 @@ public static class FeatureManager
             conn.Open();
             return conn;
         });
+
+        builder.Services.AddScoped<DapperService>();
 
         builder.Services
             .AddFluentEmail("hrsystem.opom@gmail.com")

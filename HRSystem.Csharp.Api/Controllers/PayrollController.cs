@@ -18,6 +18,26 @@ public class PayrollController : ControllerBase
         _logger = logger;
     }
 
+    [HttpPost("process")]
+    public async Task<IActionResult> ProcessPayroll(PayrollProcessRequestModel reqModel)
+    {
+        try
+        {
+            var result = await _blPayroll.ProcessPayroll(reqModel);
+            if (result.IsError)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString());
+            return StatusCode(500, "Unexpected error occurred.");
+        }
+    }
+
     [HttpGet("list")]
     public async Task<IActionResult> GetPayrollList([FromQuery] PayrollRequestModel model)
     {

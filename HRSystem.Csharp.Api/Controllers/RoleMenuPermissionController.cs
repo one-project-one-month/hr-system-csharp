@@ -28,7 +28,7 @@ public class RoleMenuPermissionController : ControllerBase
             if (result.IsError)
                 return BadRequest(result);
 
-            return Ok(result.Data);
+            return Ok(result);
         }
         catch (Exception e)
         {
@@ -57,12 +57,11 @@ public class RoleMenuPermissionController : ControllerBase
     {
         try
         {
-
             var result = await _blRoleMenuPermission.CreateRoleMenuPermission(reqModel);
             if (result.IsError)
                 return BadRequest(result);
 
-            return Ok(result.Data);
+            return Ok(result);
         }
         catch (Exception e)
         {

@@ -62,4 +62,27 @@ public class DapperService
             return Enumerable.Empty<T>();
         }
     }
+    
+    public async Task<int> ExecuteAsync(
+        string query,
+        object parameters = null,
+        CommandType commandType = CommandType.Text)
+    {
+        var result = await _dbConnection.ExecuteAsync(
+            query,
+            parameters,
+            commandType: commandType);
+        return result;
+    }
+    
+    public async Task<List<T>> GetListAsync<T>(string query, object parameters = null,
+        CommandType commandType = CommandType.Text)
+    {
+        var result = await _dbConnection.QueryAsync<T>(
+            query,
+            parameters,
+            commandType: commandType
+        );
+        return result.ToList();
+    }
 }
