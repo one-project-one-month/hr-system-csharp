@@ -1,6 +1,5 @@
 ﻿using DotNetEnv;
 using HRSystem.Csharp.Domain.Features.Reports;
-using HRSystem.Csharp.Domain.Features.Rule;
 using Microsoft.Data.SqlClient;
 using System.Net;
 using System.Net.Mail;
@@ -8,6 +7,7 @@ using HRSystem.Csharp.Domain.Features.AdminDashboard;
 using HRSystem.Csharp.Domain.Features.Payroll;
 using HRSystem.Csharp.Domain.Features.CompanyRule;
 using HRSystem.Csharp.Shared.Services;
+using HRSystem.Csharp.Domain.Features.EmployeeAttendance;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -29,7 +29,7 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_CompanyRule>();
         builder.Services.AddScoped<BL_Verification>();
         builder.Services.AddScoped<BL_AdminDashboard>();
-
+        builder.Services.AddScoped<BL_EmployeeAttendance>();
         builder.Services.AddScoped<BL_Payroll>();
         builder.Services.AddScoped<BL_AttendanceReports>();
 
@@ -52,10 +52,10 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Employee>();
         builder.Services.AddScoped<DA_Auth>();
         builder.Services.AddScoped<DA_Sequence>();
-        builder.Services.AddScoped<DA_CompanyRules>();
+        builder.Services.AddScoped<DA_CompanyRule>();
         builder.Services.AddScoped<DA_Verification>();
         builder.Services.AddScoped<DA_AdminDashboard>();
-
+        builder.Services.AddScoped<DA_EmployeeAttendance>();
         builder.Services.AddScoped<DA_Permission>();
         builder.Services.AddScoped<DA_Payroll>();
         builder.Services.AddScoped<DA_AttendanceReports>();

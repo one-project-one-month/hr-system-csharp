@@ -46,3 +46,14 @@ public class EmployeeUpdateRequestModel
 
     public DateTime? ResignDate { get; set; }
 }
+
+public class EmployeeEditProfileRequestModel
+{
+    public IFormFile ProfileImage { get; set; } = null!;
+    public string EmployeeCode { get; set; } = null!;
+    public string Username { get; set; } = null!;
+    public string Name { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string PhoneNo { get; set; } = null!;
+    public string Gender { get; set; } = null!;
+}
