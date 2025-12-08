@@ -21,8 +21,6 @@ public partial class TblEmployee
 
     public string PhoneNo { get; set; } = null!;
 
-    public string Gender { get; set; } = null!;
-
     public string ProfileImage { get; set; } = null!;
 
     public DateTime StartDate { get; set; }
@@ -42,4 +40,6 @@ public partial class TblEmployee
     public string? ModifiedBy { get; set; }
 
     public bool DeleteFlag { get; set; }
+
+    public string? Gender { get; set; }
 }

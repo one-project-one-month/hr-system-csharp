@@ -17,13 +17,9 @@ public partial class TblAttendance
 
     public string? CheckInLocation { get; set; }
 
-    public bool? IsCheckInLocationSaved { get; set; }
-
     public DateTime? CheckOutTime { get; set; }
 
     public string? CheckOutLocation { get; set; }
-
-    public bool? IsCheckOutLocationSaved { get; set; }
 
     public decimal? WorkingHour { get; set; }
 
@@ -35,6 +31,8 @@ public partial class TblAttendance
 
     public string? Remark { get; set; }
 
+    public bool? IsCheckInLocationSaved { get; set; }
+
     public string? CreatedBy { get; set; }
 
     public DateTime? CreatedAt { get; set; }
@@ -44,4 +42,6 @@ public partial class TblAttendance
     public DateTime? ModifiedAt { get; set; }
 
     public bool DeleteFlag { get; set; }
+
+    public bool? IsCheckOutLocationSaved { get; set; }
 }

@@ -39,6 +39,18 @@ public class PayrollController : ControllerBase
     }
 
     [HttpGet("list")]
+    public async Task<IActionResult> GetAllRoles([FromQuery] PayrollListRequestModel reqModel)
+    {
+        var result = await _blPayroll.PayrollList(reqModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    /*[HttpGet("list")]
     public async Task<IActionResult> GetPayrollList([FromQuery] PayrollRequestModel model)
     {
         try
@@ -56,5 +68,5 @@ public class PayrollController : ControllerBase
                 statusCode: 500
             );
         }
-    }
+    }*/
 }

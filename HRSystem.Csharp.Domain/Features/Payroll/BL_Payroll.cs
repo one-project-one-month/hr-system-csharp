@@ -29,7 +29,21 @@ public class BL_Payroll
         }
     }
 
-    public async Task<Result<List<PayrollListResponseModel>>> GetPayrollList(PayrollRequestModel requestModel)
+    public async Task<Result<PayrollListResponseModel>> PayrollList(PayrollListRequestModel reqModel)
+    {
+        try
+        {
+            var result = await _daPayroll.PayrollList(reqModel);
+            return result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString(), "Error fetching payroll list.");
+            return Result<PayrollListResponseModel>.SystemError("Error fetching payroll list!");
+        }
+    }
+
+    /*public async Task<Result<List<PayrollListResponseModel>>> GetPayrollList(PayrollRequestModel requestModel)
     {
         var reqModel = new EmployeeListRequestModel();
         var employees = await _daEmployee.GetEmployeeList(reqModel);
@@ -43,5 +57,5 @@ public class BL_Payroll
         }
 
         return Result<List<PayrollListResponseModel>>.Success(payrollList);
-    }
+    }*/
 }

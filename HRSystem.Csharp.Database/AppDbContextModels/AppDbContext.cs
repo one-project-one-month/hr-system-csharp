@@ -35,6 +35,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<TblPayroll> TblPayrolls { get; set; }
 
+    public virtual DbSet<TblPayrollSummary> TblPayrollSummaries { get; set; }
+
     public virtual DbSet<TblPermission> TblPermissions { get; set; }
 
     public virtual DbSet<TblProject> TblProjects { get; set; }
@@ -51,15 +53,19 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<TblVerification> TblVerifications { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=.;Database=HRSystem;User ID=sa;Password=sasa@123;TrustServerCertificate=True;");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TblAttendance>(entity =>
         {
-            entity.HasKey(e => e.AttendanceId).HasName("PK__Tbl_Atte__8B69261CC73C6145");
+            entity.HasKey(e => e.AttendanceId).HasName("PK__Tbl_Atte__8B69261CED479456");
 
             entity.ToTable("Tbl_Attendance");
 
-            entity.HasIndex(e => e.AttendanceCode, "UQ__Tbl_Atte__013780A2070460D4").IsUnique();
+            entity.HasIndex(e => e.AttendanceCode, "UQ__Tbl_Atte__013780A26240D576").IsUnique();
 
             entity.Property(e => e.AttendanceId).HasMaxLength(200);
             entity.Property(e => e.AttendanceCode).HasMaxLength(50);
@@ -74,11 +80,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblCompanyRule>(entity =>
         {
-            entity.HasKey(e => e.CompanyRuleId).HasName("PK__Tbl_Comp__5D113C081652F050");
+            entity.HasKey(e => e.CompanyRuleId).HasName("PK__Tbl_Comp__5D113C082D784E81");
 
             entity.ToTable("Tbl_CompanyRule");
 
-            entity.HasIndex(e => e.CompanyRuleCode, "UQ__Tbl_Comp__1893361386A96A91").IsUnique();
+            entity.HasIndex(e => e.CompanyRuleCode, "UQ__Tbl_Comp__18933613B32658DE").IsUnique();
 
             entity.Property(e => e.CompanyRuleId).HasMaxLength(200);
             entity.Property(e => e.CompanyRuleCode).HasMaxLength(50);
@@ -90,17 +96,17 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblEmployee>(entity =>
         {
-            entity.HasKey(e => e.EmployeeId).HasName("PK__Tbl_Empl__7AD04F11DE946A13");
+            entity.HasKey(e => e.EmployeeId).HasName("PK__Tbl_Empl__7AD04F113081D5FC");
 
             entity.ToTable("Tbl_Employee");
 
-            entity.HasIndex(e => e.EmployeeCode, "UQ__Tbl_Empl__1F6425484C4DB140").IsUnique();
+            entity.HasIndex(e => e.EmployeeCode, "UQ__Tbl_Empl__1F64254853AB9683").IsUnique();
 
             entity.Property(e => e.EmployeeId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
-            entity.Property(e => e.Gender).HasMaxLength(50);
+            entity.Property(e => e.Gender).HasMaxLength(20);
             entity.Property(e => e.IsFirstTimeLogin).HasDefaultValue(true);
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.Name).HasMaxLength(200);
@@ -114,11 +120,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblEmployeeProject>(entity =>
         {
-            entity.HasKey(e => e.EmployeeProjectId).HasName("PK__Tbl_Empl__541BC8B1B3E31AC6");
+            entity.HasKey(e => e.EmployeeProjectId).HasName("PK__Tbl_Empl__541BC8B16F8DF6ED");
 
             entity.ToTable("Tbl_EmployeeProject");
 
-            entity.HasIndex(e => e.EmployeeProjectCode, "UQ__Tbl_Empl__51A84C46D28F8B1A").IsUnique();
+            entity.HasIndex(e => e.EmployeeProjectCode, "UQ__Tbl_Empl__51A84C462DFC4189").IsUnique();
 
             entity.Property(e => e.EmployeeProjectId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
@@ -130,7 +136,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblHoliday>(entity =>
         {
-            entity.HasKey(e => e.HolidayId).HasName("PK__Tbl_Holi__2D35D57AF17ADF21");
+            entity.HasKey(e => e.HolidayId).HasName("PK__Tbl_Holi__2D35D57A874B3237");
 
             entity.ToTable("Tbl_Holiday");
 
@@ -141,7 +147,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblLeave>(entity =>
         {
-            entity.HasKey(e => e.LeaveId).HasName("PK__Tbl_Leav__796DB9593FB1F447");
+            entity.HasKey(e => e.LeaveId).HasName("PK__Tbl_Leav__796DB95990EFBDD4");
 
             entity.ToTable("Tbl_Leave");
 
@@ -174,11 +180,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblLocation>(entity =>
         {
-            entity.HasKey(e => e.LocationId).HasName("PK__Tbl_Loca__E7FEA4978E775538");
+            entity.HasKey(e => e.LocationId).HasName("PK__Tbl_Loca__E7FEA497495F6582");
 
             entity.ToTable("Tbl_Location");
 
-            entity.HasIndex(e => e.LocationCode, "UQ__Tbl_Loca__DDB144D5F57321F2").IsUnique();
+            entity.HasIndex(e => e.LocationCode, "UQ__Tbl_Loca__DDB144D53899B17C").IsUnique();
 
             entity.Property(e => e.LocationId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
@@ -192,11 +198,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblMenu>(entity =>
         {
-            entity.HasKey(e => e.MenuId).HasName("PK__Tbl_Menu__C99ED230737917AB");
+            entity.HasKey(e => e.MenuId).HasName("PK__Tbl_Menu__C99ED2306E51A984");
 
             entity.ToTable("Tbl_Menu");
 
-            entity.HasIndex(e => e.MenuCode, "UQ__Tbl_Menu__868A3A735718EF49").IsUnique();
+            entity.HasIndex(e => e.MenuCode, "UQ__Tbl_Menu__868A3A73B9F5D573").IsUnique();
 
             entity.Property(e => e.MenuId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
@@ -210,11 +216,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblMenuGroup>(entity =>
         {
-            entity.HasKey(e => e.MenuGroupId).HasName("PK__Tbl_Menu__1C1D7933DA021602");
+            entity.HasKey(e => e.MenuGroupId).HasName("PK__Tbl_Menu__1C1D793390456906");
 
             entity.ToTable("Tbl_MenuGroup");
 
-            entity.HasIndex(e => e.MenuGroupCode, "UQ__Tbl_Menu__22599E841385EE56").IsUnique();
+            entity.HasIndex(e => e.MenuGroupCode, "UQ__Tbl_Menu__22599E841E7123BB").IsUnique();
 
             entity.Property(e => e.MenuGroupId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
@@ -227,11 +233,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblPayroll>(entity =>
         {
-            entity.HasKey(e => e.PayrollId).HasName("PK__Tbl_Payr__99DFC672F4B12708");
+            entity.HasKey(e => e.PayrollId).HasName("PK__Tbl_Payr__99DFC67243B2C477");
 
             entity.ToTable("Tbl_Payroll");
 
-            entity.HasIndex(e => e.PayrollCode, "UQ__Tbl_Payr__EA6E0CACCC2FC02B").IsUnique();
+            entity.HasIndex(e => e.PayrollCode, "UQ__Tbl_Payr__EA6E0CACB0E9E587").IsUnique();
 
             entity.Property(e => e.PayrollId).HasMaxLength(200);
             entity.Property(e => e.ActualWorkingHour).HasColumnType("decimal(8, 2)");
@@ -251,9 +257,24 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Tax).HasColumnType("decimal(18, 2)");
         });
 
+        modelBuilder.Entity<TblPayrollSummary>(entity =>
+        {
+            entity.HasKey(e => e.PayrollSummaryId).HasName("PK__Tbl_Payr__F2CE6A3927FD2748");
+
+            entity.ToTable("Tbl_PayrollSummary");
+
+            entity.Property(e => e.CreatedBy).HasMaxLength(200);
+            entity.Property(e => e.PayrollMonth).HasMaxLength(20);
+            entity.Property(e => e.TotalActualWorkingHours).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TotalBaseSalary).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TotalLeaveHours).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TotalNetPay).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TotalWorkingHours).HasColumnType("decimal(18, 2)");
+        });
+
         modelBuilder.Entity<TblPermission>(entity =>
         {
-            entity.HasKey(e => e.PermissionId).HasName("PK__Tbl_Perm__EFA6FB2FFD52B301");
+            entity.HasKey(e => e.PermissionId).HasName("PK__Tbl_Perm__EFA6FB2FDC960496");
 
             entity.ToTable("Tbl_Permission");
 
@@ -264,11 +285,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblProject>(entity =>
         {
-            entity.HasKey(e => e.ProjectId).HasName("PK__Tbl_Proj__761ABEF0003EDE81");
+            entity.HasKey(e => e.ProjectId).HasName("PK__Tbl_Proj__761ABEF08F5C5D81");
 
             entity.ToTable("Tbl_Project");
 
-            entity.HasIndex(e => e.ProjectCode, "UQ__Tbl_Proj__2F3A494808BFE430").IsUnique();
+            entity.HasIndex(e => e.ProjectCode, "UQ__Tbl_Proj__2F3A49488200099C").IsUnique();
 
             entity.Property(e => e.ProjectId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
@@ -281,7 +302,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblRefreshToken>(entity =>
         {
-            entity.HasKey(e => e.Token).HasName("PK__Tbl_Refr__1EB4F8164631D80B");
+            entity.HasKey(e => e.Token).HasName("PK__Tbl_Refr__1EB4F816563CE361");
 
             entity.ToTable("Tbl_RefreshToken");
 
@@ -294,11 +315,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblRole>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Tbl_Role__8AFACE1A1FDB1569");
+            entity.HasKey(e => e.RoleId).HasName("PK__Tbl_Role__8AFACE1A44F51E3A");
 
             entity.ToTable("Tbl_Role");
 
-            entity.HasIndex(e => e.RoleCode, "UQ__Tbl_Role__D62CB59CBFB7459E").IsUnique();
+            entity.HasIndex(e => e.RoleCode, "UQ__Tbl_Role__D62CB59CC43DADB0").IsUnique();
 
             entity.Property(e => e.RoleId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
@@ -309,7 +330,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblRoleAndMenuPermission>(entity =>
         {
-            entity.HasKey(e => e.RoleAndMenuPermissionId).HasName("PK__Tbl_Role__E8D15B1A4F1F5AC4");
+            entity.HasKey(e => e.RoleAndMenuPermissionId).HasName("PK__Tbl_Role__E8D15B1A5CC2828B");
 
             entity.ToTable("Tbl_RoleAndMenuPermission");
 
@@ -327,7 +348,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblSequence>(entity =>
         {
-            entity.HasKey(e => e.SequenceId).HasName("PK__Tbl_Sequ__BAD61491AAFB65F1");
+            entity.HasKey(e => e.SequenceId).HasName("PK__Tbl_Sequ__BAD61491A866091B");
 
             entity.ToTable("Tbl_Sequence");
 
@@ -340,11 +361,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblTask>(entity =>
         {
-            entity.HasKey(e => e.TaskId).HasName("PK__Tbl_Task__7C6949B1F4B54858");
+            entity.HasKey(e => e.TaskId).HasName("PK__Tbl_Task__7C6949B1CE329034");
 
             entity.ToTable("Tbl_Task");
 
-            entity.HasIndex(e => e.TaskCode, "UQ__Tbl_Task__251D06991890FF4A").IsUnique();
+            entity.HasIndex(e => e.TaskCode, "UQ__Tbl_Task__251D0699517AA42E").IsUnique();
 
             entity.Property(e => e.TaskId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
@@ -360,11 +381,11 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblVerification>(entity =>
         {
-            entity.HasKey(e => e.VerificationId).HasName("PK__Tbl_Veri__306D4907AF820005");
+            entity.HasKey(e => e.VerificationId).HasName("PK__Tbl_Veri__306D4907CCF1A0C0");
 
             entity.ToTable("Tbl_Verification");
 
-            entity.HasIndex(e => e.VerificationCode, "UQ__Tbl_Veri__DA24CB14188EA405").IsUnique();
+            entity.HasIndex(e => e.VerificationCode, "UQ__Tbl_Veri__DA24CB1471918770").IsUnique();
 
             entity.Property(e => e.VerificationId).HasMaxLength(200);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);

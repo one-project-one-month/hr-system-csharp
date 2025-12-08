@@ -12,5 +12,15 @@ public class PayrollProcessRequestModel
 {
     public string PayrollMonth { get; set; } = string.Empty;
 
-    public string CreatedBy { get; set; } = string.Empty;
+    // public string CreatedBy { get; set; } = string.Empty;
+}
+
+public class PayrollListRequestModel : PaginationRequestModel
+{
+    public string? MonthName { get; set; }
+}
+
+public class EmployeePayrollListRequestModel : PaginationRequestModel
+{
+    public string? MonthName { get; set; }
 }
