@@ -17,10 +17,16 @@ public class PayrollProcessRequestModel
 
 public class PayrollListRequestModel : PaginationRequestModel
 {
-    public string? MonthName { get; set; }
+    public string? MonthYear { get; set; }
+}
+
+public class PayrollMonthDetailListRequestModel : PaginationRequestModel
+{
+    public string PayrollSummaryCode { get; set; } = string.Empty;
+    public string? EmployeeName { get; set; }
 }
 
 public class EmployeePayrollListRequestModel : PaginationRequestModel
 {
-    public string? MonthName { get; set; }
+    public string? MonthYear { get; set; }
 }

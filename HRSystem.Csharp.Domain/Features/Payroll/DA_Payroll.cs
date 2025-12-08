@@ -28,7 +28,7 @@ public class DA_Payroll : AuthorizationService
                 PayrollMonth = reqModel.PayrollMonth,
                 CreatedBy = UserCode
             };
-            
+
             await _dapperService.ExecuteAsync(
                 "sp_ProcessPayroll",
                 parameters,
@@ -50,9 +50,18 @@ public class DA_Payroll : AuthorizationService
             var query = _appDbContext.TblPayrollSummaries
                 .AsNoTracking();
 
-            if (!string.IsNullOrWhiteSpace(reqModel.MonthName))
+            if (!string.IsNullOrWhiteSpace(reqModel.MonthYear))
             {
-                query = query.Where(r => r.PayrollMonth.ToLower().Contains(reqModel.MonthName.ToLower()));
+                if (DateTime.TryParseExact(reqModel.MonthYear, "yyyy-MM", CultureInfo.InvariantCulture,
+                        DateTimeStyles.None, out var parsedDate))
+                {
+                    var targetMonth = parsedDate.ToString("MMM yyyy", CultureInfo.InvariantCulture);
+                    query = query.Where(r => r.PayrollMonth == targetMonth);
+                }
+                else
+                {
+                    return Result<PayrollListResponseModel>.SystemError($"Invalid date format.");
+                }
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);
@@ -86,11 +95,144 @@ public class DA_Payroll : AuthorizationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching payroll list");
+            _logger.LogError(ex, "Error fetching payroll summary list");
             return Result<PayrollListResponseModel>.SystemError(
                 "An error occurred while retrieving payroll summary list.");
         }
     }
+
+    public async Task<Result<PayrollMonthDetailListResponseModel>> PayrollMonthDetailList(
+        PayrollMonthDetailListRequestModel reqModel)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(reqModel.PayrollSummaryCode))
+            {
+                return Result<PayrollMonthDetailListResponseModel>.ValidationError("Payroll Summary Code is required!");
+            }
+
+            var query = from p in _appDbContext.TblPayrolls.AsNoTracking()
+                where p.PayrollSummaryCode != null && p.PayrollSummaryCode == reqModel.PayrollSummaryCode
+                join e in _appDbContext.TblEmployees.AsNoTracking()
+                    on p.EmployeeCode equals e.EmployeeCode
+                select new { Payroll = p, Employee = e };
+
+            if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
+            {
+                query = query.Where(x => x.Employee.Name.Contains(reqModel.EmployeeName));
+            }
+
+            query = query.OrderByDescending(x => x.Payroll.CreatedAt);
+
+            var payrollDetailList = query.Select(x => new PayrollMonthDetailResponseModel()
+            {
+                PayrollId = x.Payroll.PayrollId,
+                PayrollCode = x.Payroll.PayrollCode,
+                EmployeeCode = x.Payroll.EmployeeCode,
+                EmployeeName = x.Employee.Name,
+                PayrollDate = x.Payroll.PayrollDate,
+                Status = x.Payroll.Status,
+                TotalWorkingHour = x.Payroll.TotalWorkingHour,
+                LeaveHour = x.Payroll.LeaveHour,
+                ActualWorkingHour = x.Payroll.ActualWorkingHour,
+                BaseSalary = x.Payroll.BaseSalary,
+                Allowance = x.Payroll.Allowance,
+                GrossPay = x.Payroll.GrossPay,
+                Deduction = x.Payroll.Deduction,
+                Tax = x.Payroll.Tax,
+                Bonus = x.Payroll.Bonus,
+                NetPay = x.Payroll.NetPay,
+                CreatedBy = x.Payroll.CreatedBy,
+                CreatedAt = x.Payroll.CreatedAt
+            });
+
+            var pagedResult = await payrollDetailList.GetPagedResultAsync(
+                reqModel.PageNo, reqModel.PageSize);
+
+            var result = new PayrollMonthDetailListResponseModel()
+            {
+                Items = pagedResult.Items,
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<PayrollMonthDetailListResponseModel>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching payroll detail list");
+            return Result<PayrollMonthDetailListResponseModel>.SystemError(
+                "An error occurred while retrieving payroll detail list.");
+        }
+    }
+
+    public async Task<Result<EmployeePayrollListResponseModel>> GetPayrollListForEmployeeAsync(
+        EmployeePayrollListRequestModel reqModel)
+    {
+        try
+        {
+            var query = _appDbContext.TblPayrolls
+                .AsNoTracking()
+                .Where(p => p.EmployeeCode == UserCode);
+
+            if (!string.IsNullOrWhiteSpace(reqModel.MonthYear))
+            {
+                if (DateTime.TryParseExact(reqModel.MonthYear, "yyyy-MM", CultureInfo.InvariantCulture,
+                        DateTimeStyles.None, out var parsedDate))
+                {
+                    var targetMonth = parsedDate.ToString("MMM yyyy", CultureInfo.InvariantCulture);
+                    query = query.Where(r => r.PayrollMonth == targetMonth);
+                }
+                else
+                {
+                    return Result<EmployeePayrollListResponseModel>.SystemError($"Invalid date format.");
+                }
+            }
+
+            query = query.OrderByDescending(p => p.PayrollDate);
+
+            var payrollList = query.Select(p => new EmployeePayrollResponseModel()
+            {
+                PayrollId = p.PayrollId,
+                PayrollCode = p.PayrollCode,
+                PayrollSummaryCode = p.PayrollSummaryCode,
+                PayrollDate = p.PayrollDate,
+                PayrollMonth = p.PayrollMonth,
+                Status = p.Status,
+                TotalWorkingHour = p.TotalWorkingHour,
+                LeaveHour = p.LeaveHour,
+                ActualWorkingHour = p.ActualWorkingHour,
+                BaseSalary = p.BaseSalary,
+                Allowance = p.Allowance,
+                GrossPay = p.GrossPay,
+                Deduction = p.Deduction,
+                Tax = p.Tax,
+                Bonus = p.Bonus,
+                NetPay = p.NetPay,
+                CreatedAt = p.CreatedAt
+            });
+
+            var pagedResult = await payrollList.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new EmployeePayrollListResponseModel()
+            {
+                Items = pagedResult.Items,
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<EmployeePayrollListResponseModel>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching employee payroll list");
+            return Result<EmployeePayrollListResponseModel>.SystemError(
+                "An error occurred while retrieving payroll list.");
+        }
+    }
+
 
     /*public async Task<PayrollListResponseModel> GetPayrollList(PayrollRequestModel requestModel)
     {

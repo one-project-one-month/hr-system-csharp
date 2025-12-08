@@ -233,28 +233,32 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<TblPayroll>(entity =>
         {
-            entity.HasKey(e => e.PayrollId).HasName("PK__Tbl_Payr__99DFC67243B2C477");
+            entity.HasKey(e => e.PayrollId).HasName("PK__Tbl_Payr__99DFC672D63E82A8");
 
             entity.ToTable("Tbl_Payroll");
-
-            entity.HasIndex(e => e.PayrollCode, "UQ__Tbl_Payr__EA6E0CACB0E9E587").IsUnique();
 
             entity.Property(e => e.PayrollId).HasMaxLength(200);
             entity.Property(e => e.ActualWorkingHour).HasColumnType("decimal(8, 2)");
             entity.Property(e => e.Allowance).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.BaseSalary).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Bonus).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Deduction).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.EmployeeCode).HasMaxLength(50);
             entity.Property(e => e.GrossPay).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.LeaveHour).HasColumnType("decimal(8, 2)");
+            entity.Property(e => e.ModifiedAt).HasColumnType("datetime");
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.NetPay).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.PayrollCode).HasMaxLength(50);
-            entity.Property(e => e.PayrollDate).HasColumnType("datetime");
+            entity.Property(e => e.PayrollMonth).HasMaxLength(20);
+            entity.Property(e => e.PayrollSummaryCode).HasMaxLength(50);
             entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.Tax).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TotalWorkingHour).HasColumnType("decimal(8, 2)");
         });
 
         modelBuilder.Entity<TblPayrollSummary>(entity =>
@@ -265,6 +269,7 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.PayrollMonth).HasMaxLength(20);
+            entity.Property(e => e.PayrollSummaryCode).HasMaxLength(50);
             entity.Property(e => e.TotalActualWorkingHours).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TotalBaseSalary).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TotalLeaveHours).HasColumnType("decimal(18, 2)");

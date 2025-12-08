@@ -26,4 +26,6 @@ public partial class TblPayrollSummary
     public DateTime CreatedAt { get; set; }
 
     public string CreatedBy { get; set; } = null!;
+
+    public string PayrollSummaryCode { get; set; } = null!;
 }

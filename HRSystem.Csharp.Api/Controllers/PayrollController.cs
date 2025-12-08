@@ -38,10 +38,34 @@ public class PayrollController : ControllerBase
         }
     }
 
-    [HttpGet("list")]
-    public async Task<IActionResult> GetAllRoles([FromQuery] PayrollListRequestModel reqModel)
+    [HttpGet("summary-list")]
+    public async Task<IActionResult> PayrollSummaryList([FromQuery] PayrollListRequestModel reqModel)
     {
         var result = await _blPayroll.PayrollList(reqModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    [HttpGet("month-detail-list")]
+    public async Task<IActionResult> PayrollMonthDetailList([FromQuery] PayrollMonthDetailListRequestModel reqModel)
+    {
+        var result = await _blPayroll.PayrollMonthDetailList(reqModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+    
+    [HttpGet("list/employee")]
+    public async Task<IActionResult> EmployeePayrollList([FromQuery] EmployeePayrollListRequestModel reqModel)
+    {
+        var result = await _blPayroll.EmployeePayrollList(reqModel);
         if (result.IsSuccess)
         {
             return Ok(result);
