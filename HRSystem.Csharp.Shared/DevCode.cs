@@ -98,7 +98,7 @@ public static class DevCode
             throw new Exception("Error: No files were uploaded.");
         }
 
-        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), directory.ToString());
+        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", directory.ToString());
         if (!Directory.Exists(uploadPath))
         {
             Directory.CreateDirectory(uploadPath);
