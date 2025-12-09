@@ -145,12 +145,18 @@ public class DA_Role
         }
     }
 
-    public async Task<Result<bool>> DeleteRole(TblRole role)
+    public async Task<Result<bool>> DeleteRole(string roleCode)
     {
         try
         {
+            var role = await _appDbContext.TblRoles.SingleOrDefaultAsync(r => r.RoleCode == roleCode);
+            if (role is null)
+                return Result<bool>.BadRequestError(roleCode);
             role.DeleteFlag = true;
-            var deleted = await _appDbContext.SaveChangesAsync() > 0;
+            _appDbContext.Update(role);
+            var rowEffected = await _appDbContext.SaveChangesAsync();
+            var deleted = rowEffected > 0;
+
             return deleted
                 ? Result<bool>.Success("Role deleted successfully!")
                 : Result<bool>.Error("Failed to delete role.");

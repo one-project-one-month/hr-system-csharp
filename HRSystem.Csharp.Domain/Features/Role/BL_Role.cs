@@ -102,19 +102,13 @@ public class BL_Role
         return await _daRole.UpdateRole(role);
     }
 
-    public async Task<Result<bool>> DeleteRole(RoleDeleteRequestModel reqModel)
+    public async Task<Result<bool>> DeleteRole(string roleCode)
     {
-        if (string.IsNullOrWhiteSpace(reqModel.RoleCode))
+        if (string.IsNullOrWhiteSpace(roleCode))
         {
             return Result<bool>.BadRequestError("Role code cannot be empty");
         }
 
-        var roleResult = await _daRole.GetByRoleCode(reqModel.RoleCode);
-        if (!roleResult.IsSuccess)
-        {
-            return Result<bool>.Error(roleResult.Message!);
-        }
-
-        return await _daRole.DeleteRole(roleResult.Data!);
+        return await _daRole.DeleteRole(roleCode);
     }
 }

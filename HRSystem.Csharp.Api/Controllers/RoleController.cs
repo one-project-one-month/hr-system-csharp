@@ -103,10 +103,7 @@ public class RoleController : ControllerBase
             return BadRequest(response);
         }
 
-        var result = await _blRole.DeleteRole(new RoleDeleteRequestModel()
-        {
-            RoleCode = roleCode
-        });
+        var result = await _blRole.DeleteRole(roleCode);
 
         if (result.IsSuccess)
         {
