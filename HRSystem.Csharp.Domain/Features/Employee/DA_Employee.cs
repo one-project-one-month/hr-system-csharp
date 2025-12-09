@@ -147,7 +147,8 @@ public class DA_Employee(
                         Name = e.Name,
                         RoleName = r.RoleName,
                         Email = e.Email,
-                        PhoneNo = e.PhoneNo
+                        PhoneNo = e.PhoneNo,
+                        Gender = e.Gender
                     })
                 .FirstOrDefaultAsync();
 
