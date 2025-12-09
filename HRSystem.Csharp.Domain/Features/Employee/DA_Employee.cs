@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.Project;
+﻿using Azure.Core;
+using HRSystem.Csharp.Domain.Models.Project;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
 
@@ -146,7 +147,8 @@ public class DA_Employee(
                         Name = e.Name,
                         RoleName = r.RoleName,
                         Email = e.Email,
-                        PhoneNo = e.PhoneNo
+                        PhoneNo = e.PhoneNo,
+                        Gender = e.Gender
                     })
                 .FirstOrDefaultAsync();
 
@@ -406,7 +408,7 @@ public class DA_Employee(
             }
 
             var employee = await _appDbContext.TblEmployees
-                .Include(e => e.RoleCode)
+                //.Include(e => e.RoleCode)
                 .FirstOrDefaultAsync(e => e.EmployeeCode == requestModel.EmployeeCode && !e.DeleteFlag);
 
             if (employee is null)
@@ -439,7 +441,7 @@ public class DA_Employee(
 
             employee.ModifiedAt = DateTime.UtcNow;
             employee.ModifiedBy = UserCode;
-
+            _appDbContext.Update(employee);
             await _appDbContext.SaveChangesAsync();
 
             return Result<EmployeEditProfileResponseModel>.Success("Profile Updated Successfully");

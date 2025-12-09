@@ -64,8 +64,7 @@ public class DA_RoleMenuPermission
                                 IsChecked = menuPermissions.Any()
                             };
                         })
-                        .Where(menu => menu.Permissions!.Any())  // keep only menus with permissions
-                        .ToList();
+                       .ToList();
 
                     return new MenuGroupResponseModel
                     {
@@ -75,15 +74,14 @@ public class DA_RoleMenuPermission
                         MenuGroupUrl = group.Url,
                         IsChecked = !string.IsNullOrEmpty(reqModel.RoleCode) &&
                                     grantedPermissions.Any(p =>
-                                        p.MenuGroupCode == group.MenuGroupCode &&
-                                        group.HasMenuItem == true && !string.IsNullOrEmpty(p.MenuCode)),
+                                        p.MenuGroupCode == group.MenuGroupCode && !string.IsNullOrEmpty(p.MenuCode)),
                         ChildMenus = childMenus
                     };
                 }
 
 
 
-                // CASE 2: group has NO menu items - group-level permissions only
+                // CASE 2: group has NO menu items - group-level permissions 
                 var groupPermissions = grantedPermissions
                     .Where(g => g.MenuGroupCode == group.MenuGroupCode)
                     .Select(g => g.PermissionCode)
@@ -101,8 +99,7 @@ public class DA_RoleMenuPermission
                         MenuGroupUrl = group.Url,
                         IsChecked = !string.IsNullOrEmpty(reqModel.RoleCode) &&
                                     grantedPermissions.Any(p =>
-                                        p.MenuGroupCode == group.MenuGroupCode &&
-                                         group.HasMenuItem == false),
+                                        p.MenuGroupCode == group.MenuGroupCode),
                         ChildMenus = []
                     };
                 }

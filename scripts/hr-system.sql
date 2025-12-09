@@ -826,3 +826,10 @@ GO
 
 ALTER TABLE Tbl_Permission
 ADD CONSTRAINT UQ_Permission_Code UNIQUE (PermissionCode);
+
+ALTER TABLE Tbl_RoleAndMenuPermission
+ALTER COLUMN PermissionCode NVARCHAR(30) NULL;
+
+EXEC sp_depends 'Tbl_RoleAndMenuPermission';
+
+

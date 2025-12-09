@@ -1,3 +1,4 @@
+USE HRSystem;
 INSERT INTO Tbl_Menu (
     MenuId,
     MenuCode,
@@ -21,3 +22,14 @@ VALUES
 (NEWID(), 'MENU_ITEM', 'MENU', 'Menu Item', '/menu_item', 'menu', 1, GETDATE(), 'system', 0),
 
 (NEWID(), 'MENU_GROUP', 'MENU', 'Menu Group', '/menu', 'menugroup_icon', 1, GETDATE(), 'system', 0);
+
+
+
+
+INSERT INTO Tbl_Permission (PermissionId, PermissionCode, PermissionName)
+VALUES
+(NEWID(),'LIST',   'View / List records'),
+(NEWID(),'DETAILS',   'View details'),
+(NEWID(),'CREATE', 'Create new record'),
+(NEWID(),'UPDATE', 'Update / Edit record'),
+(NEWID(),'DELETE', 'Delete record');

@@ -89,8 +89,8 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpPost("EditProfile")]
-    public async Task<IActionResult> EditProfile(EmployeeEditProfileRequestModel requestModel)
-    {
+    public async Task<IActionResult> EditProfile([FromForm] EmployeeEditProfileRequestModel requestModel)
+    {   
         var result = await _blEmployee.EditProfile(requestModel);
         if (result.IsSuccess)
         {
