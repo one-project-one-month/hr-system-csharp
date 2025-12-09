@@ -826,3 +826,4 @@ GO
 
 ALTER TABLE Tbl_Permission
 ADD CONSTRAINT UQ_Permission_Code UNIQUE (PermissionCode);
+
