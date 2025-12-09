@@ -30,3 +30,8 @@ public class EmployeePayrollListRequestModel : PaginationRequestModel
 {
     public string? MonthYear { get; set; }
 }
+
+public class MonthlyPayrollChartRequestModel
+{
+    public string Year { get; set; }
+}
