@@ -49,7 +49,7 @@ public class EmployeeUpdateRequestModel
 
 public class EmployeeEditProfileRequestModel
 {
-    public IFormFile ProfileImage { get; set; } = null!;
+    public IFormFile? ProfileImage { get; set; }
     public string EmployeeCode { get; set; } = null!;
     public string Username { get; set; } = null!;
     public string Name { get; set; } = null!;
