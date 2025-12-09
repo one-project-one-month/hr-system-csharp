@@ -133,6 +133,7 @@ public class DA_Role
     {
         try
         {
+            _appDbContext.Update(role);
             var updated = await _appDbContext.SaveChangesAsync() > 0;
             return updated
                 ? Result<bool>.Success("Role updated successfully!")
