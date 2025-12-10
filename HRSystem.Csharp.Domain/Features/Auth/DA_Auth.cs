@@ -70,6 +70,7 @@ public class DA_Auth : AuthorizationService
                             Email = user.Email,
                             PhoneNo = user.PhoneNo,
                             RoleName = role.Data!.RoleName,
+                            IsFirstTimeLogin = true
                         }
                     },
                     "User is First Time.");
@@ -279,7 +280,7 @@ public class DA_Auth : AuthorizationService
             return Result<bool>.ValidationError("New password must be at least 6 characters long.");
         }
 
-        var user = await _appDbContext.TblEmployees
+        TblEmployee? user = await _appDbContext.TblEmployees
             .FirstOrDefaultAsync(x => x.EmployeeCode == requestModel.EmployeeCode && x.DeleteFlag == false);
 
         if (user is null)
@@ -294,6 +295,8 @@ public class DA_Auth : AuthorizationService
 
         user.Password = _jwtService.HashPassword(requestModel.NewPassword);
         user.IsFirstTimeLogin = false;
+        user.ModifiedAt = DateTime.UtcNow;
+        user.ModifiedBy = user.Username;
 
         _appDbContext.TblEmployees.Update(user);
         var result = await _appDbContext.SaveChangesAsync();
