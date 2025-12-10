@@ -39,9 +39,9 @@ public class BL_Auth
         return response;
     }
 
-    public async Task<Result<string>> ForgotPassword(string requestModel)
+    public async Task<Result<string>> ForgotPassword(string email)
     {
-        var response = await _da_Auth.ForgotPassword(requestModel);
+        var response = await _da_Auth.ForgotPassword(email);
         return response;
     }
 }

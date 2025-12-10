@@ -69,6 +69,7 @@ public class DA_Payroll : AuthorizationService
             var payrollSummaryList = query.Select(s => new PayrollResponseModel()
             {
                 PayrollSummaryId = s.PayrollSummaryId,
+                PayrollSummaryCode = s.PayrollSummaryCode,
                 PayrollMonth = s.PayrollMonth,
                 TotalWorkingDays = s.TotalWorkingDays,
                 EmployeeCount = s.EmployeeCount,
