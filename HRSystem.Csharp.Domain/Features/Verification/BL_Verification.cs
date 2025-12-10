@@ -144,9 +144,9 @@ public class BL_Verification : AuthorizationService
         }
     }
 
-    public async Task<Result<VerificationResponseModel>> SendEmail(VerificationRequestModel requestModel)
+    public async Task<Result<VerificationResponseModel>> SendEmail(VerificationRequestModel requestModel, string employeeCode)
     {
-        var userCode = UserCode;
+        var userCode = employeeCode;
 
         if (string.IsNullOrEmpty(requestModel.Email) || !requestModel.Email.IsValidEmail())
         {
@@ -164,7 +164,7 @@ public class BL_Verification : AuthorizationService
                 VerificationCode = otp,
                 Email = requestModel.Email,
                 ExpiredTime = expiry,
-                CreatedBy = UserCode!,
+                CreatedBy = userCode!,
                 CreatedAt = DateTime.Now,
                 DeleteFlag = false
             };

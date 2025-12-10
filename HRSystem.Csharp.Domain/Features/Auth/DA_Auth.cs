@@ -395,7 +395,7 @@ public class DA_Auth : AuthorizationService
     {
         try
         {
-            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.Email == email && x.DeleteFlag == false);
+            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower() && x.DeleteFlag == false);
             if (user is null)
             {
                 return Result<string>.NotFoundError("Email not found");
@@ -404,7 +404,7 @@ public class DA_Auth : AuthorizationService
             {
                 Email = email
             };
-            var emailResponse = await _blVerification.SendEmail(emailRequest);
+            var emailResponse = await _blVerification.SendEmail(emailRequest, user.EmployeeCode);
             if (!emailResponse.IsSuccess)
             {
                 return Result<string>.Error("Failed to send password reset email.");
