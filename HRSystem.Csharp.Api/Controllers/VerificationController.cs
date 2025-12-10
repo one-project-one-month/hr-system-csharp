@@ -74,4 +74,16 @@ public class VerificationController : ControllerBase
 
         return BadRequest(result);
     }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestModel reqModel)
+    {
+        var result = await _blVerification.ResetPassword(reqModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
 }

@@ -57,8 +57,8 @@ public class AuthController : ControllerBase
         return Ok(hashPassword);
     }
 
-    [HttpGet("change-password")]
-    public IActionResult ChangePassword(ChangePasswordRequestModel reqModel)
+    [HttpPost("change-password")]
+    public IActionResult ChangePassword([FromBody]ChangePasswordRequestModel reqModel)
     {
         var hashPassword = _bl_Auth.ChangePassword(reqModel);
         return Ok(hashPassword);
