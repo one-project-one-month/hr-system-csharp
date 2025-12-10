@@ -72,6 +72,21 @@ public class BL_Payroll
             return Result<EmployeePayrollListResponseModel>.SystemError("Error fetching payroll list!");
         }
     }
+    
+    /*public async Task<Result<EmployeePayrollListResponseModel>> EmployeePayrollChart(
+        EmployeePayrollListRequestModel reqModel)
+    {
+        try
+        {
+            var result = await _daPayroll.GetPayrollListForEmployeeAsync(reqModel);
+            return result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString(), "Error fetching payroll list.");
+            return Result<EmployeePayrollListResponseModel>.SystemError("Error fetching payroll list!");
+        }
+    }*/
 
     /*public async Task<Result<List<PayrollListResponseModel>>> GetPayrollList(PayrollRequestModel requestModel)
     {

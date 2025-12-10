@@ -105,4 +105,24 @@ public class ProjectController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost("remove-employee/{projectCode}")]
+    public async Task<IActionResult> RemoveEmployeeFromProject(string projectCode,
+        AddEmployeeToProjectRequestModel reqModel)
+    {
+        if (reqModel.EmployeeCodes.Count == 0)
+        {
+            var response = Result<AddEmployeeToProjectResponseModel>
+                .BadRequestError("At least one employee is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blProject.RemoveEmployee(projectCode, reqModel);
+        if (result.IsError)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
 }

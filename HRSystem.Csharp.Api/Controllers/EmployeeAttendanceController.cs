@@ -1,6 +1,6 @@
 ﻿namespace HRSystem.Csharp.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api")]
 [ApiController]
 public class EmployeeAttendanceController : ControllerBase
 {
@@ -11,7 +11,7 @@ public class EmployeeAttendanceController : ControllerBase
         _bl_EmployeeAttendance = bl_EmployeeAttendance;
     }
 
-    [HttpPost]
+    [HttpPost("employee/check-in-out")]
     public async Task<IActionResult> AttendanceCheck(EmployeeAttendanceRequestModel requestModel)
     {
         var response = await _bl_EmployeeAttendance.AttendanceCheck(requestModel);
@@ -19,6 +19,7 @@ public class EmployeeAttendanceController : ControllerBase
         {
             return BadRequest(response);
         }
+
         return Ok(response);
     }
 }

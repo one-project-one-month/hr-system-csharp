@@ -74,6 +74,18 @@ public class PayrollController : ControllerBase
         return BadRequest(result);
     }
 
+    /*[HttpGet("employee-chart")]
+    public async Task<IActionResult> EmployeePayrollChart([FromQuery] EmployeePayrollListRequestModel reqModel)
+    {
+        var result = await _blPayroll.EmployeePayrollChart(reqModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }*/
+
     /*[HttpGet("list")]
     public async Task<IActionResult> GetPayrollList([FromQuery] PayrollRequestModel model)
     {
