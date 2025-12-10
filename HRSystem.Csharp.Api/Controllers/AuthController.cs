@@ -58,9 +58,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("change-password")]
-    public IActionResult ChangePassword([FromBody]ChangePasswordRequestModel reqModel)
+    public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordRequestModel reqModel)
     {
-        var hashPassword = _bl_Auth.ChangePassword(reqModel);
+        var hashPassword = await _bl_Auth.ChangePassword(reqModel);
         return Ok(hashPassword);
     }
 
