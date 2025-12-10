@@ -74,9 +74,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("ForgotPassword")]
-    public async Task<IActionResult> ForgotPassword(string requestModel)
+    public async Task<IActionResult> ForgotPassword(string email)
     {
-        var response = await _bl_Auth.ForgotPassword(requestModel);
+        var response = await _bl_Auth.ForgotPassword(email);
         if (!response.IsSuccess)
             return BadRequest(response);
         return Ok(response);

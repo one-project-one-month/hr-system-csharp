@@ -22,6 +22,7 @@ public class PayrollResponseModel
 {
     public int PayrollSummaryId { get; set; }
 
+    public string PayrollSummaryCode { get; set; } = null!;
     public string PayrollMonth { get; set; } = null!;
 
     public int TotalWorkingDays { get; set; }
