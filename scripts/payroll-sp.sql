@@ -138,7 +138,8 @@ BEGIN
         Status,
         CreatedBy,
         CreatedAt,
-        DeleteFlag
+        DeleteFlag,
+        PayrollSummaryCode
     )
     SELECT
         NEWID(),
@@ -158,7 +159,8 @@ BEGIN
         'FINALIZED',
         'System',
         GETDATE(),
-        0
+        0,
+        NEWID()
     FROM AttSummary A
     LEFT JOIN LeaveSummary L
     ON A.EmployeeCode = L.EmployeeCode;
@@ -246,3 +248,6 @@ VALUES
     'ADM-001',
     0
 );
+
+exec GetPayrollList @EmployeeCode = 'EMP001';
+

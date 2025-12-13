@@ -56,10 +56,10 @@ public class AuthController : ControllerBase
         return Ok(hashPassword);
     }
 
-    [HttpGet("change-password")]
-    public IActionResult ChangePassword(ChangePasswordRequestModel reqModel)
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordRequestModel reqModel)
     {
-        var hashPassword = _bl_Auth.ChangePassword(reqModel);
+        var hashPassword = await _bl_Auth.ChangePassword(reqModel);
         return Ok(hashPassword);
     }
 
@@ -73,9 +73,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("ForgotPassword")]
-    public async Task<IActionResult> ForgotPassword(string requestModel)
+    public async Task<IActionResult> ForgotPassword(string email)
     {
-        var response = await _bl_Auth.ForgotPassword(requestModel);
+        var response = await _bl_Auth.ForgotPassword(email);
         if (!response.IsSuccess)
             return BadRequest(response);
         return Ok(response);

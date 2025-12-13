@@ -11,7 +11,7 @@ public partial class TblPayroll
 
     public string? EmployeeCode { get; set; }
 
-    public string PayrollMonth { get; set; } = string.Empty;
+    public string? PayrollMonth { get; set; }
 
     public string? Status { get; set; }
 

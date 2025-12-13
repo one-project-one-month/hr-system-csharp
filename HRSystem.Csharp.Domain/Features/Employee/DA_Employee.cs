@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using HRSystem.Csharp.Domain.Models.Project;
+using static Dapper.SqlMapper;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
 
@@ -452,4 +453,20 @@ public class DA_Employee(
             return Result<EmployeEditProfileResponseModel>.Error($"An error occurred while editing profile: {ex.Message}");
         }
     }
+
+    public async Task<TblEmployee?> GetEmployeeByEmail(string employeeEmail)
+    {
+            var employee = await _appDbContext.TblEmployees
+                .FirstOrDefaultAsync(e => e.Email.ToLower() == employeeEmail.ToLower() && e.DeleteFlag == false);
+            return employee;
+    }
+
+    public async Task<bool> UpdateEmployee (TblEmployee employee)
+    {
+         _appDbContext.TblEmployees.Update(employee);
+        var result = await _appDbContext.SaveChangesAsync();
+        return result > 0;
+    }
+
+
 }
