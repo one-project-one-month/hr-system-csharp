@@ -1,5 +1,4 @@
 ﻿using HRSystem.Csharp.Domain.Features.Auth;
-using HRSystem.Csharp.Shared;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;

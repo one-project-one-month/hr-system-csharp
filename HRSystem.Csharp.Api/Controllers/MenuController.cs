@@ -3,7 +3,6 @@ using HRSystem.Csharp.Domain.Features.Menu;
 using HRSystem.Csharp.Domain.Models.Menu;
 using System.Security.Claims;
 using HRSystem.Csharp.Shared;
-using HRSystem.Csharp.Domain.Models.Common;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
