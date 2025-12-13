@@ -711,7 +711,7 @@ BEGIN
 DECLARE 
     @StartDate DATE, @EndDate DATE, @EmpCount INT = 0;
 
-    Create Table #TmpResult (Present Int, Late Int, Absent Int, EmpCount Int)
+    Create Table #TmpResult (Present Int, Late Int, Absent Int)
 
 
     IF @DataView = 0 -- Current Day
@@ -756,14 +756,14 @@ DECLARE
 
     Insert Into #TmpResult
     Select Sum(Isnull(FullDayFlag, 0)) as Present, Sum(IIF(Isnull(HourLateFlag, 0) = 0,0,1)) as Late, 
-        (@EmpCount - Sum(Isnull(FullDayFlag, 0)) - Sum(Isnull(HalfDayFlag, 0))) as Absent, @EmpCount    
+        (@EmpCount - Sum(Isnull(FullDayFlag, 0)) - Sum(Isnull(HalfDayFlag, 0))) as Absent    
     From Tbl_Attendance ta
     Right Join #WorkingDays wd on wd.DayDate = CAST(AttendanceDate AS DATE)
     Group By CAST(AttendanceDate AS DATE), wd.DayDate;
 
 
     Select SUM(ISNULL(Present, 0)) Present, SUM(ISNULL(Late, 0)) Late, 
-        SUM(ISNULL(Absent, 0)) Absent, MAX(EmpCount) EmpCount
+        SUM(ISNULL(Absent, 0)) Absent, @EmpCount EmpCount
         From #TmpResult
 
     DROP Table #WorkingDays, #TmpResult;
