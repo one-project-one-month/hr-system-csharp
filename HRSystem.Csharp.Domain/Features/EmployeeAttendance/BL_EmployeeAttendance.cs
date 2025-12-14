@@ -14,7 +14,7 @@ public class BL_EmployeeAttendance
     }
 
     public async Task<Result<EmployeeAttendanceResponseModel>> AttendanceCheck(
-    EmployeeAttendanceRequestModel requestModel)
+        EmployeeAttendanceRequestModel requestModel)
     {
         #region Validation Request
 
@@ -132,9 +132,16 @@ public class BL_EmployeeAttendance
             else
             {
                 var checkOutLocation = $"{requestModel.Latitude},{requestModel.Longitude}";
+                var todayAttendance = await _da.GetAttendanceForToday(requestModel.EmployeeCode!);
+
+                if (todayAttendance is null)
+                {
+                    return Result<EmployeeAttendanceResponseModel>.NotFoundError("Please check in first!");
+                }
+
                 var updateModel = new AttendanceRequestModel
                 {
-                    AttendanceCode = attendanceCode,
+                    AttendanceCode = todayAttendance?.AttendanceCode,
                     EmployeeCode = requestModel.EmployeeCode!,
                     CheckInTime = (DateTime)checkInData.Data!.CheckInTime!,
                     CheckInLocation = checkInData.Data.CheckInLocation!,

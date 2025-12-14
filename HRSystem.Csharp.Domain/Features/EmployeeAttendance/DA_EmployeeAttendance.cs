@@ -88,6 +88,7 @@ public class DA_EmployeeAttendance : AuthorizationService
 
         return new EmployeeAttendanceResponseModel
         {
+            AttendanceCode = attendance.AttendanceCode,
             AttendanceDate = todayLocal,
             IsCheckIn = attendance?.CheckInTime.HasValue ?? false,
             IsCheckOut = attendance?.CheckOutTime.HasValue ?? false,
@@ -95,8 +96,7 @@ public class DA_EmployeeAttendance : AuthorizationService
             CheckOutTime = attendance?.CheckOutTime?.ToLocalTime().ToString("HH:mm") ?? ""
         };
     }
-
-
+    
     public async Task<Result<TblAttendance>> GetCheckInTime(string employeeCode)
     {
         try
