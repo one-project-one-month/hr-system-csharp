@@ -834,11 +834,10 @@ EXEC sp_depends 'Tbl_RoleAndMenuPermission';
 
 CREATE TABLE ResetPasswordTokens (
     Id INT IDENTITY PRIMARY KEY,
-    EmployeeCode INT NOT NULL,
+    Email NVARCHAR(255) NOT NULL,
     Token NVARCHAR(100) NOT NULL,
     ExpiresAt DATETIME NOT NULL,
     IsUsed BIT NOT NULL DEFAULT 0,
-    CreatedAt DATETIME NOT NULL DEFAULT GETDATE()
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+	DeleteFlag BIT NOT NULL DEFAULT 0
 );
-
-

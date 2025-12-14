@@ -4,13 +4,16 @@ public class DA_EmployeeAttendance : AuthorizationService
 {
     private readonly AppDbContext _db;
     private readonly ILogger<DA_EmployeeAttendance> _logger;
+    private readonly DA_Employee _daEmployee;
 
     public DA_EmployeeAttendance(IHttpContextAccessor contextAccessor,
                                  AppDbContext db,
-                                 ILogger<DA_EmployeeAttendance> logger) : base(contextAccessor)
+                                 ILogger<DA_EmployeeAttendance> logger,
+                                 DA_Employee daEmployee) : base(contextAccessor)
     {
         _db = db;
         _logger = logger;
+        _daEmployee = daEmployee;
     }
 
     public async Task<bool> CheckOfficeLocation(string employeeCode, string latitude, string longitude)
@@ -63,6 +66,36 @@ public class DA_EmployeeAttendance : AuthorizationService
             return false;
         }
     }
+
+    public async Task<EmployeeAttendanceResponseModel?> GetAttendanceForToday(string employeeCode)
+    {
+        if (string.IsNullOrWhiteSpace(employeeCode))
+            return null;
+
+        var employee = await _daEmployee.GetEmployeeByCode(employeeCode);
+        if (!employee.IsSuccess)
+            return null;
+
+        DateTime todayLocal = DateTime.UtcNow
+                .ToLocalTime()
+                .Date;
+
+        var attendance = await _db.TblAttendances
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a =>
+                a.EmployeeCode == employeeCode &&
+                a.AttendanceDate == todayLocal);
+
+        return new EmployeeAttendanceResponseModel
+        {
+            AttendanceDate = todayLocal,
+            IsCheckIn = attendance?.CheckInTime.HasValue ?? false,
+            IsCheckOut = attendance?.CheckOutTime.HasValue ?? false,
+            CheckInTime = attendance?.CheckInTime?.ToLocalTime().ToString("HH:mm") ?? "",
+            CheckOutTime = attendance?.CheckOutTime?.ToLocalTime().ToString("HH:mm") ?? ""
+        };
+    }
+
 
     public async Task<Result<TblAttendance>> GetCheckInTime(string employeeCode)
     {

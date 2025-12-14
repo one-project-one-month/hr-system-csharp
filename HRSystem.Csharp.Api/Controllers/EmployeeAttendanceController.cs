@@ -22,4 +22,16 @@ public class EmployeeAttendanceController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpGet("employee/today-attendance/{employeeCode}")]
+    public async Task<IActionResult> GetAttendanceForToday(string employeeCode)
+    {
+        if (employeeCode == null) return BadRequest("Employee Code is required!");
+
+        var response = await _bl_EmployeeAttendance.GetAttendanceForToday(employeeCode);
+        if (response.IsSuccess) return Ok(response);
+
+        return BadRequest(response);
+
+    }
 }
