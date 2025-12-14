@@ -148,8 +148,13 @@ public class EmployeePayrollListResponseModel : PagedResult<EmployeePayrollRespo
 
 public class MonthlyPayrollChartResponseModel
 {
-    public string Month { get; set; }       // "Jan 2024"
-    public decimal NetPay { get; set; }
-    public decimal Bonus { get; set; }
-    public decimal Deduction { get; set; }
+    public List<MonthlyPayrollChartModel> PayrollChart { get; set; }
+}
+
+public class MonthlyPayrollChartModel
+{
+    public string Month { get; set; }
+    public decimal? NetPay { get; set; }
+    public decimal? GrossPay { get; set; }
+    public decimal? Deduction { get; set; }
 }

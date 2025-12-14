@@ -1,13 +1,14 @@
 ﻿using DotNetEnv;
-using HRSystem.Csharp.Domain.Features.Reports;
 using Microsoft.Data.SqlClient;
 using System.Net;
 using System.Net.Mail;
 using HRSystem.Csharp.Domain.Features.AdminDashboard;
+using HRSystem.Csharp.Domain.Features.AttendanceReports;
 using HRSystem.Csharp.Domain.Features.Payroll;
 using HRSystem.Csharp.Domain.Features.CompanyRule;
 using HRSystem.Csharp.Shared.Services;
 using HRSystem.Csharp.Domain.Features.EmployeeAttendance;
+using HRSystem.Csharp.Domain.Features.Reports;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -72,6 +73,13 @@ public static class FeatureManager
 
         builder.Services.AddScoped<BL_RoleMenuPermission>();
         builder.Services.AddScoped<DA_RoleMenuPermission>();
+
+        #endregion
+
+        #region Report
+
+        builder.Services.AddScoped<BL_ReportService>();
+        builder.Services.AddScoped<DA_ReportService>();
 
         #endregion
 

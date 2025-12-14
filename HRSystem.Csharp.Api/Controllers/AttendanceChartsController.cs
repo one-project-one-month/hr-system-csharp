@@ -1,4 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features.Reports;
+﻿using HRSystem.Csharp.Domain.Features.AttendanceReports;
 using HRSystem.Csharp.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

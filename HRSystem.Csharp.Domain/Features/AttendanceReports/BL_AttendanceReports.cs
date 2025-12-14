@@ -1,6 +1,6 @@
-﻿using HRSystem.Csharp.Domain.Models.Reports;
+﻿using HRSystem.Csharp.Domain.Models.AttendanceReports;
 
-namespace HRSystem.Csharp.Domain.Features.Reports;
+namespace HRSystem.Csharp.Domain.Features.AttendanceReports;
 
 public class BL_AttendanceReports
 {

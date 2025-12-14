@@ -61,7 +61,7 @@ public class PayrollController : ControllerBase
 
         return BadRequest(result);
     }
-    
+
     [HttpGet("list/employee")]
     public async Task<IActionResult> EmployeePayrollList([FromQuery] EmployeePayrollListRequestModel reqModel)
     {
@@ -74,8 +74,8 @@ public class PayrollController : ControllerBase
         return BadRequest(result);
     }
 
-    /*[HttpGet("employee-chart")]
-    public async Task<IActionResult> EmployeePayrollChart([FromQuery] EmployeePayrollListRequestModel reqModel)
+    [HttpGet("employee-dashboard/monthly-payroll-chart")]
+    public async Task<IActionResult> EmployeePayrollChart([FromQuery] MonthlyPayrollChartRequestModel reqModel)
     {
         var result = await _blPayroll.EmployeePayrollChart(reqModel);
         if (result.IsSuccess)
@@ -84,7 +84,7 @@ public class PayrollController : ControllerBase
         }
 
         return BadRequest(result);
-    }*/
+    }
 
     /*[HttpGet("list")]
     public async Task<IActionResult> GetPayrollList([FromQuery] PayrollRequestModel model)

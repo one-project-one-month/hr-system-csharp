@@ -9,9 +9,9 @@ public partial class TblPayroll
 
     public string PayrollCode { get; set; } = null!;
 
-    public string? EmployeeCode { get; set; }
+    public string EmployeeCode { get; set; } = null!;
 
-    public string? PayrollMonth { get; set; }
+    public string PayrollMonth { get; set; } = null!;
 
     public string? Status { get; set; }
 

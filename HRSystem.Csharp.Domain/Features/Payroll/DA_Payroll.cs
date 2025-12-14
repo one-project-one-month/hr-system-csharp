@@ -234,58 +234,71 @@ public class DA_Payroll : AuthorizationService
         }
     }
 
-    /*public async Task<Result<List<MonthlyPayrollChartResponseModel>>> GetMonthlyPayrollChartAsync(
+    public async Task<Result<MonthlyPayrollChartResponseModel>> GetMonthlyPayrollChartAsync(
         MonthlyPayrollChartRequestModel reqModel)
     {
         try
         {
             var payrolls = await _appDbContext.TblPayrolls
-                .Where(p => p.EmployeeCode == UserCode &&
-                            p.PayrollMonth.EndsWith(reqModel.Year)) // e.g. "Nov 2025"
+                .Where(p => p.EmployeeCode == "EMP_251114_0001" &&
+                            p.PayrollMonth.EndsWith(reqModel.Year.ToString()))
                 .ToListAsync();
 
-            // Step 2: Group by month and aggregate
             var grouped = payrolls
                 .GroupBy(p => p.PayrollMonth)
                 .ToDictionary(
                     g => g.Key,
-                    g => new MonthlyPayrollChartResponseModel
+                    g => new MonthlyPayrollChartModel
                     {
                         Month = g.Key,
                         NetPay = g.Sum(x => x.NetPay),
-                        Bonus = g.Sum(x => x.Bonus),
+                        GrossPay = g.Sum(x => x.GrossPay),
                         Deduction = g.Sum(x => x.Deduction)
                     });
 
-            // Step 3: Fill missing months with zeroes
-            var result = new List<MonthlyPayrollChartResponseModel>();
+            var monthlyList = new List<MonthlyPayrollChartModel>();
+
             for (int m = 1; m <= 12; m++)
             {
-                var monthKey = new DateTime(reqModel.Year, m, 1).ToString("MMM yyyy", CultureInfo.InvariantCulture);
+                var monthKey = new DateTime(reqModel.Year, m, 1)
+                    .ToString("MMM yyyy", CultureInfo.InvariantCulture);
+
+                var shortMonth = new DateTime(reqModel.Year, m, 1)
+                    .ToString("MMM", CultureInfo.InvariantCulture);
+
                 if (grouped.ContainsKey(monthKey))
                 {
-                    result.Add(grouped[monthKey]);
+                    // monthlyList.Add(grouped[monthKey]);
+                    var item = grouped[monthKey];
+                    item.Month = shortMonth;
+                    monthlyList.Add(item);
                 }
                 else
                 {
-                    result.Add(new MonthlyPayrollChartResponseModel
+                    monthlyList.Add(new MonthlyPayrollChartModel
                     {
-                        Month = monthKey,
+                        Month = shortMonth,
                         NetPay = 0,
-                        Bonus = 0,
+                        GrossPay = 0,
                         Deduction = 0
                     });
                 }
             }
 
-            return Result<List<MonthlyPayrollChartResponseModel>>.Success(result);
+            var response = new MonthlyPayrollChartResponseModel
+            {
+                PayrollChart = monthlyList
+            };
+
+            return Result<MonthlyPayrollChartResponseModel>.Success(response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error generating payroll chart");
-            return Result<List<MonthlyPayrollChartResponseModel>>.SystemError("Unable to generate payroll chart.");
+            return Result<MonthlyPayrollChartResponseModel>.SystemError(
+                "Unable to generate payroll chart.");
         }
-    }*/
+    }
 
 
     /*public async Task<PayrollListResponseModel> GetPayrollList(PayrollRequestModel requestModel)

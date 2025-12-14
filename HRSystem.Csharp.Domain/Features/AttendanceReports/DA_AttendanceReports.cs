@@ -1,8 +1,8 @@
 ﻿using Dapper;
-using HRSystem.Csharp.Domain.Models.Reports;
+using HRSystem.Csharp.Domain.Models.AttendanceReports;
 using HRSystem.Csharp.Shared.Services;
 
-namespace HRSystem.Csharp.Domain.Features.Reports;
+namespace HRSystem.Csharp.Domain.Features.AttendanceReports;
 
 public class DA_AttendanceReports
 {
