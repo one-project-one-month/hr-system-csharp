@@ -8,11 +8,11 @@ namespace HRSystem.Csharp.Api.Controllers;
 [Route("api")]
 [ApiController]
 [Authorize]
-public class ReportsController : Controller
+public class AttendanceChartsController : Controller
 {
     private readonly BL_AttendanceReports _bL_AttendanceReports;
 
-    public ReportsController(BL_AttendanceReports bL_AttendanceReports)
+    public AttendanceChartsController(BL_AttendanceReports bL_AttendanceReports)
     {
         _bL_AttendanceReports = bL_AttendanceReports;
     }

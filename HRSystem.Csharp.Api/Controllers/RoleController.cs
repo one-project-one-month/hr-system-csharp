@@ -1,5 +1,4 @@
 ﻿using HRSystem.Csharp.Domain.Models.Roles;
-using System.Threading.Tasks;
 using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Shared;
 using Microsoft.AspNetCore.Authorization;
