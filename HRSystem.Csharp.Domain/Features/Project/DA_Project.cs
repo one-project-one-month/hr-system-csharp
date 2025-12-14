@@ -215,8 +215,69 @@ public class DA_Project
             {
                 EmployeeCodes = new List<string>()
             },
-            $"No duplicate employees found for Project - {projectCode}"
+            $"None of these employees has added to the Project - {projectCode}"
         );
+    }
+
+    public async Task<Result<EmployeesProjectResponseModel>> EmployeesAssignedToProject(string projectCode,
+        EmployeesProjectRequestModel reqModel)
+    {
+        var query = _appDbContext.TblEmployees.AsNoTracking()
+            .Join(_appDbContext.TblEmployeeProjects.AsNoTracking(),
+                e => e.EmployeeCode,
+                ep => ep.EmployeeCode,
+                (e, ep) => new { e, ep })
+            .Where(x => x.ep.ProjectCode == projectCode)
+            .OrderByDescending(x => x.ep.CreatedAt)
+            .Select(x => new EmployeesInfo
+            {
+                EmployeeCode = x.e.EmployeeCode,
+                EmployeeName = x.e.Name
+            });
+
+        var employeePagedResult = await query.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+        var result = new EmployeesProjectResponseModel
+        {
+            ProjectCode = projectCode,
+            EmployeeList = employeePagedResult
+        };
+
+        return Result<EmployeesProjectResponseModel>.Success(result);
+    }
+
+    public async Task<Result<EmployeesProjectResponseModel>> EmployeesUnassignedToProject(string projectCode,
+        EmployeesProjectRequestModel reqModel)
+    {
+        try
+        {
+            var query = _appDbContext.TblEmployees.AsNoTracking()
+                .Where(e => !_appDbContext.TblEmployeeProjects
+                    .Any(ep => ep.EmployeeCode == e.EmployeeCode
+                               && ep.ProjectCode == projectCode))
+                .OrderBy(e => e.Name)
+                .Select(e => new EmployeesInfo
+                {
+                    EmployeeCode = e.EmployeeCode,
+                    EmployeeName = e.Name
+                });
+
+            var employeePagedResult = await query.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new EmployeesProjectResponseModel
+            {
+                ProjectCode = projectCode,
+                EmployeeList = employeePagedResult
+            };
+
+            return Result<EmployeesProjectResponseModel>.Success(result);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString(), $"Error fetching employees unassigned to the project {projectCode}");
+            return Result<EmployeesProjectResponseModel>.SystemError(
+                $"Error fetching employees unassigned to the project {projectCode}");
+        }
     }
 
     public async Task<Result<AddEmployeeToProjectResponseModel>> AddEmployee(
