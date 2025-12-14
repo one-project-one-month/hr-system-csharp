@@ -8,4 +8,5 @@ public class ReportRequestModel : PaginationRequestModel
     public DateTime FromDate { get; set; } = DateTime.UtcNow;
     public DateTime ToDate { get; set; } = DateTime.UtcNow;
     public string Item { get; set; }
+    public bool IsExport { get; set; } = false;
 }

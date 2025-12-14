@@ -78,8 +78,9 @@ public static class FeatureManager
 
         #region Report
 
-        builder.Services.AddScoped<BL_ReportService>();
-        builder.Services.AddScoped<DA_ReportService>();
+        builder.Services.AddScoped<AdminReportService>();
+        builder.Services.AddScoped<EmployeeReportService>();
+        builder.Services.AddScoped<ExportService>();
 
         #endregion
 

@@ -2,7 +2,7 @@
 
 public enum EnumReportType
 {
-    Employee,
+    Backlog,
     Payroll,
     Attendance,
     Location,
