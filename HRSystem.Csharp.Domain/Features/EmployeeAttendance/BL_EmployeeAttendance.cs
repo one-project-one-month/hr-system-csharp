@@ -161,4 +161,16 @@ public class BL_EmployeeAttendance
             return Result<EmployeeAttendanceResponseModel>.SystemError(ex.Message);
         }
     }
+
+    public async Task<Result<EmployeeAttendanceResponseModel>> GetAttendanceForToday(string employeeCode)
+    {
+        if (employeeCode is null)
+            return Result<EmployeeAttendanceResponseModel>.InvalidDataError("Employee Code is required!");
+
+        var response = await _da.GetAttendanceForToday(employeeCode);
+
+        if (response is null)
+            return Result<EmployeeAttendanceResponseModel>.BadRequestError("Employee not found");
+        return Result<EmployeeAttendanceResponseModel>.Success(response);
+    }
 }
