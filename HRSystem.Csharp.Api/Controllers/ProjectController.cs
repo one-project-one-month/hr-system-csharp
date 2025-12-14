@@ -86,8 +86,31 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
+    /*[HttpGet("{projectCode}/assigned-employees")]
+    public async Task<IActionResult> EmployeesAssignedToProject(string projectCode)
+    {
+        if (string.IsNullOrWhiteSpace(projectCode))
+        {
+            var error = Result<bool>.ValidationError("Project code is required!");
+            return BadRequest(error);
+        }
+        
+        
+    }
+
+    [HttpGet("{projectCode}/unassigned-employees")]
+    public async Task<IActionResult> EmployeesUnassignedToProject(string projectCode)
+    {
+        if (string.IsNullOrWhiteSpace(projectCode))
+        {
+            var error = Result<bool>.ValidationError("Project code is required!");
+            return BadRequest(error);
+        }
+    }*/
+
     [HttpPost("add-employee/{projectCode}")]
-    public async Task<IActionResult> AddEmployee(string projectCode, AddEmployeeToProjectRequestModel reqModel)
+    public async Task<IActionResult> AddEmployee(string projectCode, 
+        AddEmployeeToProjectRequestModel reqModel)
     {
         if (reqModel.EmployeeCodes.Count == 0)
         {

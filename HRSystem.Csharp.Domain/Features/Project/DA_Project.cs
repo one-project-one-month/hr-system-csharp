@@ -215,7 +215,7 @@ public class DA_Project
             {
                 EmployeeCodes = new List<string>()
             },
-            $"No duplicate employees found for Project - {projectCode}"
+            $"None of these employees has added to the Project - {projectCode}"
         );
     }
 

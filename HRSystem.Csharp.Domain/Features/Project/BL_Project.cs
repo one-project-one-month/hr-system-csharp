@@ -7,11 +7,13 @@ public class BL_Project
 {
     private readonly DA_Project _daProject;
     private readonly DA_Employee _daEmployee;
+    private readonly ILogger<BL_Project> _logger;
 
-    public BL_Project(DA_Project daProject, DA_Employee daEmployee)
+    public BL_Project(DA_Project daProject, DA_Employee daEmployee, ILogger<BL_Project> logger)
     {
         _daProject = daProject;
         _daEmployee = daEmployee;
+        _logger = logger;
     }
 
     public async Task<Result<ProjectListResponseModel>> GetAllProjects(ProjectListRequestModel reqModel)
@@ -60,6 +62,18 @@ public class BL_Project
         return await _daProject.DeleteProject(code);
     }
 
+    /*public async Task<Result<>> EmployeesAssignedToProject(string projectCode)
+    {
+        try
+        {
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }*/
+
     public async Task<Result<AddEmployeeToProjectResponseModel>> AddEmployee(string projectCode,
         AddEmployeeToProjectRequestModel reqModel)
     {
@@ -75,7 +89,7 @@ public class BL_Project
             if (!normalized.Any())
                 return Result<AddEmployeeToProjectResponseModel>.ValidationError(
                     "At least one employee code is required.",
-                    new AddEmployeeToProjectResponseModel { EmployeeCodes = [] });
+                    new AddEmployeeToProjectResponseModel { EmployeeCodes =  [] });
 
             // check duplicate code in request data
             var duplicatesInRequest = normalized
@@ -90,6 +104,7 @@ public class BL_Project
                     $"Duplicate employee codes in request: {string.Join(", ", duplicatesInRequest)}",
                     new AddEmployeeToProjectResponseModel { EmployeeCodes = duplicatesInRequest });
             }
+
             #endregion
 
             #region Validate Project Exists
@@ -115,10 +130,10 @@ public class BL_Project
             #region Validate each employee exists and not have been added to the project
 
             // check employee exist in Tbl_Employee
-            var invalidEmployeesResult = await _daEmployee.ValidateEmployeesExist(reqModel!);
-            if (invalidEmployeesResult.IsError)
+            var employeesExistResult = await _daEmployee.ValidateEmployeesExist(reqModel!);
+            if (employeesExistResult.IsError)
             {
-                return invalidEmployeesResult;
+                return employeesExistResult;
             }
 
             // check employees already added to the project
@@ -135,8 +150,8 @@ public class BL_Project
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            _logger.LogError(e.ToString(), "Error adding employees to project");
+            return Result<AddEmployeeToProjectResponseModel>.SystemError("Error adding employees to project");
         }
     }
 
@@ -179,7 +194,8 @@ public class BL_Project
         }
         catch (Exception ex)
         {
-            return Result<AddEmployeeToProjectResponseModel>.SystemError(ex.Message);
+            _logger.LogError(ex.ToString(), "Error removing employees from project.");
+            return Result<AddEmployeeToProjectResponseModel>.SystemError("Error removing employees from project");
         }
     }
 }
