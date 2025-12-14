@@ -120,7 +120,7 @@ public class DA_Payroll : AuthorizationService
 
             if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
             {
-                query = query.Where(x => x.Employee.Name.Contains(reqModel.EmployeeName));
+                query = query.Where(x => x.Employee.Name.ToLower().Contains(reqModel.EmployeeName.ToLower()));
             }
 
             query = query.OrderByDescending(x => x.Payroll.CreatedAt);
