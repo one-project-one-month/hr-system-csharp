@@ -18,4 +18,9 @@
 	 <ProjectReference Include="..\HRSystem.Csharp.Database\HRSystem.Csharp.Database.csproj" />
 	 <ProjectReference Include="..\HRSystem.Csharp.Shared\HRSystem.Csharp.Shared.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Report\Admin\" />
+    <Folder Include="Models\Report\Employee\" />
+  </ItemGroup>
 </Project>
