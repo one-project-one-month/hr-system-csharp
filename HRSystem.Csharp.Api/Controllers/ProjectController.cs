@@ -86,30 +86,46 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
-    /*[HttpGet("{projectCode}/assigned-employees")]
-    public async Task<IActionResult> EmployeesAssignedToProject(string projectCode)
+    [HttpGet("{projectCode}/assigned-employees")]
+    public async Task<IActionResult> EmployeesAssignedToProject(string projectCode,
+        [FromQuery] EmployeesProjectRequestModel reqModel)
     {
         if (string.IsNullOrWhiteSpace(projectCode))
         {
             var error = Result<bool>.ValidationError("Project code is required!");
             return BadRequest(error);
         }
-        
-        
+
+        var result = await _blProject.EmployeesAssignedToProject(projectCode, reqModel);
+        if (result.IsError)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 
     [HttpGet("{projectCode}/unassigned-employees")]
-    public async Task<IActionResult> EmployeesUnassignedToProject(string projectCode)
+    public async Task<IActionResult> EmployeesUnassignedToProject(string projectCode,
+        [FromQuery] EmployeesProjectRequestModel reqModel)
     {
         if (string.IsNullOrWhiteSpace(projectCode))
         {
             var error = Result<bool>.ValidationError("Project code is required!");
             return BadRequest(error);
         }
-    }*/
+
+        var result = await _blProject.EmployeesUnassignedToProject(projectCode, reqModel);
+        if (result.IsError)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
 
     [HttpPost("add-employee/{projectCode}")]
-    public async Task<IActionResult> AddEmployee(string projectCode, 
+    public async Task<IActionResult> AddEmployee(string projectCode,
         AddEmployeeToProjectRequestModel reqModel)
     {
         if (reqModel.EmployeeCodes.Count == 0)

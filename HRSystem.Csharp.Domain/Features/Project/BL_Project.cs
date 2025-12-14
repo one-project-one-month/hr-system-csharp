@@ -62,17 +62,57 @@ public class BL_Project
         return await _daProject.DeleteProject(code);
     }
 
-    /*public async Task<Result<>> EmployeesAssignedToProject(string projectCode)
+    public async Task<Result<EmployeesProjectResponseModel>> EmployeesAssignedToProject(string projectCode,
+        EmployeesProjectRequestModel reqModel)
     {
         try
         {
+            var project = await GetProjectByCode(new ProjectEditRequestModel()
+            {
+                ProjectCode = projectCode
+            });
+
+            if (project.IsError)
+            {
+                return Result<EmployeesProjectResponseModel>.Error(project.Message);
+            }
+            
+            var result = await _daProject.EmployeesAssignedToProject(projectCode, reqModel);
+            return result;
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            _logger.LogError(e.ToString(), $"Error fetching employees assigned to the project {projectCode}");
+            return Result<EmployeesProjectResponseModel>.SystemError(
+                $"Error fetching employees assigned to the project {projectCode}");
         }
-    }*/
+    }
+
+    public async Task<Result<EmployeesProjectResponseModel>> EmployeesUnassignedToProject(string projectCode,
+        EmployeesProjectRequestModel reqModel)
+    {
+        try
+        {
+            var project = await GetProjectByCode(new ProjectEditRequestModel()
+            {
+                ProjectCode = projectCode
+            });
+
+            if (project.IsError)
+            {
+                return Result<EmployeesProjectResponseModel>.Error(project.Message);
+            }
+            
+            var result = await _daProject.EmployeesUnassignedToProject(projectCode, reqModel);
+            return result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString(), $"Error fetching employees unassigned to the project {projectCode}");
+            return Result<EmployeesProjectResponseModel>.SystemError(
+                $"Error fetching employees unassigned to the project {projectCode}");
+        }
+    }
 
     public async Task<Result<AddEmployeeToProjectResponseModel>> AddEmployee(string projectCode,
         AddEmployeeToProjectRequestModel reqModel)
