@@ -840,5 +840,3 @@ CREATE TABLE ResetPasswordTokens (
     IsUsed BIT NOT NULL DEFAULT 0,
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE()
 );
-
-

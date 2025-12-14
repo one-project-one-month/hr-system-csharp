@@ -8,11 +8,11 @@ BEGIN
     ------------------------------------------------------
     -- 1. Ensure ADMIN role exists
     ------------------------------------------------------
-    --IF NOT EXISTS (SELECT 1 FROM Tbl_Role WHERE RoleCode = @RoleCode)
-    --BEGIN
-        --INSERT INTO Tbl_Role (RoleCode, RoleName, CreatedAt, CreatedBy, DeleteFlag)
-        --VALUES (@RoleCode, 'Administrator', GETDATE(), 'SYSTEM', 0);
-    --END
+    IF NOT EXISTS (SELECT 1 FROM Tbl_Role WHERE RoleCode = @RoleCode)
+    BEGIN
+        INSERT INTO Tbl_Role (RoleId,RoleCode, RoleName, CreatedAt, CreatedBy, DeleteFlag)
+        VALUES (NEWID(),@RoleCode, 'Administrator', GETDATE(), 'SYSTEM', 0);
+    END
 
 
     ------------------------------------------------------

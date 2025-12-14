@@ -28,7 +28,7 @@ public class BL_EmployeeAttendance
             return Result<EmployeeAttendanceResponseModel>.ValidationError("Check In Status is required!");
         }
 
-        if (!requestModel.Latitude.IsNullOrEmpty())
+        if (requestModel.Latitude.IsNullOrEmpty())
         {
             return Result<EmployeeAttendanceResponseModel>.ValidationError("Latitude is required!");
         }
