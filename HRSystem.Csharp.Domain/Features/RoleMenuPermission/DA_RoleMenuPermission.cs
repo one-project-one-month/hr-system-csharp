@@ -171,7 +171,7 @@ public class DA_RoleMenuPermission
                     RoleCode = reqModel.RoleCode,
                     MenuGroupCode = p.MenuGroupCode,
                     MenuCode = p.MenuItemCode ?? null,
-                    PermissionCode = p.PermissionCode ?? null!,
+                    PermissionCode = p.PermissionCode,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "admin",
                     DeleteFlag = false
