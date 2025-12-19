@@ -84,9 +84,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.CompanyRuleCode, "UQ__Tbl_Comp__18933613B32658DE").IsUnique();
 
-            entity.Property(e => e.CompanyRuleId)
-                .HasMaxLength(200)
-                .HasDefaultValueSql("(newid())");
+            entity.Property(e => e.CompanyRuleId).HasMaxLength(200);
             entity.Property(e => e.CompanyRuleCode).HasMaxLength(50);
             entity.Property(e => e.CreatedBy).HasMaxLength(200);
             entity.Property(e => e.Description).HasMaxLength(200);
@@ -162,14 +160,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.DeleteFlag).HasDefaultValue(false);
             entity.Property(e => e.EmployeeCode)
                 .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.FullOrHalf)
-                .HasMaxLength(20)
-                .IsUnicode(false);
-            entity.Property(e => e.LeaveCode)
-                .HasMaxLength(40)
                 .IsUnicode(false);
             entity.Property(e => e.LeaveType)
                 .HasMaxLength(30)
@@ -376,10 +369,8 @@ public partial class AppDbContext : DbContext
 
             entity.ToTable("Tbl_Sequence");
 
-            entity.Property(e => e.SequenceId)
-                .HasMaxLength(200)
-                .HasDefaultValueSql("(newid())");
-            entity.Property(e => e.SequenceDate).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.SequenceId).HasMaxLength(200);
+            entity.Property(e => e.SequenceDate).HasColumnType("datetime");
             entity.Property(e => e.SequenceNo).HasMaxLength(50);
             entity.Property(e => e.SequenceType).HasMaxLength(50);
             entity.Property(e => e.UniqueName).HasMaxLength(50);

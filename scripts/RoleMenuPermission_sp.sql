@@ -10,54 +10,126 @@ BEGIN
     ------------------------------------------------------
     IF NOT EXISTS (SELECT 1 FROM Tbl_Role WHERE RoleCode = @RoleCode)
     BEGIN
-        INSERT INTO Tbl_Role (RoleId,RoleCode, RoleName, CreatedAt, CreatedBy, DeleteFlag)
-        VALUES (NEWID(),@RoleCode, 'Administrator', GETDATE(), 'SYSTEM', 0);
+        INSERT INTO Tbl_Role
+        (RoleId, RoleCode, RoleName, CreatedAt, CreatedBy, DeleteFlag)
+        VALUES
+        (NEWID(), @RoleCode, 'Administrator', GETDATE(), 'SYSTEM', 0);
     END
 
-
     ------------------------------------------------------
-    -- 2. Insert all menu/permission combos that are missing
+    -- 2. DASHBOARD & PAYROLL (no menu, no permission)
     ------------------------------------------------------
-    INSERT INTO Tbl_RoleAndMenuPermission (
+    INSERT INTO Tbl_RoleAndMenuPermission
+    (
         RoleAndMenuPermissionId,
         RoleAndMenuPermissionCode,
         RoleCode,
         MenuGroupCode,
         MenuCode,
+        PermissionCode,
         CreatedAt,
         CreatedBy,
-        DeleteFlag,
-        PermissionCode
+        DeleteFlag
     )
-    SELECT 
+    SELECT
         NEWID(),
-        CONCAT('ADMIN-', mg.MenuGroupCode, '-', ISNULL(m.MenuCode, 'X'), '-', p.PermissionCode),
+        CONCAT('ADMIN-', mg.MenuGroupCode),
         @RoleCode,
         mg.MenuGroupCode,
-        m.MenuCode,
+        NULL,
+        NULL,
         GETDATE(),
         'SYSTEM',
-        0,
-        p.PermissionCode
+        0
     FROM Tbl_MenuGroup mg
-    LEFT JOIN Tbl_Menu m ON m.MenuGroupCode = mg.MenuGroupCode
-    CROSS JOIN Tbl_Permission p
-    WHERE NOT EXISTS (
-        SELECT 1 
-        FROM Tbl_RoleAndMenuPermission x
+    WHERE mg.MenuGroupCode IN ('DASHBOARD', 'PAYROLL', 'ROLE_MENU_PERMISSION')
+    AND NOT EXISTS (
+        SELECT 1 FROM Tbl_RoleAndMenuPermission x
         WHERE x.RoleCode = @RoleCode
         AND x.MenuGroupCode = mg.MenuGroupCode
-        AND (
-            (x.MenuCode = m.MenuCode)
-            OR (x.MenuCode IS NULL AND m.MenuCode IS NULL)
-        )
+    );
+
+    ------------------------------------------------------
+    -- 3. COMPANY RULES (permissions, no menu items)
+    ------------------------------------------------------
+    INSERT INTO Tbl_RoleAndMenuPermission
+    (
+        RoleAndMenuPermissionId,
+        RoleAndMenuPermissionCode,
+        RoleCode,
+        MenuGroupCode,
+        MenuCode,
+        PermissionCode,
+        CreatedAt,
+        CreatedBy,
+        DeleteFlag
+    )
+    SELECT
+        NEWID(),
+        CONCAT('ADMIN-COMPANY_RULES-', p.PermissionCode),
+        @RoleCode,
+        'COMPANY_RULES',
+        NULL,
+        p.PermissionCode,
+        GETDATE(),
+        'SYSTEM',
+        0
+    FROM Tbl_Permission p
+    WHERE p.PermissionCode IN ('LIST','UPDATE')
+    AND NOT EXISTS (
+        SELECT 1 FROM Tbl_RoleAndMenuPermission x
+        WHERE x.RoleCode = @RoleCode
+        AND x.MenuGroupCode = 'COMPANY_RULES'
         AND x.PermissionCode = p.PermissionCode
     );
 
-    PRINT 'All missing ADMIN permissions inserted.';
+    ------------------------------------------------------
+    -- 4. NORMAL MODULES (menu + full permissions)
+    ------------------------------------------------------
+    INSERT INTO Tbl_RoleAndMenuPermission
+    (
+        RoleAndMenuPermissionId,
+        RoleAndMenuPermissionCode,
+        RoleCode,
+        MenuGroupCode,
+        MenuCode,
+        PermissionCode,
+        CreatedAt,
+        CreatedBy,
+        DeleteFlag
+    )
+    SELECT
+        NEWID(),
+        CONCAT(
+            'ADMIN-',
+            mg.MenuGroupCode, '-',
+            m.MenuCode, '-',
+            p.PermissionCode
+        ),
+        @RoleCode,
+        mg.MenuGroupCode,
+        m.MenuCode,
+        p.PermissionCode,
+        GETDATE(),
+        'SYSTEM',
+        0
+    FROM Tbl_MenuGroup mg
+    JOIN Tbl_Menu m
+        ON m.MenuGroupCode = mg.MenuGroupCode
+    CROSS JOIN Tbl_Permission p
+    WHERE mg.MenuGroupCode NOT IN ('DASHBOARD', 'PAYROLL', 'COMPANY_RULES')
+    AND NOT EXISTS (
+        SELECT 1 FROM Tbl_RoleAndMenuPermission x
+        WHERE x.RoleCode = @RoleCode
+        AND x.MenuGroupCode = mg.MenuGroupCode
+        AND x.MenuCode = m.MenuCode
+        AND x.PermissionCode = p.PermissionCode
+    );
+
+    PRINT 'ADMIN permissions initialized with inline rules.';
 END;
 GO
 
 EXEC InitializeFullAdminPermissions;
 
-
+SELECT * FROM Tbl_RoleAndMenuPermission;

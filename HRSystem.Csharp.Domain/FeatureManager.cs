@@ -79,6 +79,9 @@ public static class FeatureManager
 
         #region Leave
 
+        builder.Services.AddScoped<AdminReportService>();
+        builder.Services.AddScoped<EmployeeReportService>();
+        builder.Services.AddScoped<ExportService>();
         builder.Services.AddScoped<DA_Leave>();
         builder.Services.AddScoped<BL_Leave>();
 
