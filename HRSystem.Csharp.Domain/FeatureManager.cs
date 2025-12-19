@@ -77,11 +77,16 @@ public static class FeatureManager
 
         #endregion
 
-        #region Leave
+        #region Report
 
         builder.Services.AddScoped<AdminReportService>();
         builder.Services.AddScoped<EmployeeReportService>();
         builder.Services.AddScoped<ExportService>();
+
+        #endregion
+
+        #region Leave
+
         builder.Services.AddScoped<DA_Leave>();
         builder.Services.AddScoped<BL_Leave>();
 
