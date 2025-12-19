@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.Leave;
+﻿using HRSystem.Csharp.Domain.Features.Rule;
+using HRSystem.Csharp.Domain.Models.Leave;
 
 namespace HRSystem.Csharp.Domain.Features.Leave;
 
@@ -7,36 +8,20 @@ public class DA_Leave : AuthorizationService
     private readonly AppDbContext _appDbContext;
     private readonly ILogger<DA_Leave> _logger;
     private readonly DA_Sequence _daSequence;
+    private readonly DA_Rule _daRule;
 
-    public DA_Leave(HttpContextAccessor httpContextAccessor,
-        AppDbContext appDbContext, ILogger<DA_Leave> logger, DA_Sequence daSequence) : base(httpContextAccessor)
+    public DA_Leave(IHttpContextAccessor httpContextAccessor,
+        AppDbContext appDbContext, ILogger<DA_Leave> logger, DA_Sequence daSequence,
+        DA_Rule daRule) : base(httpContextAccessor)
     {
         _appDbContext = appDbContext;
         _logger = logger;
         _daSequence = daSequence;
+        _daRule = daRule;
     }
 
-    public async Task<Result<bool>> CreateLeave(LeaveCreateRequestModel reqModel)
+    public async Task<Result<bool>> CreateLeave(TblLeave leave)
     {
-        var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
-
-        var leave = new TblLeave()
-        {
-            LeaveId = DevCode.GenerateNewUlid(),
-            LeaveCode = generatedCode,
-            EmployeeCode = UserCode,
-            FromDate = reqModel.FromDate,
-            ToDate = reqModel.ToDate,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = UserCode,
-            Reason = reqModel.Reason,
-            LeaveType = reqModel.LeaveType.ToString(),
-            TotalHours = reqModel.TotalHours,
-            Status = EnumLeaveStatus.Pending.ToString(),
-            FullOrHalf = reqModel.FullOrHalf.ToString(),
-            IsPaid = reqModel.IsPaid
-        };
-
         await _appDbContext.TblLeaves.AddAsync(leave);
         var saved = await _appDbContext.SaveChangesAsync() > 0;
 

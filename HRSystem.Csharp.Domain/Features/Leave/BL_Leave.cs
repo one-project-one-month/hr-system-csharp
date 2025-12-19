@@ -9,15 +9,18 @@ public class BL_Leave : AuthorizationService
     private readonly ILogger<BL_Leave> _logger;
     private readonly DA_Employee _daEmployee;
     private readonly DA_Rule _daRule;
+    private readonly DA_Sequence _daSequence;
 
     public BL_Leave(IHttpContextAccessor httpContextAccessor,
         DA_Leave daLeave,
-        ILogger<BL_Leave> logger, DA_Employee daEmployee, DA_Rule daRule) : base(httpContextAccessor)
+        ILogger<BL_Leave> logger, DA_Employee daEmployee, DA_Rule daRule,
+        DA_Sequence daSequence) : base(httpContextAccessor)
     {
         _daLeave = daLeave;
         _logger = logger;
         _daEmployee = daEmployee;
         _daRule = daRule;
+        _daSequence = daSequence;
     }
 
     public async Task<Result<bool>> CreateLeave(LeaveCreateRequestModel reqModel)
@@ -63,12 +66,52 @@ public class BL_Leave : AuthorizationService
 
             if (reqModel.FromDate < reqModel.ToDate && reqModel.FullOrHalf == EnumFullOrHalfLeave.HalfLeave)
             {
-                throw new ArgumentException("Half leave can only be applied for a single day.");
+                return Result<bool>.ValidationError("Half leave can only be applied for a single day.");
             }
 
             #endregion
 
-            var result = await _daLeave.CreateLeave(reqModel);
+            var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
+            var isPaidLeave = reqModel.LeaveType != EnumLeaveType.LeaveWithoutPay;
+            var requestedDays = (reqModel.ToDate.DayNumber - reqModel.FromDate.DayNumber) + 1;
+
+            #region Get Working Hour By Half Leave or Full Leave & Calculate Total Leave Hours
+
+            var ruleCode = reqModel.FullOrHalf == EnumFullOrHalfLeave.HalfLeave
+                ? RuleCode.HalfWorkingHour
+                : RuleCode.FullWorkingHour;
+
+            var workingHourRule = await _daRule.GetRuleByCode(ruleCode);
+            if (workingHourRule?.Data is null || workingHourRule.IsError)
+            {
+                return Result<bool>
+                    .SystemError("An error occured while requesting leave. Try requesting later!");
+            }
+
+            var totalLeaveHours = reqModel.FullOrHalf == EnumFullOrHalfLeave.HalfLeave
+                ? workingHourRule.Data.Value.ToInt()
+                : requestedDays * workingHourRule.Data.Value.ToInt();
+
+            #endregion
+
+            var leave = new TblLeave
+            {
+                LeaveId = DevCode.GenerateNewUlid(),
+                LeaveCode = generatedCode,
+                EmployeeCode = UserCode,
+                FromDate = reqModel.FromDate,
+                ToDate = reqModel.ToDate,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = UserCode,
+                Reason = reqModel.Reason,
+                LeaveType = reqModel.LeaveType.ToString(),
+                TotalHours = totalLeaveHours,
+                Status = EnumLeaveStatus.Pending.ToString(),
+                FullOrHalf = reqModel.FullOrHalf.ToString(),
+                IsPaid = isPaidLeave
+            };
+
+            var result = await _daLeave.CreateLeave(leave);
             return result;
         }
         catch (Exception e)
@@ -151,12 +194,12 @@ public class BL_Leave : AuthorizationService
                 .Error("Your casual leave quota has been reached.");
         }
 
-        var requestedDays = (reqModel.ToDate.DayNumber - reqModel.FromDate.DayNumber) + 1;
+        /*var requestedDays = (reqModel.ToDate.DayNumber - reqModel.FromDate.DayNumber) + 1;
         if (requestedDays > 3)
         {
             return Result<AvailableLeaveResponseModel>
                 .Error("Casual leave cannot exceed 3 consecutive days.");
-        }
+        }*/
 
         return Result<AvailableLeaveResponseModel>.Success(new AvailableLeaveResponseModel
         {
@@ -249,9 +292,9 @@ public class BL_Leave : AuthorizationService
         if (leavesTaken >= allowedDays)
             return Result<AvailableLeaveResponseModel>.Error("Your maternity leave quota has been reached.");
 
-        if (reqModel.FromDate < DateOnly.FromDateTime(DateTime.Today.AddDays(28)))
+        /*if (reqModel.FromDate < DateOnly.FromDateTime(DateTime.Today.AddDays(28)))
             return Result<AvailableLeaveResponseModel>.Error(
-                "Maternity leave must be requested at least 4 weeks in advance.");
+                "Maternity leave must be requested at least 4 weeks in advance.");*/
 
         return Result<AvailableLeaveResponseModel>.Success(new AvailableLeaveResponseModel
         {
@@ -268,8 +311,7 @@ public class BL_Leave : AuthorizationService
         {
             EnumLeaveType.MedicalLeave,
             EnumLeaveType.CasualLeave,
-            EnumLeaveType.EarnLeave,
-            EnumLeaveType.MaternityLeave
+            EnumLeaveType.EarnLeave
         };
 
         foreach (var leaveType in paidLeaveTypes)

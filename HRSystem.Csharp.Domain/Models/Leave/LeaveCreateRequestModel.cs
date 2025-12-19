@@ -2,15 +2,11 @@
 
 public class LeaveCreateRequestModel
 {
-    public string EmployeeCode { get; set; } = null!;
     public EnumLeaveType LeaveType { get; set; }
-    public string Reason { get; set; } = null!;
     public DateOnly FromDate { get; set; }
     public DateOnly ToDate { get; set; }
-    public decimal? TotalHours { get; set; }
-    public bool? IsPaid { get; set; }
-    public string Status { get; set; } = null!;
     public EnumFullOrHalfLeave FullOrHalf { get; set; }
+    public string Reason { get; set; } = null!;
 }
 
 public enum EnumLeaveType
@@ -38,8 +34,8 @@ public enum EnumLeaveStatus
 public class AvailableLeaveRequestModel
 {
     public EnumLeaveType LeaveType { get; set; }
-    public DateOnly FromDate { get; set; }
-    public DateOnly ToDate { get; set; }
+    /*public DateOnly FromDate { get; set; }
+    public DateOnly ToDate { get; set; }*/
 }
 
 public class AvailableLeaveResponseModel

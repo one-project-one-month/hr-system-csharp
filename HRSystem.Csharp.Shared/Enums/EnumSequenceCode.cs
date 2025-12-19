@@ -17,5 +17,6 @@ public enum EnumSequenceCode
     [Description("Employee")] EMP,
     [Description("Location")] LOC,
     [Description("Payroll")] PAY,
-    [Description("Attendance")] ATT
+    [Description("Attendance")] ATT,
+    [Description("Leave")] LV,
 }

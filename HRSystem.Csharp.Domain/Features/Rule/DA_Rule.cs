@@ -54,4 +54,6 @@ public class RuleCode
     public static string TotalMedicalLeave { get; } = "RL002";
     public static string TotalEarnLeave { get; } = "RL003";
     public static string TotalMaternityLeave { get; } = "RL004";
+    public static string FullWorkingHour { get; } = "RL005";
+    public static string HalfWorkingHour { get; } = "RL006";
 }
