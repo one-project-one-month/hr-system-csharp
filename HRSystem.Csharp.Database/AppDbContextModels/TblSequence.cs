@@ -11,9 +11,9 @@ public partial class TblSequence
 
     public string? SequenceNo { get; set; }
 
-    public DateTime? SequenceDate { get; set; }
+    public DateTime SequenceDate { get; set; }
 
     public string? SequenceType { get; set; }
 
-    public bool? DeleteFlag { get; set; }
+    public bool DeleteFlag { get; set; }
 }

@@ -8,6 +8,7 @@ using HRSystem.Csharp.Domain.Features.Payroll;
 using HRSystem.Csharp.Domain.Features.CompanyRule;
 using HRSystem.Csharp.Shared.Services;
 using HRSystem.Csharp.Domain.Features.EmployeeAttendance;
+using HRSystem.Csharp.Domain.Features.Leave;
 using HRSystem.Csharp.Domain.Features.Reports;
 
 namespace HRSystem.Csharp.Domain;
@@ -76,8 +77,10 @@ public static class FeatureManager
 
         #endregion
 
-        #region Report
+        #region Leave
 
+        builder.Services.AddScoped<DA_Leave>();
+        builder.Services.AddScoped<BL_Leave>();
 
         #endregion
 

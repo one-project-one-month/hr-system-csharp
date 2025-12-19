@@ -11,6 +11,16 @@ public static class DevCode
 {
     private static readonly long MaxFileSize = 5 * 1024 * 1024;
 
+    public static int ToInt(this string value)
+    {
+        if (int.TryParse(value, out int result))
+        {
+            return result;
+        }
+
+        return 0;
+    }
+
     public static string GenerateNewUlid()
     {
         return Ulid.NewUlid().ToString()!;
@@ -91,7 +101,8 @@ public static class DevCode
 
     #region File Upload
 
-    public static async Task<List<FileUploadData>> UploadFilesAsync(this EnumDirectory directory, IEnumerable<IFormFile> files)
+    public static async Task<List<FileUploadData>> UploadFilesAsync(this EnumDirectory directory,
+        IEnumerable<IFormFile> files)
     {
         if (files == null || !files.Any())
         {
@@ -145,6 +156,7 @@ public static class DevCode
                         // throw;
                     }
                 }
+
                 throw new Exception($"Error uploading files: {ex.Message}");
             }
         }

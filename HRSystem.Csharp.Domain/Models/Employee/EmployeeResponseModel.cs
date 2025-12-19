@@ -37,6 +37,7 @@ public class EmployeeEditResponseModel
     public decimal? Salary { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? ResignDate { get; set; }
+    public string Gender { get; set; } = null!;
 }
 
 public class EmployeeCreateResponseModel

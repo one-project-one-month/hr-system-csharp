@@ -93,7 +93,8 @@ public class DA_Employee(
                 PhoneNo = employee.PhoneNo,
                 Salary = employee.Salary,
                 StartDate = employee.StartDate,
-                ResignDate = employee.ResignDate
+                ResignDate = employee.ResignDate,
+                Gender = employee.Gender
             };
             return Result<EmployeeEditResponseModel>.Success(result);
         }

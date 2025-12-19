@@ -9,19 +9,19 @@ public partial class TblLeave
 
     public string EmployeeCode { get; set; } = null!;
 
-    public string? LeaveType { get; set; }
+    public string LeaveType { get; set; } = null!;
 
-    public string? Reason { get; set; }
+    public string Reason { get; set; } = null!;
 
-    public DateOnly? StartDate { get; set; }
+    public DateOnly FromDate { get; set; }
 
-    public DateOnly? EndDate { get; set; }
+    public DateOnly ToDate { get; set; }
 
     public decimal? TotalHours { get; set; }
 
     public bool? IsPaid { get; set; }
 
-    public string? Status { get; set; }
+    public string Status { get; set; } = null!;
 
     public string? ApprovedBy { get; set; }
 
@@ -29,7 +29,11 @@ public partial class TblLeave
 
     public DateTime CreatedAt { get; set; }
 
-    public string? CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = null!;
 
-    public bool? DeleteFlag { get; set; }
+    public bool DeleteFlag { get; set; }
+
+    public string FullOrHalf { get; set; } = null!;
+
+    public string LeaveCode { get; set; } = null!;
 }
