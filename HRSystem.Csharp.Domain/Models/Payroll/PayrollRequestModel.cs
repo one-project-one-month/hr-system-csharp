@@ -23,7 +23,7 @@ public class PayrollListRequestModel : PaginationRequestModel
 public class PayrollMonthDetailListRequestModel : PaginationRequestModel
 {
     public string PayrollSummaryCode { get; set; } = string.Empty;
-    public string? EmployeeName { get; set; }
+    public string? EmployeeCode { get; set; }
 }
 
 public class EmployeePayrollListRequestModel : PaginationRequestModel

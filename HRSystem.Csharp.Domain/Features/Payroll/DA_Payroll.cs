@@ -118,9 +118,9 @@ public class DA_Payroll : AuthorizationService
                     on p.EmployeeCode equals e.EmployeeCode
                 select new { Payroll = p, Employee = e };
 
-            if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
+            if (!string.IsNullOrWhiteSpace(reqModel.EmployeeCode))
             {
-                query = query.Where(x => x.Employee.Name.ToLower().Contains(reqModel.EmployeeName.ToLower()));
+                query = query.Where(x => x.Employee.EmployeeCode.ToLower().Contains(reqModel.EmployeeCode.ToLower()));
             }
 
             query = query.OrderByDescending(x => x.Payroll.CreatedAt);
