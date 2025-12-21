@@ -220,7 +220,7 @@ public class BL_Project
 
             #endregion
 
-            #region Validate each employee exists and not have been added to the project
+            #region check employee exist in Tbl_Employee
 
             var invalidEmployeesResult = await _daEmployee.ValidateEmployeesExist(reqModel);
             if (invalidEmployeesResult.IsError)

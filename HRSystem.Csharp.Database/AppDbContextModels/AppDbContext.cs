@@ -54,7 +54,11 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<TblTask> TblTasks { get; set; }
 
     public virtual DbSet<TblVerification> TblVerifications { get; set; }
-    
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=.;Database=HRSystem;User ID=sa;Password=sasa@123;TrustServerCertificate=True;");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TblAttendance>(entity =>
@@ -88,7 +92,10 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(200)
                 .HasDefaultValueSql("(newid())");
             entity.Property(e => e.CompanyRuleCode).HasMaxLength(50);
-            entity.Property(e => e.CreatedBy).HasMaxLength(200);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.CreatedBy)
+                .HasMaxLength(200)
+                .HasDefaultValue("SYSTEM");
             entity.Property(e => e.Description).HasMaxLength(200);
             entity.Property(e => e.ModifiedBy).HasMaxLength(200);
             entity.Property(e => e.Value).HasMaxLength(50);

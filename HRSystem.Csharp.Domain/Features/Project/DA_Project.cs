@@ -227,7 +227,8 @@ public class DA_Project
                 e => e.EmployeeCode,
                 ep => ep.EmployeeCode,
                 (e, ep) => new { e, ep })
-            .Where(x => x.ep.ProjectCode == projectCode)
+            .Where(x => x.ep.ProjectCode == projectCode
+                        && !x.ep.DeleteFlag && !x.e.DeleteFlag)
             .OrderByDescending(x => x.ep.CreatedAt)
             .Select(x => new EmployeesInfo
             {
@@ -252,9 +253,10 @@ public class DA_Project
         try
         {
             var query = _appDbContext.TblEmployees.AsNoTracking()
-                .Where(e => !_appDbContext.TblEmployeeProjects
+                .Where(e => !e.DeleteFlag && !_appDbContext.TblEmployeeProjects
                     .Any(ep => ep.EmployeeCode == e.EmployeeCode
-                               && ep.ProjectCode == projectCode))
+                               && ep.ProjectCode == projectCode
+                               && !ep.DeleteFlag))
                 .OrderBy(e => e.Name)
                 .Select(e => new EmployeesInfo
                 {
@@ -340,13 +342,23 @@ public class DA_Project
 
         try
         {
-            var entries = new List<TblEmployeeProject>(reqModel.EmployeeCodes.Count);
+            /*var entries = new List<TblEmployeeProject>(reqModel.EmployeeCodes.Count);
             foreach (var employeeCode in reqModel.EmployeeCodes)
             {
                 entries.Add(new TblEmployeeProject
                 {
                     DeleteFlag = true
                 });
+            }*/
+
+            var entries = await _appDbContext.TblEmployeeProjects
+                .Where(ep => ep.ProjectCode == projectCode
+                             && reqModel.EmployeeCodes.Contains(ep.EmployeeCode))
+                .ToListAsync();
+
+            foreach (var entry in entries)
+            {
+                entry.DeleteFlag = true;
             }
 
             _appDbContext.TblEmployeeProjects.UpdateRange(entries);
