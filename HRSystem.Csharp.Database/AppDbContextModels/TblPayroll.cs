@@ -43,7 +43,7 @@ public partial class TblPayroll
 
     public DateTime? ModifiedAt { get; set; }
 
-    public bool? DeleteFlag { get; set; }
+    public bool DeleteFlag { get; set; }
 
     public string PayrollSummaryCode { get; set; } = null!;
 

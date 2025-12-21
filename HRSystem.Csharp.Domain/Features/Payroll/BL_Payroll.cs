@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.Payroll;
+﻿using System.Text.RegularExpressions;
+using HRSystem.Csharp.Domain.Models.Payroll;
 
 namespace HRSystem.Csharp.Domain.Features.Payroll;
 
@@ -19,6 +20,28 @@ public class BL_Payroll
     {
         try
         {
+            #region Validate PayrollMonth Format
+
+            var validation = ValidatePayrollMonth(reqModel.PayrollMonth);
+            if (!validation.IsSuccess)
+            {
+                return validation;
+            }
+
+            #endregion
+
+            #region Check Payroll has already processed for the given month
+
+            var alreadyProcessed = await _daPayroll.ExistsForMonthAsync(reqModel.PayrollMonth);
+
+            if (alreadyProcessed)
+            {
+                return Result<bool>.ValidationError(
+                    $"Payroll has already been processed for {reqModel.PayrollMonth}.");
+            }
+
+            #endregion
+
             var result = await _daPayroll.ProcessPayroll(reqModel);
             return result;
         }
@@ -28,6 +51,22 @@ public class BL_Payroll
             return Result<bool>.SystemError("Error occured while processing payroll!");
         }
     }
+
+    private Result<bool> ValidatePayrollMonth(string payrollMonth)
+    {
+        if (string.IsNullOrWhiteSpace(payrollMonth))
+            return Result<bool>.ValidationError("PayrollMonth is required.");
+
+        // Regex: 3-letter month + space + 4-digit year
+        var regex = new Regex(@"^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}$",
+            RegexOptions.IgnoreCase);
+
+        if (!regex.IsMatch(payrollMonth))
+            return Result<bool>.ValidationError("PayrollMonth must be in the format 'MMM yyyy' (e.g., Nov 2025).");
+
+        return Result<bool>.Success();
+    }
+
 
     public async Task<Result<PayrollListResponseModel>> PayrollList(PayrollListRequestModel reqModel)
     {

@@ -19,6 +19,12 @@ public class DA_Payroll : AuthorizationService
         _logger = logger;
     }
 
+    public async Task<bool> ExistsForMonthAsync(string payrollMonth)
+    {
+        return await _appDbContext.TblPayrolls
+            .AnyAsync(p => !p.DeleteFlag && p.PayrollMonth == payrollMonth);
+    }
+    
     public async Task<Result<bool>> ProcessPayroll(PayrollProcessRequestModel reqModel)
     {
         try
