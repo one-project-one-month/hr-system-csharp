@@ -127,10 +127,13 @@ public class BL_Project
                 .ToList() ?? new List<string>();
 
             if (!normalized.Any())
+            {
                 return Result<AddEmployeeToProjectResponseModel>.ValidationError(
                     "At least one employee code is required.",
                     new AddEmployeeToProjectResponseModel { EmployeeCodes =  [] });
 
+            }
+            
             // check duplicate code in request data
             var duplicatesInRequest = normalized
                 .GroupBy(c => c, StringComparer.OrdinalIgnoreCase)

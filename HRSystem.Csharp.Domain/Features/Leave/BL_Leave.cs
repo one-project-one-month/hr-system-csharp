@@ -80,7 +80,7 @@ public class BL_Leave : AuthorizationService
 
             #endregion
 
-            var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
+            var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.LV.ToString());
             var isPaidLeave = reqModel.LeaveType != EnumLeaveType.LeaveWithoutPay;
             var requestedDays = (reqModel.ToDate.DayNumber - reqModel.FromDate.DayNumber) + 1;
 
