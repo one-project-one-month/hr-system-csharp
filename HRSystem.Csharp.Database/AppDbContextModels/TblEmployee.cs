@@ -41,5 +41,5 @@ public partial class TblEmployee
 
     public bool DeleteFlag { get; set; }
 
-    public string Gender { get; set; } = null!;
+    public string? Gender { get; set; }
 }

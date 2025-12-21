@@ -88,7 +88,7 @@ public class DA_EmployeeAttendance : AuthorizationService
 
         return new EmployeeAttendanceResponseModel
         {
-            AttendanceCode = attendance.AttendanceCode,
+            AttendanceCode = attendance?.AttendanceCode ?? "",
             AttendanceDate = todayLocal,
             IsCheckIn = attendance?.CheckInTime.HasValue ?? false,
             IsCheckOut = attendance?.CheckOutTime.HasValue ?? false,
