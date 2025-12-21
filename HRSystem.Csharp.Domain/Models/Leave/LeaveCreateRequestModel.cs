@@ -28,7 +28,7 @@ public enum EnumLeaveStatus
 {
     Pending,
     Approved,
-    Reject
+    Rejected
 }
 
 public class AvailableLeaveRequestModel
@@ -46,6 +46,12 @@ public class AvailableLeaveResponseModel
     public EnumLeaveType LeaveType { get; set; }
 }
 
-public class LeaveCreateResponseModel
+public class LeaveApproveRequestModel
 {
+    public string LeaveCode { get; set; }
+}
+
+public class LeaveRejectRequestModel
+{
+    public string LeaveCode { get; set; }
 }

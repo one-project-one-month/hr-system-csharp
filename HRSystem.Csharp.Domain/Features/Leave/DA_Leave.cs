@@ -39,4 +39,55 @@ public class DA_Leave : AuthorizationService
         var daysTaken = leavesTaken.Sum(l => (l.ToDate.DayNumber - l.FromDate.DayNumber) + 1);
         return daysTaken;
     }
+
+    public async Task<Result<bool>> ValidateLeaveOverlapAsync(
+        string employeeCode,
+        DateOnly fromDate,
+        DateOnly toDate)
+    {
+        var existingLeaves = await _appDbContext.TblLeaves
+            .AsNoTracking()
+            .Where(l => !l.DeleteFlag
+                        && l.EmployeeCode == employeeCode
+                        && l.Status != EnumLeaveStatus.Rejected.ToString())
+            .ToListAsync();
+
+        var overlappingDays = new List<DateOnly>();
+
+        foreach (var leave in existingLeaves)
+        {
+            if (fromDate <= leave.ToDate && toDate >= leave.FromDate)
+            {
+                var overlapStart = fromDate > leave.FromDate ? fromDate : leave.FromDate;
+                var overlapEnd = toDate < leave.ToDate ? toDate : leave.ToDate;
+
+                for (var d = overlapStart; d <= overlapEnd; d = d.AddDays(1))
+                {
+                    overlappingDays.Add(d);
+                }
+            }
+        }
+
+        if (overlappingDays.Any())
+        {
+            var daysText = string.Join(", ", overlappingDays.Select(d => d.ToString("dd-MM-yyyy")));
+            return Result<bool>.ValidationError($"Leave has already taken for the chosen dates: {daysText}");
+        }
+
+        return Result<bool>.Success();
+    }
+
+    public async Task<TblLeave?> GetLeaveByCodeAsync(string leaveCode)
+    {
+        var leave = await _appDbContext.TblLeaves
+            .FirstOrDefaultAsync(l => !l.DeleteFlag && l.LeaveCode == leaveCode);
+        return leave;
+    }
+
+    public async Task<bool> UpdateLeaveAsync(TblLeave leave)
+    {
+        _appDbContext.TblLeaves.Update(leave);
+        var response = await _appDbContext.SaveChangesAsync() > 0;
+        return response;
+    }
 }

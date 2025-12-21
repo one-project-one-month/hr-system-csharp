@@ -72,6 +72,14 @@ public class BL_Leave : AuthorizationService
 
             #endregion
 
+            #region Check Leave already taken
+
+            var taken = await _daLeave.ValidateLeaveOverlapAsync(UserCode, reqModel.FromDate, reqModel.ToDate);
+            if (!taken.IsSuccess)
+                return taken;
+
+            #endregion
+
             var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.EMP.ToString());
             var isPaidLeave = reqModel.LeaveType != EnumLeaveType.LeaveWithoutPay;
             var requestedDays = (reqModel.ToDate.DayNumber - reqModel.FromDate.DayNumber) + 1;
@@ -343,16 +351,77 @@ public class BL_Leave : AuthorizationService
         };
     }
 
-    /*public async Task<Result<bool>> ApproveLeave()
+    public async Task<Result<bool>> ApproveLeaveAsync(LeaveApproveRequestModel reqModel)
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(reqModel.LeaveCode))
+            {
+                return Result<bool>.ValidationError("Leave not found.");
+            }
 
+            var leave = await _daLeave.GetLeaveByCodeAsync(reqModel.LeaveCode);
+
+            if (leave == null)
+                return Result<bool>.ValidationError("Leave not found.");
+
+            if (leave.Status == EnumLeaveStatus.Approved.ToString())
+                return Result<bool>.ValidationError("Leave is already approved.");
+
+            if (leave.Status == EnumLeaveStatus.Rejected.ToString())
+                return Result<bool>.ValidationError("Leave has already been rejected.");
+
+            leave.Status = EnumLeaveStatus.Approved.ToString();
+            leave.ModifiedAt = DateTime.UtcNow;
+            leave.ModifiedBy = UserCode;
+
+            var saved = await _daLeave.UpdateLeaveAsync(leave);
+
+            return saved
+                ? Result<bool>.Success("Leave approved successfully.")
+                : Result<bool>.Error("Failed to approve leave.");
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e);
-            throw;
+            _logger.LogError(ex, "Error approving leave.");
+            return Result<bool>.SystemError("An error occurred while approving leave.");
         }
-    }*/
+    }
+
+    public async Task<Result<bool>> RejectLeaveAsync(LeaveRejectRequestModel reqModel)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(reqModel.LeaveCode))
+            {
+                return Result<bool>.ValidationError("Leave not found.");
+            }
+
+            var leave = await _daLeave.GetLeaveByCodeAsync(reqModel.LeaveCode);
+
+            if (leave == null)
+                return Result<bool>.ValidationError("Leave not found.");
+
+            if (leave.Status == EnumLeaveStatus.Approved.ToString())
+                return Result<bool>.ValidationError("Leave has already been approved.");
+
+            if (leave.Status == EnumLeaveStatus.Rejected.ToString())
+                return Result<bool>.ValidationError("Leave is already rejected.");
+
+            leave.Status = EnumLeaveStatus.Rejected.ToString();
+            leave.ModifiedAt = DateTime.UtcNow;
+            leave.ModifiedBy = UserCode;
+
+            var saved = await _daLeave.UpdateLeaveAsync(leave);
+
+            return saved
+                ? Result<bool>.Success("Leave rejected successfully.")
+                : Result<bool>.Error("Failed to reject leave.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error rejecting leave.");
+            return Result<bool>.SystemError("An error occurred while rejecting leave.");
+        }
+    }
 }

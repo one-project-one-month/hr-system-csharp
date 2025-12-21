@@ -23,9 +23,9 @@ public partial class TblLeave
 
     public string Status { get; set; } = null!;
 
-    public string? ApprovedBy { get; set; }
+    public string? ModifiedBy { get; set; }
 
-    public DateTime? ApprovedAt { get; set; }
+    public DateTime? ModifiedAt { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

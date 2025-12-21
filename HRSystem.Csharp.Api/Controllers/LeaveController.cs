@@ -39,6 +39,30 @@ public class LeaveController : ControllerBase
 
         return BadRequest(result);
     }
-    
-    
+
+    [HttpPost("approve-leave")]
+    public async Task<IActionResult> ApproveLeave(LeaveApproveRequestModel reqModel)
+    {
+        var result = await _blLeave.ApproveLeaveAsync(reqModel);
+
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    [HttpPost("reject-leave")]
+    public async Task<IActionResult> RejectLeave(LeaveRejectRequestModel reqModel)
+    {
+        var result = await _blLeave.RejectLeaveAsync(reqModel);
+
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
 }
