@@ -1,5 +1,6 @@
 ﻿using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models.Leave;
+using Sprache;
 
 namespace HRSystem.Csharp.Domain.Features.Leave;
 
@@ -341,4 +342,17 @@ public class BL_Leave : AuthorizationService
             _ => throw new ArgumentException("Invalid paid leave type")
         };
     }
+
+    /*public async Task<Result<bool>> ApproveLeave()
+    {
+        try
+        {
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }*/
 }
