@@ -1,10 +1,12 @@
 using HRSystem.Csharp.Domain.Features.Leave;
 using HRSystem.Csharp.Domain.Models.Leave;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class LeaveController : ControllerBase
 {
     private readonly BL_Leave _blLeave;

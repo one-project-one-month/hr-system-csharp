@@ -75,7 +75,7 @@ public class BL_Leave : AuthorizationService
             #region Check Leave already taken
 
             var taken = await _daLeave.ValidateLeaveOverlapAsync(UserCode, reqModel.FromDate, reqModel.ToDate);
-            if (!taken.IsSuccess)
+            if (taken.IsError)
                 return taken;
 
             #endregion
