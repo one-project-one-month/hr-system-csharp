@@ -36,12 +36,17 @@ public class DA_Leave : AuthorizationService
 
         if(!string.IsNullOrEmpty(leave.EmployeeCode))
         {
-             query = _appDbContext.TblLeaves.Where(l => l.EmployeeCode == leave.EmployeeCode).AsNoTracking();
+             query = _appDbContext.TblLeaves.Where(l => l.EmployeeCode.ToLower() == leave.EmployeeCode.ToLower()).AsNoTracking();
         }
 
-        if(!string.IsNullOrEmpty(leave.LeaveType))
+        if (!string.IsNullOrEmpty(leave.Status))
         {
-             query = _appDbContext.TblLeaves.Where(l => l.LeaveType == leave.LeaveType).AsNoTracking();
+            query = _appDbContext.TblLeaves.Where(l => l.Status.ToLower() == leave.Status.ToLower()).AsNoTracking();
+        }
+
+        if (!string.IsNullOrEmpty(leave.LeaveType))
+        {
+             query = _appDbContext.TblLeaves.Where(l => l.LeaveType.ToLower() == leave.LeaveType.ToLower()).AsNoTracking();
         }
         var pagedResult = await query.GetPagedResultAsync(leave.PageNo, leave.PageSize);
 
