@@ -1,6 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models.Leave;
-
 namespace HRSystem.Csharp.Domain.Features.Leave;
 
 public class DA_Leave : AuthorizationService
@@ -29,6 +28,48 @@ public class DA_Leave : AuthorizationService
             ? Result<bool>.Success("Leave requested successfully!")
             : Result<bool>.Error("Failed to request leave.");
     }
+
+    public async Task<Result<LeaveListResponseModel>> GetAllRequestLeaves(LeaveListRequestModel leave)
+    {
+        
+        var query = _appDbContext.TblLeaves.Where(l => l.DeleteFlag == false && l.Status == "Pending").AsNoTracking();
+
+        if(!string.IsNullOrEmpty(leave.EmployeeCode))
+        {
+             query = _appDbContext.TblLeaves.Where(l => l.EmployeeCode == leave.EmployeeCode).AsNoTracking();
+        }
+
+        if(!string.IsNullOrEmpty(leave.LeaveType))
+        {
+             query = _appDbContext.TblLeaves.Where(l => l.LeaveType == leave.LeaveType).AsNoTracking();
+        }
+        var pagedResult = await query.GetPagedResultAsync(leave.PageNo, leave.PageSize);
+
+        var result = new LeaveListResponseModel
+        {
+            Items = pagedResult.Items?.Select (l =>
+                new LeaveResponseModel
+                {
+                    LeaveCode = l.LeaveCode,
+                    LeaveId = l.LeaveId,
+                    LeaveType = l.LeaveType,
+                    EmployeeCode = l.EmployeeCode,
+                    FromDate = l.FromDate,
+                    ToDate = l.ToDate,
+                    FullOrHalf = l.FullOrHalf,
+                    Reason = l.Reason,
+                    IsPaid = l.IsPaid,
+                    TotalHours = l.TotalHours,
+                    Status = l.Status,
+                }
+                ).ToList(),
+            TotalCount = pagedResult.TotalCount,
+            PageNo = leave.PageNo,
+            PageSize = leave.PageSize
+        };
+        return Result<LeaveListResponseModel>.Success(result);
+
+    } 
 
     public async Task<int> LeavesTaken(EnumLeaveType leaveType)
     {

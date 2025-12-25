@@ -67,4 +67,11 @@ public class LeaveController : ControllerBase
 
         return BadRequest(result);
     }
+
+    [HttpGet("requested-leaves")]
+    public async Task<IActionResult> GetAllRequestedLeaves([FromQuery]LeaveListRequestModel requestModel) {
+        var result = await _blLeave.GetAllRequestedLeaves(requestModel);
+        if(result.IsSuccess) { return Ok(result); }
+        return BadRequest(result);
+    }
 }

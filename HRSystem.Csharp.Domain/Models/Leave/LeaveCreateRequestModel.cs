@@ -1,4 +1,6 @@
-﻿namespace HRSystem.Csharp.Domain.Models.Leave;
+﻿using HRSystem.Csharp.Domain.Models.Common;
+
+namespace HRSystem.Csharp.Domain.Models.Leave;
 
 public class LeaveCreateRequestModel
 {
@@ -54,4 +56,10 @@ public class LeaveApproveRequestModel
 public class LeaveRejectRequestModel
 {
     public string LeaveCode { get; set; }
+}
+
+public class LeaveListRequestModel : PaginationRequestModel
+{
+    public string? EmployeeCode { get; set; }
+    public string? LeaveType { get; set; }
 }
