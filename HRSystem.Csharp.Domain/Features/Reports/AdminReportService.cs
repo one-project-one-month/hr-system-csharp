@@ -98,31 +98,56 @@ public class AdminReportService
     private async Task<ReportResponseModel> HandleProjectListing(IQueryable<TblProject> query, ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
+        List<ReportProjectModel> data;
 
-        var paginatedQuery = query
-            .OrderByDescending(p => p.CreatedAt)
-            .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
-            .Take(requestModel.PageSize);
-
-        var data = await paginatedQuery
-            .Select(p => new ReportProjectModel
-            {
-                ProjectCode = p.ProjectCode,
-                ProjectName = p.ProjectName,
-                StartDate = p.StartDate,
-                EndDate = p.EndDate,
-                ProjectStatus = p.ProjectStatus
-            })
-            .ToListAsync();
-
-        return new PaginatedResponse<ReportProjectModel>
+        if (requestModel.PageSize == 0)
         {
-            Data = data,
-            TotalRecords = totalRecords,
-            PageNumber = requestModel.PageNo,
-            PageSize = requestModel.PageSize,
-            TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
-        };
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new ReportProjectModel
+                {
+                    ProjectCode = p.ProjectCode,
+                    ProjectName = p.ProjectName,
+                    StartDate = p.StartDate,
+                    EndDate = p.EndDate,
+                    ProjectStatus = p.ProjectStatus
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportProjectModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = 0,
+                PageSize = 0,
+                TotalPages = 1
+            };
+        }
+        else
+        {
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
+                .Take(requestModel.PageSize)
+                .Select(p => new ReportProjectModel
+                {
+                    ProjectCode = p.ProjectCode,
+                    ProjectName = p.ProjectName,
+                    StartDate = p.StartDate,
+                    EndDate = p.EndDate,
+                    ProjectStatus = p.ProjectStatus
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportProjectModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = requestModel.PageNo,
+                PageSize = requestModel.PageSize,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
+            };
+        }
     }
 
     private async Task<ReportResponseModel> HandleProjectExport(IQueryable<TblProject> query, ReportRequestModel requestModel)
@@ -179,30 +204,54 @@ public class AdminReportService
     private async Task<ReportResponseModel> HandleLocationListing(IQueryable<TblLocation> query, ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
+        List<ReportLocationModel> data;
 
-        var paginatedQuery = query
-            .OrderByDescending(p => p.CreatedAt)
-            .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
-            .Take(requestModel.PageSize);
-
-        var data = await paginatedQuery
-            .Select(p => new ReportLocationModel
-            {
-                LocationName = p.Name,
-                Latitude = p.Latitude,
-                Longitude = p.Longitude,
-                Radius = p.Radius
-            })
-            .ToListAsync();
-
-        return new PaginatedResponse<ReportLocationModel>
+        if (requestModel.PageSize == 0)
         {
-            Data = data,
-            TotalRecords = totalRecords,
-            PageNumber = requestModel.PageNo,
-            PageSize = requestModel.PageSize,
-            TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
-        };
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new ReportLocationModel
+                {
+                    LocationName = p.Name,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
+                    Radius = p.Radius
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportLocationModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = 0,
+                PageSize = 0,
+                TotalPages = 1
+            };
+        }
+        else
+        {
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
+                .Take(requestModel.PageSize)
+                .Select(p => new ReportLocationModel
+                {
+                    LocationName = p.Name,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
+                    Radius = p.Radius
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportLocationModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = requestModel.PageNo,
+                PageSize = requestModel.PageSize,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
+            };
+        }
     }
 
     private async Task<ReportResponseModel> HandleLocationExport(IQueryable<TblLocation> query, ReportRequestModel requestModel)
@@ -281,32 +330,58 @@ public class AdminReportService
     private async Task<ReportResponseModel> HandleAttendanceListing(IQueryable<TblAttendance> query, ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
+        List<ReportAttendanceModel> data;
 
-        var paginatedQuery = query
-            .OrderByDescending(p => p.CreatedAt)
-            .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
-            .Take(requestModel.PageSize);
-
-        var data = await paginatedQuery
-            .Select(p => new ReportAttendanceModel
-            {
-                EmployeeCode = p.EmployeeCode!,
-                AttendanceDate = p.AttendanceDate ?? DateTime.MinValue,
-                CheckInTime = p.CheckInTime ?? DateTime.MinValue,
-                CheckOutTime = p.CheckOutTime ?? DateTime.MinValue,
-                WorkingHour = p.WorkingHour.ToString()!,
-                Remark = p.Remark!
-            })
-            .ToListAsync();
-
-        return new PaginatedResponse<ReportAttendanceModel>
+        if (requestModel.PageSize == 0)
         {
-            Data = data,
-            TotalRecords = totalRecords,
-            PageNumber = requestModel.PageNo,
-            PageSize = requestModel.PageSize,
-            TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
-        };
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new ReportAttendanceModel
+                {
+                    EmployeeCode = p.EmployeeCode!,
+                    AttendanceDate = p.AttendanceDate ?? DateTime.MinValue,
+                    CheckInTime = p.CheckInTime ?? DateTime.MinValue,
+                    CheckOutTime = p.CheckOutTime ?? DateTime.MinValue,
+                    WorkingHour = p.WorkingHour.ToString()!,
+                    Remark = p.Remark!
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportAttendanceModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = 0,
+                PageSize = 0,
+                TotalPages = 1
+            };
+        }
+        else
+        {
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
+                .Take(requestModel.PageSize)
+                .Select(p => new ReportAttendanceModel
+                {
+                    EmployeeCode = p.EmployeeCode!,
+                    AttendanceDate = p.AttendanceDate ?? DateTime.MinValue,
+                    CheckInTime = p.CheckInTime ?? DateTime.MinValue,
+                    CheckOutTime = p.CheckOutTime ?? DateTime.MinValue,
+                    WorkingHour = p.WorkingHour.ToString()!,
+                    Remark = p.Remark!
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportAttendanceModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = requestModel.PageNo,
+                PageSize = requestModel.PageSize,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
+            };
+        }
     }
 
     private async Task<ReportResponseModel> HandleAttendanceExport(IQueryable<TblAttendance> query, ReportRequestModel requestModel)
@@ -343,7 +418,7 @@ public class AdminReportService
             .AsNoTracking()
             .Where(p => p.CreatedAt >= requestModel.FromDate && p.CreatedAt <= requestModel.ToDate);
 
-        if (requestModel.IsExport)
+        if (requestModel.IsExport == true)
         {
             return await HandlePayrollExport(query, requestModel);
         }
@@ -356,36 +431,66 @@ public class AdminReportService
     private async Task<ReportResponseModel> HandlePayrollListing(IQueryable<TblPayroll> query, ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
+        List<ReportPayrollModel> data;
 
-        var paginatedQuery = query
-            .OrderByDescending(p => p.CreatedAt)
-            .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
-            .Take(requestModel.PageSize);
-
-        var data = await paginatedQuery
-            .Select(p => new ReportPayrollModel
-            {
-                PayrollCode = p.PayrollCode,
-                EmployeeName = p.EmployeeCode,
-                PayrollMonth = p.PayrollMonth,
-                TotalWorkingHour = p.TotalWorkingHour.ToString()!,
-                LeaveHour = p.LeaveHour.ToString()!,
-                ActualWorkingHour = p.ActualWorkingHour.ToString()!,
-                BaseSalary = p.BaseSalary.ToString()!,
-                GrossPay = p.GrossPay.ToString()!,
-                Deduction = p.Deduction.ToString()!,
-                NetPay = p.NetPay.ToString()!
-            })
-            .ToListAsync();
-
-        return new PaginatedResponse<ReportPayrollModel>
+        if (requestModel.PageSize == 0)
         {
-            Data = data,
-            TotalRecords = totalRecords,
-            PageNumber = requestModel.PageNo,
-            PageSize = requestModel.PageSize,
-            TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
-        };
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new ReportPayrollModel
+                {
+                    PayrollCode = p.PayrollCode,
+                    EmployeeName = p.EmployeeCode,
+                    PayrollMonth = p.PayrollMonth,
+                    TotalWorkingHour = p.TotalWorkingHour.ToString()!,
+                    LeaveHour = p.LeaveHour.ToString()!,
+                    ActualWorkingHour = p.ActualWorkingHour.ToString()!,
+                    BaseSalary = p.BaseSalary.ToString()!,
+                    GrossPay = p.GrossPay.ToString()!,
+                    Deduction = p.Deduction.ToString()!,
+                    NetPay = p.NetPay.ToString()!
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportPayrollModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = 0,
+                PageSize = 0,
+                TotalPages = 1
+            };
+        }
+        else
+        {
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
+                .Take(requestModel.PageSize)
+                .Select(p => new ReportPayrollModel
+                {
+                    PayrollCode = p.PayrollCode,
+                    EmployeeName = p.EmployeeCode,
+                    PayrollMonth = p.PayrollMonth,
+                    TotalWorkingHour = p.TotalWorkingHour.ToString()!,
+                    LeaveHour = p.LeaveHour.ToString()!,
+                    ActualWorkingHour = p.ActualWorkingHour.ToString()!,
+                    BaseSalary = p.BaseSalary.ToString()!,
+                    GrossPay = p.GrossPay.ToString()!,
+                    Deduction = p.Deduction.ToString()!,
+                    NetPay = p.NetPay.ToString()!
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportPayrollModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = requestModel.PageNo,
+                PageSize = requestModel.PageSize,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
+            };
+        }
     }
 
     private async Task<ReportResponseModel> HandlePayrollExport(IQueryable<TblPayroll> query, ReportRequestModel requestModel)
@@ -447,35 +552,64 @@ public class AdminReportService
     private async Task<ReportResponseModel> HandleBacklogListing(IQueryable<TblTask> query, ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
+        List<ReportBacklogModel> data;
 
-        var paginatedQuery = query
-            .OrderByDescending(p => p.CreatedAt)
-            .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
-            .Take(requestModel.PageSize);
-
-        var data = await paginatedQuery
-            .Select(p => new ReportBacklogModel
-            {
-                TaskCode = p.TaskCode,
-                ProjectName = p.ProjectCode!,
-                AssignedTo = p.EmployeeCode!,
-                StartDate = ((DateTime)p.StartDate!).ToString("yyyy-MM-dd"),
-                EndDate = ((DateTime)p.EndDate!).ToString("yyyy-MM-dd"),
-                Status = p.TaskStatus!,
-                WorkingHour = p.WorkingHour.ToString()!,
-                CreatedAt = ((DateTime)p.CreatedAt!).ToString("yyyy-MM-dd"),
-                CreatedBy = p.CreatedBy!
-            })
-            .ToListAsync();
-
-        return new PaginatedResponse<ReportBacklogModel>
+        if (requestModel.PageSize == 0)
         {
-            Data = data,
-            TotalRecords = totalRecords,
-            PageNumber = requestModel.PageNo,
-            PageSize = requestModel.PageSize,
-            TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
-        };
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new ReportBacklogModel
+                {
+                    TaskCode = p.TaskCode,
+                    ProjectName = p.ProjectCode!,
+                    AssignedTo = p.EmployeeCode!,
+                    StartDate = ((DateTime)p.StartDate!).ToString("yyyy-MM-dd"),
+                    EndDate = ((DateTime)p.EndDate!).ToString("yyyy-MM-dd"),
+                    Status = p.TaskStatus!,
+                    WorkingHour = p.WorkingHour.ToString()!,
+                    CreatedAt = ((DateTime)p.CreatedAt!).ToString("yyyy-MM-dd"),
+                    CreatedBy = p.CreatedBy!
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportBacklogModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = 0,
+                PageSize = 0,
+                TotalPages = 1
+            };
+        }
+        else
+        {
+            data = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((requestModel.PageNo - 1) * requestModel.PageSize)
+                .Take(requestModel.PageSize)
+                .Select(p => new ReportBacklogModel
+                {
+                    TaskCode = p.TaskCode,
+                    ProjectName = p.ProjectCode!,
+                    AssignedTo = p.EmployeeCode!,
+                    StartDate = ((DateTime)p.StartDate!).ToString("yyyy-MM-dd"),
+                    EndDate = ((DateTime)p.EndDate!).ToString("yyyy-MM-dd"),
+                    Status = p.TaskStatus!,
+                    WorkingHour = p.WorkingHour.ToString()!,
+                    CreatedAt = ((DateTime)p.CreatedAt!).ToString("yyyy-MM-dd"),
+                    CreatedBy = p.CreatedBy!
+                })
+                .ToListAsync();
+
+            return new PaginatedResponse<ReportBacklogModel>
+            {
+                Data = data,
+                TotalRecords = totalRecords,
+                PageNumber = requestModel.PageNo,
+                PageSize = requestModel.PageSize,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)requestModel.PageSize)
+            };
+        }
     }
 
     private async Task<ReportResponseModel> HandleBacklogExport(IQueryable<TblTask> query, ReportRequestModel requestModel)
