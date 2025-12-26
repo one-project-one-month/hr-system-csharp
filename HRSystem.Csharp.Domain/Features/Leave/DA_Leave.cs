@@ -32,7 +32,7 @@ public class DA_Leave : AuthorizationService
     public async Task<Result<LeaveListResponseModel>> GetAllRequestLeaves(LeaveListRequestModel leave)
     {
         
-        var query = _appDbContext.TblLeaves.Where(l => l.DeleteFlag == false && l.Status == "Pending").AsNoTracking();
+        var query = _appDbContext.TblLeaves.Where(l => l.DeleteFlag == false).AsNoTracking();
 
         if(!string.IsNullOrEmpty(leave.EmployeeCode))
         {
