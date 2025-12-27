@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Features.Rule;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models.Leave;
 namespace HRSystem.Csharp.Domain.Features.Leave;
 
@@ -48,27 +49,42 @@ public class DA_Leave : AuthorizationService
         {
              query = _appDbContext.TblLeaves.Where(l => l.LeaveType.ToLower() == leave.LeaveType.ToLower()).AsNoTracking();
         }
-        var pagedResult = await query.GetPagedResultAsync(leave.PageNo, leave.PageSize);
+
+        leave.PageNo = leave.PageNo < 1 ? 1 : leave.PageNo;
+        leave.PageSize = leave.PageSize < 1 ? 10: leave.PageSize;
+
+        var pagedResult = await (from l in _appDbContext.TblLeaves
+                                 join e in _appDbContext.TblEmployees
+                                        on l.EmployeeCode equals e.EmployeeCode
+                                 select new
+                                 {
+                                     Leave = l,
+                                     EmployeeName = e.Name
+                                 })
+                                 .Skip((leave.PageNo - 1) * leave.PageSize)
+                                 .Take(leave.PageSize)
+                                 .ToListAsync();
 
         var result = new LeaveListResponseModel
         {
-            Items = pagedResult.Items?.Select (l =>
+            Items = pagedResult.Select(l =>
                 new LeaveResponseModel
                 {
-                    LeaveCode = l.LeaveCode,
-                    LeaveId = l.LeaveId,
-                    LeaveType = l.LeaveType,
-                    EmployeeCode = l.EmployeeCode,
-                    FromDate = l.FromDate,
-                    ToDate = l.ToDate,
-                    FullOrHalf = l.FullOrHalf,
-                    Reason = l.Reason,
-                    IsPaid = l.IsPaid,
-                    TotalHours = l.TotalHours,
-                    Status = l.Status,
+                    LeaveCode = l.Leave.LeaveCode,
+                    LeaveId = l.Leave.LeaveId,
+                    LeaveType = l.Leave.LeaveType,
+                    EmployeeCode = l.Leave.EmployeeCode,
+                    FromDate = l.Leave.FromDate,
+                    ToDate = l.Leave.ToDate,
+                    FullOrHalf = l.Leave.FullOrHalf,
+                    Reason = l.Leave.Reason,
+                    IsPaid = l.Leave.IsPaid,
+                    TotalHours = l.Leave.TotalHours,
+                    Status = l.Leave.Status,
+                    EmployeeName = l.EmployeeName
                 }
                 ).ToList(),
-            TotalCount = pagedResult.TotalCount,
+            TotalCount = pagedResult.Count(),
             PageNo = leave.PageNo,
             PageSize = leave.PageSize
         };
