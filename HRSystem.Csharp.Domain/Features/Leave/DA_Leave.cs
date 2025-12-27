@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
 using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models.Leave;
+using HRSystem.Csharp.Shared;
 namespace HRSystem.Csharp.Domain.Features.Leave;
 
 public class DA_Leave : AuthorizationService
@@ -32,65 +33,73 @@ public class DA_Leave : AuthorizationService
 
     public async Task<Result<LeaveListResponseModel>> GetAllRequestLeaves(LeaveListRequestModel leave)
     {
-        
-        var query = _appDbContext.TblLeaves.Where(l => l.DeleteFlag == false).AsNoTracking();
+        var query =
+            from l in _appDbContext.TblLeaves.AsNoTracking()
+            join e in _appDbContext.TblEmployees.AsNoTracking()
+                on l.EmployeeCode equals e.EmployeeCode
+            where !l.DeleteFlag
+            select new
+            {
+                Leave = l,
+                EmployeeName = e.Name
+            };
 
-        if(!string.IsNullOrEmpty(leave.EmployeeCode))
+        // Global search
+        if (!string.IsNullOrEmpty(leave.Query))
         {
-             query = _appDbContext.TblLeaves.Where(l => l.EmployeeCode.ToLower() == leave.EmployeeCode.ToLower()).AsNoTracking();
+            var search = leave.Query.Trim();
+
+            query = query.Where(x =>
+                EF.Functions.Like(x.EmployeeName, $"%{search}%") ||
+                EF.Functions.Like(x.Leave.EmployeeCode, $"%{search}%") ||
+                EF.Functions.Like(x.Leave.Status, $"%{search}%")
+            );
         }
 
-        if (!string.IsNullOrEmpty(leave.Status))
-        {
-            query = _appDbContext.TblLeaves.Where(l => l.Status.ToLower() == leave.Status.ToLower()).AsNoTracking();
-        }
-
+        // Leave type filter
         if (!string.IsNullOrEmpty(leave.LeaveType))
         {
-             query = _appDbContext.TblLeaves.Where(l => l.LeaveType.ToLower() == leave.LeaveType.ToLower()).AsNoTracking();
+            query = query.Where(x =>
+                x.Leave.LeaveType == leave.LeaveType);
         }
 
+        // Paging defaults
         leave.PageNo = leave.PageNo < 1 ? 1 : leave.PageNo;
-        leave.PageSize = leave.PageSize < 1 ? 10: leave.PageSize;
+        leave.PageSize = leave.PageSize < 1 ? 10 : leave.PageSize;
 
-        var pagedResult = await (from l in _appDbContext.TblLeaves
-                                 join e in _appDbContext.TblEmployees
-                                        on l.EmployeeCode equals e.EmployeeCode
-                                 select new
-                                 {
-                                     Leave = l,
-                                     EmployeeName = e.Name
-                                 })
-                                 .Skip((leave.PageNo - 1) * leave.PageSize)
-                                 .Take(leave.PageSize)
-                                 .ToListAsync();
+        var totalCount = await query.CountAsync();
+
+        var pagedResult = await query
+            .OrderByDescending(x => x.Leave.FromDate) // optional but recommended
+            .Skip((leave.PageNo - 1) * leave.PageSize)
+            .Take(leave.PageSize)
+            .ToListAsync();
 
         var result = new LeaveListResponseModel
         {
-            Items = pagedResult.Select(l =>
-                new LeaveResponseModel
-                {
-                    LeaveCode = l.Leave.LeaveCode,
-                    LeaveId = l.Leave.LeaveId,
-                    LeaveType = l.Leave.LeaveType,
-                    EmployeeCode = l.Leave.EmployeeCode,
-                    FromDate = l.Leave.FromDate,
-                    ToDate = l.Leave.ToDate,
-                    FullOrHalf = l.Leave.FullOrHalf,
-                    Reason = l.Leave.Reason,
-                    IsPaid = l.Leave.IsPaid,
-                    TotalHours = l.Leave.TotalHours,
-                    Status = l.Leave.Status,
-                    EmployeeName = l.EmployeeName
-                }
-                ).ToList(),
-            TotalCount = pagedResult.Count(),
+            Items = pagedResult.Select(l => new LeaveResponseModel
+            {
+                LeaveCode = l.Leave.LeaveCode,
+                LeaveId = l.Leave.LeaveId,
+                LeaveType = l.Leave.LeaveType,
+                EmployeeCode = l.Leave.EmployeeCode,
+                FromDate = l.Leave.FromDate,
+                ToDate = l.Leave.ToDate,
+                FullOrHalf = l.Leave.FullOrHalf,
+                Reason = l.Leave.Reason,
+                IsPaid = l.Leave.IsPaid,
+                TotalHours = l.Leave.TotalHours,
+                Status = l.Leave.Status,
+                EmployeeName = l.EmployeeName
+            }).ToList(),
+            TotalCount = totalCount,
             PageNo = leave.PageNo,
             PageSize = leave.PageSize
         };
-        return Result<LeaveListResponseModel>.Success(result);
 
-    } 
+        return Result<LeaveListResponseModel>.Success(result);
+    }
+
 
     public async Task<int> LeavesTaken(EnumLeaveType leaveType)
     {
