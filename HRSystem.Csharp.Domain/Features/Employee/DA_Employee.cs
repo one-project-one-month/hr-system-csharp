@@ -41,13 +41,13 @@ public class DA_Employee(
             if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
             {
                 query = query.Where(r => r.Name != null
-                                         && r.Name.Contains(reqModel.EmployeeName, StringComparison.CurrentCultureIgnoreCase));
+                                         && r.Name.ToLower().Contains(reqModel.EmployeeName.ToLower()));
             }
 
             if (!string.IsNullOrWhiteSpace(reqModel.RoleName))
             {
                 query = query.Where(r => r.RoleName != null
-                                         && r.RoleName.Equals(reqModel.RoleName, StringComparison.CurrentCultureIgnoreCase));
+                                         && r.RoleName.ToLower().Equals(reqModel.RoleName.ToLower()));
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);
