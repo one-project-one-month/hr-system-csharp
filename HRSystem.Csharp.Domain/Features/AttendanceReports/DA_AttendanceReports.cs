@@ -75,9 +75,13 @@ public class DA_AttendanceReports
 
         var first = results.FirstOrDefault();
 
+        overviewReport.Date = first?.Date ?? String.Empty;
         overviewReport.Present = first?.Present ?? 0;
         overviewReport.Absent = first?.Absent ?? 0;
         overviewReport.HalfDayLeave = first?.HalfDayLeave ?? 0;
+        overviewReport.EmpCount = first?.EmpCount ?? 0;
+        overviewReport.ProjCount = first?.ProjCount ?? 0;
+        overviewReport.TdyAbsent = first?.TdyAbsent ?? 0;
 
         return overviewReport;
     }
