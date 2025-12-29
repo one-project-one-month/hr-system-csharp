@@ -155,6 +155,175 @@ public class BL_Leave : AuthorizationService
         }
     }
 
+    public async Task<Result<LeaveEditResponseModel>> GetLeaveByCode(LeaveEditRequestModel reqModel)
+    {
+        try
+        {
+            var leave = await _daLeave.GetLeaveByCodeAsync(reqModel.LeaveCode);
+
+            if (leave is null)
+            {
+                return Result<LeaveEditResponseModel>.NotFoundError($"Leave {reqModel.LeaveCode} doesn't exist");
+            }
+
+            var response = new LeaveEditResponseModel
+            {
+                LeaveCode = leave.LeaveCode,
+                Reason = leave.Reason,
+                LeaveType = leave.LeaveType,
+                FromDate = leave.FromDate,
+                ToDate = leave.ToDate,
+                FullOrHalf = leave.FullOrHalf
+            };
+
+            return Result<LeaveEditResponseModel>.Success(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString(), $"Error fetching leave by code {reqModel.LeaveCode}!");
+            return Result<LeaveEditResponseModel>.SystemError(
+                $"An error occured while getting leave by code {reqModel.LeaveCode}!");
+        }
+    }
+
+    public async Task<Result<bool>> UpdateLeaveAsync(string leaveCode, LeaveUpdateRequestModel reqModel)
+    {
+        try
+        {
+            var leave = await _daLeave.GetLeaveByCodeAsync(leaveCode);
+
+            if (leave == null)
+            {
+                return Result<bool>.ValidationError("Leave not found.");
+            }
+
+            if (leave.Status == EnumLeaveStatus.Approved.ToString() ||
+                leave.Status == EnumLeaveStatus.Rejected.ToString())
+            {
+                return Result<bool>.ValidationError("Approved or rejected leave cannot be modified.");
+            }
+
+            #region Validation
+
+            if (!Enum.IsDefined(typeof(EnumLeaveType), reqModel.LeaveType))
+            {
+                return Result<bool>.ValidationError("Invalid Leave Type");
+            }
+
+            if (string.IsNullOrWhiteSpace(reqModel.Reason))
+            {
+                return Result<bool>.ValidationError("Reason is required");
+            }
+
+            if (reqModel.FromDate == default || reqModel.ToDate == default)
+            {
+                return Result<bool>.ValidationError("FromDate and ToDate are required");
+            }
+
+            if (reqModel.FromDate > reqModel.ToDate)
+            {
+                return Result<bool>.ValidationError("FromDate should be earlier than or equal to ToDate");
+            }
+
+            if (!Enum.IsDefined(typeof(EnumFullOrHalfLeave), reqModel.FullOrHalf))
+            {
+                return Result<bool>.ValidationError("Leave can only be Full leave or Half leave");
+            }
+
+            if (reqModel.FromDate < reqModel.ToDate && reqModel.FullOrHalf == EnumFullOrHalfLeave.HalfLeave)
+            {
+                return Result<bool>.ValidationError("Half leave can only be applied for a single day");
+            }
+
+            #endregion
+
+            #region Check Leave already taken
+
+            var taken = await _daLeave
+                .ValidateLeaveOverlapAsync(UserCode, reqModel.FromDate, reqModel.ToDate, leaveCode);
+            if (taken.IsError)
+                return taken;
+
+            #endregion
+
+            #region Calculate Total Leave Hours
+
+            var requestedDays = (reqModel.ToDate.DayNumber - reqModel.FromDate.DayNumber) + 1;
+            var ruleCode = reqModel.FullOrHalf == EnumFullOrHalfLeave.HalfLeave
+                ? RuleCode.HalfWorkingHour
+                : RuleCode.FullWorkingHour;
+
+            var workingHourRule = await _daRule.GetRuleByCode(ruleCode);
+            if (workingHourRule?.Data is null || workingHourRule.IsError)
+            {
+                return Result<bool>
+                    .SystemError("An error occured while requesting leave. Try requesting later!");
+            }
+
+            var totalLeaveHours = reqModel.FullOrHalf == EnumFullOrHalfLeave.HalfLeave
+                ? workingHourRule.Data.Value.ToInt()
+                : requestedDays * workingHourRule.Data.Value.ToInt();
+
+            #endregion
+
+            leave.Reason = reqModel.Reason;
+            leave.LeaveType = reqModel.LeaveType.ToString();
+            leave.FromDate = reqModel.FromDate;
+            leave.ToDate = reqModel.ToDate;
+            leave.FullOrHalf = reqModel.FullOrHalf.ToString();
+            leave.TotalHours = totalLeaveHours;
+            leave.IsPaid = reqModel.LeaveType != EnumLeaveType.LeaveWithoutPay;
+            leave.ModifiedAt = DateTime.UtcNow;
+            leave.ModifiedBy = UserCode;
+
+            var saved = await _daLeave.UpdateLeaveAsync(leave);
+
+            return saved
+                ? Result<bool>.Success("Leave updated successfully.")
+                : Result<bool>.Error("Failed to update leave.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating leave.");
+            return Result<bool>.SystemError("An error occurred while updating leave.");
+        }
+    }
+
+    public async Task<Result<bool>> DeleteLeaveAsync(string leaveCode)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(leaveCode))
+                return Result<bool>.ValidationError("Leave code is required.");
+
+            var leave = await _daLeave.GetLeaveByCodeAsync(leaveCode);
+
+            if (leave == null)
+                return Result<bool>.ValidationError("Leave not found.");
+
+            if (leave.Status == EnumLeaveStatus.Approved.ToString() ||
+                leave.Status == EnumLeaveStatus.Rejected.ToString())
+            {
+                return Result<bool>.ValidationError("Approved or rejected leave cannot be deleted.");
+            }
+
+            leave.DeleteFlag = true;
+            leave.ModifiedAt = DateTime.UtcNow;
+            leave.ModifiedBy = UserCode;
+
+            var saved = await _daLeave.UpdateLeaveAsync(leave);
+
+            return saved
+                ? Result<bool>.Success("Leave deleted successfully.")
+                : Result<bool>.Error("Failed to delete leave.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting leave.");
+            return Result<bool>.SystemError("An error occurred while deleting leave.");
+        }
+    }
+
     public async Task<Result<AvailableLeaveResponseModel>> CheckLeaveTypeAvailable(
         AvailableLeaveRequestModel reqModel)
     {

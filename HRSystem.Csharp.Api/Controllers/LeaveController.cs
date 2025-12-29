@@ -1,5 +1,6 @@
 using HRSystem.Csharp.Domain.Features.Leave;
 using HRSystem.Csharp.Domain.Models.Leave;
+using HRSystem.Csharp.Shared;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
@@ -83,6 +84,65 @@ public class LeaveController : ControllerBase
     public async Task<IActionResult> RejectLeave(LeaveRejectRequestModel reqModel)
     {
         var result = await _blLeave.RejectLeaveAsync(reqModel);
+
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    [HttpGet("edit/{leaveCode}")]
+    public async Task<IActionResult> GetRoleByCode(string leaveCode)
+    {
+        if (string.IsNullOrWhiteSpace(leaveCode))
+        {
+            var response = Result<bool>.ValidationError("Leave code is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blLeave.GetLeaveByCode(new LeaveEditRequestModel()
+        {
+            LeaveCode = leaveCode
+        });
+
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    [HttpPut("update/{leaveCode}")]
+    public async Task<IActionResult> UpdateLeave(string leaveCode, [FromBody] LeaveUpdateRequestModel reqModel)
+    {
+        if (string.IsNullOrWhiteSpace(leaveCode))
+        {
+            var response = Result<bool>.ValidationError("Leave code is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blLeave.UpdateLeaveAsync(leaveCode, reqModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    [HttpDelete("delete/{leaveCode}")]
+    public async Task<IActionResult> DeleteLeave(string leaveCode)
+    {
+        if (string.IsNullOrWhiteSpace(leaveCode))
+        {
+            var response = Result<bool>.ValidationError("Leave code is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blLeave.DeleteLeaveAsync(leaveCode);
 
         if (result.IsSuccess)
         {

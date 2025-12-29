@@ -70,3 +70,27 @@ public class EmployeeLeaveListRequestModel : PaginationRequestModel
     public DateOnly ToDate { get; set; }
     public string? LeaveType { get; set; }
 }
+
+public class LeaveEditRequestModel
+{
+    public string LeaveCode { get; set; }
+}
+
+public class LeaveEditResponseModel
+{
+    public string LeaveCode { get; set; }
+    public string LeaveType { get; set; }
+    public DateOnly FromDate { get; set; }
+    public DateOnly ToDate { get; set; }
+    public string FullOrHalf { get; set; }
+    public string Reason { get; set; } = null!;
+}
+
+public class LeaveUpdateRequestModel
+{
+    public EnumLeaveType LeaveType { get; set; }
+    public DateOnly FromDate { get; set; }
+    public DateOnly ToDate { get; set; }
+    public EnumFullOrHalfLeave FullOrHalf { get; set; }
+    public string Reason { get; set; } = null!;
+}
