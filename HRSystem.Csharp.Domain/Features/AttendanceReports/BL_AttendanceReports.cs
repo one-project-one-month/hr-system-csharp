@@ -22,4 +22,10 @@ public class BL_AttendanceReports
         var result = await _daAttendanceReports.GetStaffAttendanceOverviewReportAsync(Year, empCode);
         return result;
     }
+
+    public async Task<AdminAttendanceOverviewReport> GetAdminAttendanceOverviewReport(String Date, int dataView)
+    {
+        var result = await _daAttendanceReports.GetAdminAttendanceOverviewReportAsync(Date, dataView);
+        return result;
+    }
 }

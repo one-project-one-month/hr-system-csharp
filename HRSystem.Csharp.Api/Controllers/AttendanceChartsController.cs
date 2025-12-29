@@ -45,4 +45,21 @@ public class AttendanceChartsController : Controller
         return Ok(data);
 
     }
+
+    [HttpGet("admin-dashboard/attendance-overview")]
+    public async Task<IActionResult> AdminAttendanceReport(String date, int dataView) // dataView = 1 for weekly, 2 for monthly
+    {
+        if (date == null)
+        {
+            return BadRequest(Result<bool>.BadRequestError("Date parameter is required."));
+        }
+
+        if (dataView < 0 || dataView > 3)
+        {
+            return BadRequest(Result<bool>.BadRequestError("Invalid dataView parameter. It must be between 0 and 3."));
+        }
+
+        var data = await _bL_AttendanceReports.GetAdminAttendanceOverviewReport(date, dataView);
+        return Ok(data);
+    }
 }
