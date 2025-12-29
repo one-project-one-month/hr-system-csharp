@@ -2,6 +2,7 @@
 using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models.Leave;
 using HRSystem.Csharp.Shared;
+
 namespace HRSystem.Csharp.Domain.Features.Leave;
 
 public class DA_Leave : AuthorizationService
@@ -19,6 +20,59 @@ public class DA_Leave : AuthorizationService
         _logger = logger;
         _daSequence = daSequence;
         _daRule = daRule;
+    }
+
+    public async Task<Result<EmployeeLeaveListResponseModel>> GetEmployeeLeaveList(
+        EmployeeLeaveListRequestModel reqModel)
+    {
+        var query = _appDbContext.TblLeaves
+            .AsNoTracking()
+            .Where(l => !l.DeleteFlag && l.EmployeeCode == UserCode);
+
+        if (!string.IsNullOrWhiteSpace(reqModel.LeaveType))
+        {
+            query = query.Where(l => l.LeaveType.ToLower().Contains(reqModel.LeaveType.ToLower()));
+        }
+
+        if (reqModel.FromDate != default && reqModel.ToDate != default)
+        {
+            query = query.Where(l => l.FromDate <= reqModel.ToDate && l.ToDate >= reqModel.FromDate);
+        }
+        else if (reqModel.FromDate != default)
+        {
+            query = query.Where(l => l.ToDate >= reqModel.FromDate);
+        }
+        else if (reqModel.ToDate != default)
+        {
+            query = query.Where(l => l.FromDate <= reqModel.ToDate);
+        }
+
+        query = query.OrderByDescending(l => l.CreatedAt);
+
+        var leaveList = query.Select(l => new EmployeeLeaveResponseModel()
+        {
+            LeaveType = l.LeaveType,
+            LeaveCode = l.LeaveCode,
+            TotalHours = l.TotalHours,
+            Status = l.Status,
+            FullOrHalf = l.FullOrHalf,
+            Reason = l.Reason,
+            IsPaid = l.IsPaid,
+            FromDate = l.FromDate,
+            ToDate = l.ToDate
+        });
+
+        var pagedResult = await leaveList.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+        var result = new EmployeeLeaveListResponseModel()
+        {
+            Items = pagedResult.Items,
+            TotalCount = pagedResult.TotalCount,
+            PageNo = reqModel.PageNo,
+            PageSize = reqModel.PageSize
+        };
+
+        return Result<EmployeeLeaveListResponseModel>.Success(result);
     }
 
     public async Task<Result<bool>> CreateLeave(TblLeave leave)
@@ -99,7 +153,6 @@ public class DA_Leave : AuthorizationService
 
         return Result<LeaveListResponseModel>.Success(result);
     }
-
 
     public async Task<int> LeavesTaken(EnumLeaveType leaveType)
     {

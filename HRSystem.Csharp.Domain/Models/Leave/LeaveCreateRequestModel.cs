@@ -63,3 +63,10 @@ public class LeaveListRequestModel : PaginationRequestModel
     public string? LeaveType { get; set; }
     public string? Query { get; set; }
 }
+
+public class EmployeeLeaveListRequestModel : PaginationRequestModel
+{
+    public DateOnly FromDate { get; set; }
+    public DateOnly ToDate { get; set; }
+    public string? LeaveType { get; set; }
+}

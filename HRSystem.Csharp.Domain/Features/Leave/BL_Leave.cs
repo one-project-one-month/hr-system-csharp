@@ -26,7 +26,27 @@ public class BL_Leave : AuthorizationService
 
     public async Task<Result<LeaveListResponseModel>> GetAllRequestedLeaves(LeaveListRequestModel model)
     {
-        return  await _daLeave.GetAllRequestLeaves(model);
+        return await _daLeave.GetAllRequestLeaves(model);
+    }
+
+    public async Task<Result<EmployeeLeaveListResponseModel>> GetEmployeeLeaveList(
+        EmployeeLeaveListRequestModel reqModel)
+    {
+        try
+        {
+            if (reqModel == null)
+            {
+                _logger.LogWarning("Role list request is null");
+                return Result<EmployeeLeaveListResponseModel>.BadRequestError("Request cannot be null");
+            }
+
+            return await _daLeave.GetEmployeeLeaveList(reqModel);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString(), "Error fetching leave!");
+            return Result<EmployeeLeaveListResponseModel>.SystemError("An error occured while getting leave list!");
+        }
     }
 
     public async Task<Result<bool>> CreateLeave(LeaveCreateRequestModel reqModel)

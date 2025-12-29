@@ -16,6 +16,30 @@ public class LeaveController : ControllerBase
         _blLeave = blLeave;
     }
 
+    [HttpGet("list")]
+    public async Task<IActionResult> GetAllRequestedLeaves([FromQuery] LeaveListRequestModel requestModel)
+    {
+        var result = await _blLeave.GetAllRequestedLeaves(requestModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    [HttpGet("list-for-employee")]
+    public async Task<IActionResult> GetEmployeeLeaveList([FromQuery] EmployeeLeaveListRequestModel reqModel)
+    {
+        var result = await _blLeave.GetEmployeeLeaveList(reqModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> CreateLeave(LeaveCreateRequestModel reqModel)
     {
@@ -65,13 +89,6 @@ public class LeaveController : ControllerBase
             return Ok(result);
         }
 
-        return BadRequest(result);
-    }
-
-    [HttpGet("list")]
-    public async Task<IActionResult> GetAllRequestedLeaves([FromQuery]LeaveListRequestModel requestModel) {
-        var result = await _blLeave.GetAllRequestedLeaves(requestModel);
-        if(result.IsSuccess) { return Ok(result); }
         return BadRequest(result);
     }
 }
