@@ -25,4 +25,20 @@ public class CompanyRulesController(BL_CompanyRule blCompanyRules) : Controller
         var result = await _blCompanyRules.Update(reqModel);
         return Ok(result);
     }
+
+    [HttpGet("update/{ruleCode}")]
+    public async Task<IActionResult> GetRuleById (string ruleCode)
+    {
+        if (ruleCode is null)
+            return BadRequest("Code is required!");
+        var result = await _blCompanyRules.GetCompanyRuleByIdAysnc(ruleCode);
+
+        if (result.IsNotFound)
+            return NotFound("Company Rule not found!");
+
+        if (result.IsError)
+            return BadRequest("Code is required");
+        
+        return Ok(result);
+    }
 }

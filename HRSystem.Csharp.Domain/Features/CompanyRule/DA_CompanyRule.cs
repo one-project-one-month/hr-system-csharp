@@ -1,4 +1,5 @@
 ﻿using HRSystem.Csharp.Domain.Models.CompanyRule;
+using Entity = HRSystem.Csharp.Database.AppDbContextModels.TblCompanyRule;
 
 namespace HRSystem.Csharp.Domain.Features.CompanyRule;
 
@@ -54,6 +55,12 @@ public class DA_CompanyRule(AppDbContext context)
             return Result<CompanyRuleListResponseModel>.Error(
                 $"An error occurred while retrieving company rules: {ex.Message}");
         }
+    }
+
+    public async Task<Entity> GetCompanyRuleByIdAsync (string code)
+    {
+        var result =await _context.TblCompanyRules.FirstOrDefaultAsync(cr => cr.CompanyRuleCode == code);
+        return result;
     }
 
     public async Task<Result<bool>> UpdateCompanyRuleAsync(RuleUpdateRequestModel reqModel)

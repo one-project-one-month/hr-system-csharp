@@ -25,6 +25,14 @@ public class CompanyRuleModel
     public bool DeleteFlag { get; set; }
 }
 
+public class CompanyRuleResponseModel
+{
+    public string? CompanyRuleCode { get; set; }
+    public string? Description { get; set; }
+    public string? Value { get; set; }
+    public bool IsActive { get; set; }
+}
+
 public class RuleUpdateRequestModel
 {
     public string? CompanyRuleCode { get; set; }

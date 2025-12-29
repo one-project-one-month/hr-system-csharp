@@ -60,4 +60,25 @@ public class DA_AttendanceReports
 
         return overviewReport;
     }
+
+    public async Task<AdminAttendanceOverviewReport> GetAdminAttendanceOverviewReportAsync(String Date, int dataView)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@Date", Date, DbType.Date, ParameterDirection.Input);
+        parameters.Add("@DataView", dataView, DbType.Int32, ParameterDirection.Input);
+
+        var results =
+            await _dapperService.QueryStoredProcedureWithMultipleResults<AdminAttendanceOverviewReport>(
+                "sp_AdminAttendanceDashboard", parameters);
+
+        AdminAttendanceOverviewReport overviewReport = new AdminAttendanceOverviewReport();
+
+        var first = results.FirstOrDefault();
+
+        overviewReport.Present = first?.Present ?? 0;
+        overviewReport.Absent = first?.Absent ?? 0;
+        overviewReport.HalfDayLeave = first?.HalfDayLeave ?? 0;
+
+        return overviewReport;
+    }
 }

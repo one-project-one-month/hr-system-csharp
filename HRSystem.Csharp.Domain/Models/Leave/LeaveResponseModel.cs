@@ -12,6 +12,8 @@ namespace HRSystem.Csharp.Domain.Models.Leave;
 
         public string EmployeeCode { get; set; } = null!;
 
+    public string EmployeeName { get; set; } = null!;
+
         public string LeaveType { get; set; } = null!;
 
         public string Reason { get; set; } = null!;
