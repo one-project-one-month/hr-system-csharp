@@ -91,7 +91,7 @@ public class ReportController : ControllerBase
                 {
                     return BadRequest(result.Message);
                 }
-                reportResponse = result.Data as ReportResponseModel;
+                reportResponse = result.Data!;
             }
 
             if (reportResponse!.ReportData is null)

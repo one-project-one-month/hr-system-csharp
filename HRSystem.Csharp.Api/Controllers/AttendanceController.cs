@@ -18,9 +18,10 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpGet("AttendanceList")]
-    public async Task<IActionResult> AttendanceLists(String? EmpName, DateTime startDate, DateTime endDate, int pageNo=1, int PageSize=10)
+    public async Task<IActionResult> AttendanceLists(String? EmpName, DateTime startDate, DateTime endDate,
+        int pageNo = 1, int PageSize = 10)
     {
-        var data = await _bL_Attendance.List(EmpName,startDate, endDate, pageNo, PageSize);
+        var data = await _bL_Attendance.List(EmpName, startDate, endDate, pageNo, PageSize);
         return Ok(data);
     }
 
@@ -32,7 +33,7 @@ public class AttendanceController : ControllerBase
         if (userId == null)
             return Unauthorized("Invalid user token.");
 
-        var data = await _bL_Attendance.Create(userId,requestModel);
+        var data = await _bL_Attendance.Create(userId, requestModel);
         return Ok(data);
     }
 
