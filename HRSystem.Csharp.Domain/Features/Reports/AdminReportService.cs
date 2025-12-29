@@ -95,7 +95,8 @@ public class AdminReportService
         }
     }
 
-    private async Task<ReportResponseModel> HandleProjectListing(IQueryable<TblProject> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandleProjectListing(IQueryable<TblProject> query,
+        ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
         List<ReportProjectModel> data;
@@ -150,7 +151,8 @@ public class AdminReportService
         }
     }
 
-    private async Task<ReportResponseModel> HandleProjectExport(IQueryable<TblProject> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandleProjectExport(IQueryable<TblProject> query,
+        ReportRequestModel requestModel)
     {
         var data = await query
             .OrderByDescending(p => p.CreatedAt)
@@ -201,7 +203,8 @@ public class AdminReportService
         }
     }
 
-    private async Task<ReportResponseModel> HandleLocationListing(IQueryable<TblLocation> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandleLocationListing(IQueryable<TblLocation> query,
+        ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
         List<ReportLocationModel> data;
@@ -254,7 +257,8 @@ public class AdminReportService
         }
     }
 
-    private async Task<ReportResponseModel> HandleLocationExport(IQueryable<TblLocation> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandleLocationExport(IQueryable<TblLocation> query,
+        ReportRequestModel requestModel)
     {
         var data = await query
             .OrderByDescending(p => p.CreatedAt)
@@ -327,7 +331,8 @@ public class AdminReportService
         return query;
     }
 
-    private async Task<ReportResponseModel> HandleAttendanceListing(IQueryable<TblAttendance> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandleAttendanceListing(IQueryable<TblAttendance> query,
+        ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
         List<ReportAttendanceModel> data;
@@ -384,7 +389,8 @@ public class AdminReportService
         }
     }
 
-    private async Task<ReportResponseModel> HandleAttendanceExport(IQueryable<TblAttendance> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandleAttendanceExport(IQueryable<TblAttendance> query,
+        ReportRequestModel requestModel)
     {
         var data = await query
             .OrderByDescending(p => p.CreatedAt)
@@ -428,7 +434,8 @@ public class AdminReportService
         }
     }
 
-    private async Task<ReportResponseModel> HandlePayrollListing(IQueryable<TblPayroll> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandlePayrollListing(IQueryable<TblPayroll> query,
+        ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
         List<ReportPayrollModel> data;
@@ -493,7 +500,8 @@ public class AdminReportService
         }
     }
 
-    private async Task<ReportResponseModel> HandlePayrollExport(IQueryable<TblPayroll> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandlePayrollExport(IQueryable<TblPayroll> query,
+        ReportRequestModel requestModel)
     {
         var data = await query
             .OrderByDescending(p => p.CreatedAt)
@@ -549,7 +557,8 @@ public class AdminReportService
         }
     }
 
-    private async Task<ReportResponseModel> HandleBacklogListing(IQueryable<TblTask> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandleBacklogListing(IQueryable<TblTask> query,
+        ReportRequestModel requestModel)
     {
         var totalRecords = await query.CountAsync();
         List<ReportBacklogModel> data;
@@ -612,7 +621,8 @@ public class AdminReportService
         }
     }
 
-    private async Task<ReportResponseModel> HandleBacklogExport(IQueryable<TblTask> query, ReportRequestModel requestModel)
+    private async Task<ReportResponseModel> HandleBacklogExport(IQueryable<TblTask> query,
+        ReportRequestModel requestModel)
     {
         var data = await query
             .OrderByDescending(p => p.CreatedAt)

@@ -18,9 +18,12 @@ public class AttendanceChartsController : Controller
     }
 
     [HttpGet("hr-dashboard/attendance-overview")]
-    public async Task<IActionResult> AttendanceReport(String date, int dataView) // dataView = 0 for currentDay, 1 for weekly, 2 for monthly, 3 for yearly
+    public async Task<IActionResult>
+        AttendanceReport(String date,
+            int dataView) // dataView = 0 for currentDay, 1 for weekly, 2 for monthly, 3 for yearly
     {
-        if (date == null) { 
+        if (date == null)
+        {
             return BadRequest(Result<bool>.BadRequestError("Date parameter is required."));
         }
 
@@ -43,7 +46,6 @@ public class AttendanceChartsController : Controller
 
         var data = await _bL_AttendanceReports.GetStaffAttendanceOverviewReport(year, empCode);
         return Ok(data);
-
     }
 
     [HttpGet("admin-dashboard/attendance-overview")]
