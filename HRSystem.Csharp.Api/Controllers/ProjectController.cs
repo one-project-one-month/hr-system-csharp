@@ -163,4 +163,16 @@ public class ProjectController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpGet("project-overview")]
+    public async Task<IActionResult> ProjectOverview()
+    {
+        var result = await _blProject.ProjectOverviewAsync();
+        if (result.IsError)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
 }

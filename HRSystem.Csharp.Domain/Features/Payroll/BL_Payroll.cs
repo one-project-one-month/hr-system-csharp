@@ -32,7 +32,10 @@ public class BL_Payroll
 
             #region Check Payroll has already processed for the given month
 
-            var alreadyProcessed = await _daPayroll.ExistsForMonthAsync(reqModel.PayrollMonth);
+            var parsedDate = DateTime.ParseExact(reqModel.PayrollMonth, "yyyy-MM", CultureInfo.InvariantCulture);
+            var dbFormatMonth = parsedDate.ToString("MMM yyyy", CultureInfo.InvariantCulture);
+
+            var alreadyProcessed = await _daPayroll.ExistsForMonthAsync(dbFormatMonth);
 
             if (alreadyProcessed)
             {
@@ -52,7 +55,7 @@ public class BL_Payroll
         }
     }
 
-    private Result<bool> ValidatePayrollMonth(string payrollMonth)
+    /*private Result<bool> ValidatePayrollMonth(string payrollMonth)
     {
         if (string.IsNullOrWhiteSpace(payrollMonth))
             return Result<bool>.ValidationError("PayrollMonth is required.");
@@ -65,8 +68,21 @@ public class BL_Payroll
             return Result<bool>.ValidationError("PayrollMonth must be in the format 'MMM yyyy' (e.g., Nov 2025).");
 
         return Result<bool>.Success();
-    }
+    }*/
 
+    private Result<bool> ValidatePayrollMonth(string payrollMonth)
+    {
+        if (string.IsNullOrWhiteSpace(payrollMonth))
+            return Result<bool>.ValidationError("PayrollMonth is required.");
+
+        // Regex: 4-digit year + dash + 2-digit month
+        var regex = new Regex(@"^\d{4}-(0[1-9]|1[0-2])$");
+
+        if (!regex.IsMatch(payrollMonth))
+            return Result<bool>.ValidationError("PayrollMonth must be in the format 'yyyy-MM' (e.g., 2025-12).");
+
+        return Result<bool>.Success();
+    }
 
     public async Task<Result<PayrollListResponseModel>> PayrollList(PayrollListRequestModel reqModel)
     {

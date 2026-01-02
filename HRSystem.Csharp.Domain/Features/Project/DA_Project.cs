@@ -387,4 +387,20 @@ public class DA_Project
             );
         }
     }
+
+    public async Task<List<ProjectOverviewResponseModel>> GetProjectStatusCountsAsync()
+    {
+        var response = await _appDbContext.TblProjects
+            .Where(p => !p.DeleteFlag)
+            .GroupBy(p => p.ProjectStatus)
+            .Select(g => new ProjectOverviewResponseModel
+            {
+                ProjectStatus = g.Key,
+                StatusCount = g.Count()
+            })
+            .ToListAsync();
+
+        return response;
+    }
+
 }

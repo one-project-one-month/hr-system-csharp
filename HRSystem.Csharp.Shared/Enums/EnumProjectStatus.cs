@@ -3,8 +3,7 @@
 public enum EnumProjectStatus
 {
     Planned,
-    Active,
+    InProgress,
     Completed,
-    Cancelled,
-    InProgress
+    Cancelled
 }

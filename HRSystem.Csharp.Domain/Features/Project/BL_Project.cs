@@ -76,7 +76,7 @@ public class BL_Project
             {
                 return Result<EmployeesProjectResponseModel>.Error(project.Message);
             }
-            
+
             var result = await _daProject.EmployeesAssignedToProject(projectCode, reqModel);
             return result;
         }
@@ -102,7 +102,7 @@ public class BL_Project
             {
                 return Result<EmployeesProjectResponseModel>.Error(project.Message);
             }
-            
+
             var result = await _daProject.EmployeesUnassignedToProject(projectCode, reqModel);
             return result;
         }
@@ -131,9 +131,8 @@ public class BL_Project
                 return Result<AddEmployeeToProjectResponseModel>.ValidationError(
                     "At least one employee code is required.",
                     new AddEmployeeToProjectResponseModel { EmployeeCodes =  [] });
-
             }
-            
+
             // check duplicate code in request data
             var duplicatesInRequest = normalized
                 .GroupBy(c => c, StringComparer.OrdinalIgnoreCase)
@@ -239,6 +238,35 @@ public class BL_Project
         {
             _logger.LogError(ex.ToString(), "Error removing employees from project.");
             return Result<AddEmployeeToProjectResponseModel>.SystemError("Error removing employees from project");
+        }
+    }
+
+    public async Task<Result<ProjectOverviewListResponseModel>> ProjectOverviewAsync()
+    {
+        try
+        {
+            var response = await _daProject.GetProjectStatusCountsAsync();
+
+            var total = response.Sum(r => r.StatusCount);
+            if (total > 0)
+            {
+                foreach (var r in response)
+                {
+                    r.Percentage = Math.Round((double)r.StatusCount / total * 100, 2);
+                }
+            }
+
+            var result = new ProjectOverviewListResponseModel
+            {
+                ProjectOverview = response
+            };
+
+            return Result<ProjectOverviewListResponseModel>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing project overview.");
+            return Result<ProjectOverviewListResponseModel>.SystemError("Error processing project overview");
         }
     }
 }
