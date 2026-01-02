@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using HRSystem.Csharp.Domain.Models.AttendanceReports;
 using HRSystem.Csharp.Shared.Services;
+using static HRSystem.Csharp.Domain.Models.AttendanceReports.AdminAttendanceOverviewReport;
 
 namespace HRSystem.Csharp.Domain.Features.AttendanceReports;
 
@@ -68,21 +69,25 @@ public class DA_AttendanceReports
         parameters.Add("@DataView", dataView, DbType.Int32, ParameterDirection.Input);
 
         var results =
-            await _dapperService.QueryStoredProcedureWithMultipleResults<AdminAttendanceOverviewReport>(
+            await _dapperService.QueryStoredProcedureWithMultipleResults<AdminAttendanceOverviewReportModel>(
                 "sp_AdminAttendanceDashboard", parameters);
 
-        AdminAttendanceOverviewReport overviewReport = new AdminAttendanceOverviewReport();
+        var overviewReport = new AdminAttendanceOverviewReport();
 
-        var first = results.FirstOrDefault();
-
-        overviewReport.Date = first?.Date ?? String.Empty;
-        overviewReport.Present = first?.Present ?? 0;
-        overviewReport.Absent = first?.Absent ?? 0;
-        overviewReport.HalfDayLeave = first?.HalfDayLeave ?? 0;
-        overviewReport.EmpCount = first?.EmpCount ?? 0;
-        overviewReport.ProjCount = first?.ProjCount ?? 0;
-        overviewReport.TdyAbsent = first?.TdyAbsent ?? 0;
-
+        foreach (var item in results)
+        {
+            var reportModel = new AdminAttendanceOverviewReportModel
+            {
+                Date = item.Date,
+                Present = item.Present,
+                Absent = item.Absent,
+                HalfDayLeave = item.HalfDayLeave,
+                EmpCount = item.EmpCount,
+                ProjCount = item.ProjCount,
+                TdyAbsent = item.TdyAbsent
+            };
+            overviewReport.adminAttendanceOverviewReports.Add(reportModel);
+        }
         return overviewReport;
     }
 }
