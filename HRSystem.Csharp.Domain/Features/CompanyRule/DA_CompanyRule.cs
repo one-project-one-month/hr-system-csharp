@@ -19,7 +19,8 @@ public class DA_CompanyRule(AppDbContext context)
             if (!string.IsNullOrWhiteSpace(reqModel.RuleDescription))
             {
                 query = query.Where(r => r.Description != null
-                                         && r.Description.Equals(reqModel.RuleDescription, StringComparison.CurrentCultureIgnoreCase));
+                                         && r.Description.Equals(reqModel.RuleDescription,
+                                             StringComparison.CurrentCultureIgnoreCase));
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);
@@ -57,9 +58,9 @@ public class DA_CompanyRule(AppDbContext context)
         }
     }
 
-    public async Task<Entity> GetCompanyRuleByIdAsync (string code)
+    public async Task<Entity> GetCompanyRuleByIdAsync(string code)
     {
-        var result =await _context.TblCompanyRules.FirstOrDefaultAsync(cr => cr.CompanyRuleCode == code);
+        var result = await _context.TblCompanyRules.FirstOrDefaultAsync(cr => cr.CompanyRuleCode == code);
         return result;
     }
 
@@ -88,5 +89,17 @@ public class DA_CompanyRule(AppDbContext context)
         {
             return Result<bool>.Error($"An error occurred while updating the company rule: {ex.Message}");
         }
+    }
+
+    public async Task<int> GetRuleValue(string ruleCode)
+    {
+        int ruleValue = 0;
+        var rule = await _context.TblCompanyRules.AsNoTracking()
+            .Where(r => r.CompanyRuleCode == ruleCode
+                        && r.DeleteFlag == false)
+            .Select(r => r.Value).FirstOrDefaultAsync();
+
+        ruleValue = rule.ToInt();
+        return ruleValue;
     }
 }

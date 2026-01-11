@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Features.Rule;
+﻿using HRSystem.Csharp.Domain.Features.CompanyRule;
+using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models.Leave;
 
 namespace HRSystem.Csharp.Domain.Features.Leave;
@@ -9,15 +10,19 @@ public class DA_Leave : AuthorizationService
     private readonly ILogger<DA_Leave> _logger;
     private readonly DA_Sequence _daSequence;
     private readonly DA_Rule _daRule;
+    private readonly DA_CompanyRule _companyRule;
+    private readonly DA_Employee _daEmployee;
 
     public DA_Leave(IHttpContextAccessor httpContextAccessor,
         AppDbContext appDbContext, ILogger<DA_Leave> logger, DA_Sequence daSequence,
-        DA_Rule daRule) : base(httpContextAccessor)
+        DA_Rule daRule, DA_CompanyRule companyRule, DA_Employee daEmployee) : base(httpContextAccessor)
     {
         _appDbContext = appDbContext;
         _logger = logger;
         _daSequence = daSequence;
         _daRule = daRule;
+        _companyRule = companyRule;
+        _daEmployee = daEmployee;
     }
 
     public async Task<Result<EmployeeLeaveListResponseModel>> GetEmployeeLeaveList(
@@ -252,17 +257,10 @@ public class DA_Leave : AuthorizationService
         return response;
     }
 
-    public async Task<List<LeaveBreakdownResponseModel>> LeaveBreakdownByYearAsync(int year)
+    public async Task<List<(string LeaveType, int Count)>> GetLeaveCountsByYearAsync(int year, string employeeCode)
     {
         return await _appDbContext.TblLeaves
-            .Where(l => l.FromDate.Year == year 
-                        && l.DeleteFlag == false
-                        && l.Status == EnumLeaveStatus.Approved.ToString())
-            .GroupBy(l => l.LeaveType).Select(g => new LeaveBreakdownResponseModel
-            {
-                LeaveType = g.Key, 
-                Count = g.Count()
-            })
-            .ToListAsync();
+            .Where(l => l.EmployeeCode == employeeCode && l.FromDate.Year == year && l.DeleteFlag == false)
+            .GroupBy(l => l.LeaveType).Select(g => new ValueTuple<string, int>(g.Key, g.Count())).ToListAsync();
     }
 }

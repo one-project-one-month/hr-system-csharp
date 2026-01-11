@@ -56,8 +56,14 @@ public class EmployeeLeaveResponseModel
     public string LeaveCode { get; set; } = null!;
 }
 
+public class LeaveBreakdownListResponseModel
+{
+    public List<LeaveBreakdownResponseModel> Leaves { get; set; }
+}
+
 public class LeaveBreakdownResponseModel
 {
     public string LeaveType { get; set; }
-    public int Count { get; set; }
+    public int Taken { get; set; }
+    public int Remaining { get; set; }
 }

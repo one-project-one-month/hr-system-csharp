@@ -41,10 +41,10 @@ public class LeaveController : ControllerBase
         return BadRequest(result);
     }
 
-    [HttpGet("leave-breakdown/{year}")]
-    public async Task<IActionResult> LeaveBreakdown(int year)
+    [HttpGet("leave-balance/{year}")]
+    public async Task<IActionResult> LeaveBalance(int year)
     {
-        var result = await _blLeave.GetLeaveTypeBreakdownByYearAsync(year);
+        var result = await _blLeave.GetLeaveBalanceByYearAsync(year);
         if (result.IsSuccess)
         {
             return Ok(result);

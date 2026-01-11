@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Shared.Enums;
+﻿using System.ComponentModel;
+using HRSystem.Csharp.Shared.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -180,6 +181,15 @@ public static class DevCode
     }
 
     #endregion
+    
+    public static string ToEnumDescription<T>(this T val)
+    {
+        DescriptionAttribute[] attributes = (DescriptionAttribute[])val
+            .GetType()
+            .GetField(val.ToString())
+            .GetCustomAttributes(typeof(DescriptionAttribute), false);
+        return attributes.Length > 0 ? attributes[0].Description : string.Empty;
+    }
 }
 
 public class FileUploadData

@@ -1,4 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Features.Rule;
+﻿using HRSystem.Csharp.Domain.Features.CompanyRule;
+using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models.Leave;
 using Sprache;
 
@@ -11,17 +12,19 @@ public class BL_Leave : AuthorizationService
     private readonly DA_Employee _daEmployee;
     private readonly DA_Rule _daRule;
     private readonly DA_Sequence _daSequence;
+    private readonly DA_CompanyRule _companyRule;
 
     public BL_Leave(IHttpContextAccessor httpContextAccessor,
         DA_Leave daLeave,
         ILogger<BL_Leave> logger, DA_Employee daEmployee, DA_Rule daRule,
-        DA_Sequence daSequence) : base(httpContextAccessor)
+        DA_Sequence daSequence, DA_CompanyRule companyRule) : base(httpContextAccessor)
     {
         _daLeave = daLeave;
         _logger = logger;
         _daEmployee = daEmployee;
         _daRule = daRule;
         _daSequence = daSequence;
+        _companyRule = companyRule;
     }
 
     public async Task<Result<LeaveListResponseModel>> GetAllRequestedLeaves(LeaveListRequestModel model)
@@ -619,21 +622,116 @@ public class BL_Leave : AuthorizationService
         }
     }
 
-    public async Task<Result<Dictionary<string, decimal>>> GetLeaveTypeBreakdownByYearAsync(int year)
+    public async Task<Result<LeaveBreakdownListResponseModel>> GetLeaveBalanceByYearAsync(
+        int year)
     {
-        var leaveGroups = await _daLeave.LeaveBreakdownByYearAsync(year);
-
-        var totalCount = leaveGroups.Sum(x => x.Count);
-        if (totalCount == 0)
+        try
         {
-            return Result<Dictionary<string, decimal>>
-                .NotFoundError("No leave records found for the given year.");
-        }
+            if (year < 2000 || year > DateTime.UtcNow.Year + 1)
+            {
+                return Result<LeaveBreakdownListResponseModel>.BadRequestError("Invalid year provided.");
+            }
 
-        var result = leaveGroups.ToDictionary(
-            x => x.LeaveType,
-            x => Math.Round((x.Count * 100m) / totalCount, 2)
-        );
-        return Result<Dictionary<string, decimal>>.Success(result);
+            var leaveGroups = await _daLeave.GetLeaveCountsByYearAsync(year, UserCode);
+
+            #region Check Employee Exists
+
+            var employee = await _daEmployee.GetEmployeeByCode(UserCode);
+            if (employee is not { Data: not null })
+            {
+                return Result<LeaveBreakdownListResponseModel>.NotFoundError("Employee not found.");
+            }
+
+            #endregion
+
+            var result = new List<LeaveBreakdownResponseModel>();
+            
+            int GetTaken(string leaveType)
+            {
+                var group = leaveGroups.FirstOrDefault(x => x.LeaveType == leaveType);
+                return group.LeaveType == null ? 0 : group.Count;
+            }
+
+            #region Medical Leave
+
+            var medicalTaken = GetTaken(EnumLeaveType.MedicalLeave.ToString());
+            var medicalTotal = await _companyRule.GetRuleValue(EnumRuleCode.TotalMedicalLeave.ToEnumDescription());
+            result.Add(new LeaveBreakdownResponseModel
+            {
+                LeaveType = EnumLeaveType.MedicalLeave.ToString(),
+                Taken = medicalTaken,
+                Remaining = medicalTotal - medicalTaken
+            });
+
+            #endregion Medical Leave
+
+            #region Casual Leave
+
+            var casualTaken = GetTaken(EnumLeaveType.CasualLeave.ToString());
+            var casualTotal = await _companyRule.GetRuleValue(EnumRuleCode.TotalCasualLeave.ToEnumDescription());
+            result.Add(new LeaveBreakdownResponseModel
+            {
+                LeaveType = EnumLeaveType.CasualLeave.ToString(),
+                Taken = casualTaken,
+                Remaining = casualTotal - casualTaken
+            });
+
+            #endregion
+
+            #region Earn Leave
+
+            var earnTaken = GetTaken(EnumLeaveType.EarnLeave.ToString());
+            var earnTotal = await _companyRule.GetRuleValue(EnumRuleCode.TotalEarnLeave.ToEnumDescription());
+            result.Add(new LeaveBreakdownResponseModel
+            {
+                LeaveType = EnumLeaveType.EarnLeave.ToString(),
+                Taken = earnTaken,
+                Remaining = earnTotal - earnTaken
+            });
+
+            #endregion
+
+            #region Leave Without Pay
+
+            var lwopTaken = GetTaken(EnumLeaveType.LeaveWithoutPay.ToString());
+            result.Add(new LeaveBreakdownResponseModel
+            {
+                LeaveType = EnumLeaveType.LeaveWithoutPay.ToString(), 
+                Taken = lwopTaken, 
+                Remaining = -1
+            });
+
+            #endregion
+
+            #region Maternity Leave for Female Employees
+
+            if (!string.IsNullOrEmpty(employee.Data.Gender) &&
+                employee.Data.Gender.Equals("Female", StringComparison.OrdinalIgnoreCase))
+            {
+                var maternityTaken = GetTaken(EnumLeaveType.MaternityLeave.ToString());
+                var maternityTotal =
+                    await _companyRule.GetRuleValue(EnumRuleCode.TotalMaternityLeave.ToEnumDescription());
+                result.Add(new LeaveBreakdownResponseModel
+                {
+                    LeaveType = EnumLeaveType.MaternityLeave.ToString(), 
+                    Taken = maternityTaken,
+                    Remaining = maternityTotal - maternityTaken
+                });
+            }
+
+            #endregion
+
+            var leaves = new LeaveBreakdownListResponseModel()
+            {
+                Leaves = result
+            };
+
+            return Result<LeaveBreakdownListResponseModel>.Success(leaves);
+        }
+        catch (Exception e)
+        {
+            _logger.LogExceptionError(e);
+            return Result<LeaveBreakdownListResponseModel>.SystemError("Can't get leave breakdown for now!");
+        }
     }
 }
