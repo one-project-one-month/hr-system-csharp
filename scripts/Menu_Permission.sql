@@ -24,8 +24,6 @@ VALUES
 (NEWID(), 'MENU_GROUP', 'MENU', 'Menu Group', '/menu', 'menugroup_icon', 1, GETDATE(), 'system', 0);
 
 
-
-
 INSERT INTO Tbl_Permission (PermissionId, PermissionCode, PermissionName)
 VALUES
 (NEWID(),'LIST',   'View / List records'),

@@ -35,5 +35,6 @@ VALUES
 (NEWID(), 'PAYROLL', 'Payroll', 0, '/payroll', 'fa-money-check-alt', 7, GETDATE(), 'system', NULL, NULL, 0),
 
 (NEWID(), 'ROLE_MENU_PERMISSION', 'Role and Menu Permission', 0, '/role-and-menu-permissions', 'fa-money-check-alt', 8, GETDATE(), 'system', NULL, NULL, 0),
-(NEWID(), 'COMPANY_RULES', 'Company Rules', 0, '/company-rules', 'fa-money-check-alt', 9, GETDATE(), 'system', NULL, NULL, 0);
+(NEWID(), 'COMPANY_RULES', 'Company Rules', 0, '/company-rules', 'fa-money-check-alt', 9, GETDATE(), 'system', NULL, NULL, 0),
+(NEWID(), 'LEAVE', 'Leave', 0, '/leave', 'fa-money-check-alt', 9, GETDATE(), 'system', NULL, NULL, 0);
 

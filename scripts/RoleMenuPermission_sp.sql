@@ -42,7 +42,7 @@ BEGIN
         'SYSTEM',
         0
     FROM Tbl_MenuGroup mg
-    WHERE mg.MenuGroupCode IN ('DASHBOARD', 'PAYROLL', 'ROLE_MENU_PERMISSION')
+    WHERE mg.MenuGroupCode IN ('DASHBOARD', 'PAYROLL', 'ROLE_MENU_PERMISSION', 'LEAVE')
     AND NOT EXISTS (
         SELECT 1 FROM Tbl_RoleAndMenuPermission x
         WHERE x.RoleCode = @RoleCode
