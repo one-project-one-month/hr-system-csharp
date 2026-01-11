@@ -55,3 +55,9 @@ public class EmployeeLeaveResponseModel
 
     public string LeaveCode { get; set; } = null!;
 }
+
+public class LeaveBreakdownResponseModel
+{
+    public string LeaveType { get; set; }
+    public int Count { get; set; }
+}

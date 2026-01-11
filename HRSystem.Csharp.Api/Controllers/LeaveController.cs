@@ -41,6 +41,18 @@ public class LeaveController : ControllerBase
         return BadRequest(result);
     }
 
+    [HttpGet("leave-breakdown/{year}")]
+    public async Task<IActionResult> LeaveBreakdown(int year)
+    {
+        var result = await _blLeave.GetLeaveTypeBreakdownByYearAsync(year);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> CreateLeave(LeaveCreateRequestModel reqModel)
     {

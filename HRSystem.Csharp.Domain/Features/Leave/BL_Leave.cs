@@ -618,4 +618,22 @@ public class BL_Leave : AuthorizationService
             return Result<bool>.SystemError("An error occurred while rejecting leave.");
         }
     }
+
+    public async Task<Result<Dictionary<string, decimal>>> GetLeaveTypeBreakdownByYearAsync(int year)
+    {
+        var leaveGroups = await _daLeave.LeaveBreakdownByYearAsync(year);
+
+        var totalCount = leaveGroups.Sum(x => x.Count);
+        if (totalCount == 0)
+        {
+            return Result<Dictionary<string, decimal>>
+                .NotFoundError("No leave records found for the given year.");
+        }
+
+        var result = leaveGroups.ToDictionary(
+            x => x.LeaveType,
+            x => Math.Round((x.Count * 100m) / totalCount, 2)
+        );
+        return Result<Dictionary<string, decimal>>.Success(result);
+    }
 }

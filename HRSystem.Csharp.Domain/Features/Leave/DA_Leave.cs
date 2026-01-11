@@ -1,7 +1,5 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using HRSystem.Csharp.Domain.Features.Rule;
+﻿using HRSystem.Csharp.Domain.Features.Rule;
 using HRSystem.Csharp.Domain.Models.Leave;
-using HRSystem.Csharp.Shared;
 
 namespace HRSystem.Csharp.Domain.Features.Leave;
 
@@ -239,7 +237,7 @@ public class DA_Leave : AuthorizationService
 
         return Result<bool>.Success();
     }
-    
+
     public async Task<TblLeave?> GetLeaveByCodeAsync(string leaveCode)
     {
         var leave = await _appDbContext.TblLeaves
@@ -252,5 +250,19 @@ public class DA_Leave : AuthorizationService
         _appDbContext.TblLeaves.Update(leave);
         var response = await _appDbContext.SaveChangesAsync() > 0;
         return response;
+    }
+
+    public async Task<List<LeaveBreakdownResponseModel>> LeaveBreakdownByYearAsync(int year)
+    {
+        return await _appDbContext.TblLeaves
+            .Where(l => l.FromDate.Year == year 
+                        && l.DeleteFlag == false
+                        && l.Status == EnumLeaveStatus.Approved.ToString())
+            .GroupBy(l => l.LeaveType).Select(g => new LeaveBreakdownResponseModel
+            {
+                LeaveType = g.Key, 
+                Count = g.Count()
+            })
+            .ToListAsync();
     }
 }
