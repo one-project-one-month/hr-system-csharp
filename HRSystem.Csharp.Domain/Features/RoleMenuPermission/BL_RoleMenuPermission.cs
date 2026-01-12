@@ -73,10 +73,7 @@ public class BL_RoleMenuPermission
             }
         }
 
-        var result = await _daRoleMenuPermission.SaveRoleMenuPermissionsAsync(reqModel);
-        return result.IsError
-            ? Result<CreateRoleMenuPermissionResponseModel>.Error(result.Message!)
-            : Result<CreateRoleMenuPermissionResponseModel>.Success(result.Data!);
+        return await _daRoleMenuPermission.SaveRoleMenuPermissionsAsync(reqModel);
     }
 
     public async Task<Result<List<PermissionModel>>> GetAllPermissions()

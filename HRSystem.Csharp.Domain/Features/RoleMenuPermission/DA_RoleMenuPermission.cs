@@ -148,9 +148,12 @@ public class DA_RoleMenuPermission
         CreateRoleMenuPermissionRequestModel reqModel)
     {
         await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
         try
         {
-            var generatedCode = await _daSequence.GenerateCodeAsync(EnumSequenceCode.RL.ToString());
+            var generatedCode =
+                await _daSequence.GenerateCodeAsync(EnumSequenceCode.RL.ToString());
+
             var existing = await _dbContext.TblRoleAndMenuPermissions
                 .Where(p => p.RoleCode == reqModel.RoleCode && !p.DeleteFlag)
                 .ToListAsync();
@@ -160,10 +163,7 @@ public class DA_RoleMenuPermission
                 item.DeleteFlag = true;
                 item.ModifiedAt = DateTime.UtcNow;
                 item.ModifiedBy = "admin";
-                _dbContext.TblRoleAndMenuPermissions.Update(item);
             }
-            await transaction.CommitAsync();
-            await _dbContext.SaveChangesAsync();
 
             var newPermissions = reqModel.MenuPermissions
                 .Where(p => p.IsChecked)
@@ -173,43 +173,45 @@ public class DA_RoleMenuPermission
                     RoleAndMenuPermissionCode = generatedCode,
                     RoleCode = reqModel.RoleCode,
                     MenuGroupCode = p.MenuGroupCode,
-                    MenuCode = p.MenuItemCode ?? null,
+                    MenuCode = p.MenuItemCode,
                     PermissionCode = p.PermissionCode,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "admin",
                     DeleteFlag = false
-                }).ToList();
+                })
+                .ToList();
 
             await _dbContext.TblRoleAndMenuPermissions.AddRangeAsync(newPermissions);
+
+            // ✅ Save ONCE
             await _dbContext.SaveChangesAsync();
+
+            // ✅ Commit ONCE
             await transaction.CommitAsync();
 
-            var permissions = newPermissions
-                .Select(p => new CreateRoleMenuPermissionModel
+            var response = new CreateRoleMenuPermissionResponseModel
+            {
+                RoleMenuPermissions = newPermissions.Select(p => new CreateRoleMenuPermissionModel
                 {
                     RoleAndMenuPermissionId = p.RoleAndMenuPermissionId,
                     RoleAndMenuPermissionCode = p.RoleAndMenuPermissionCode!,
                     RoleCode = p.RoleCode,
                     MenuGroupCode = p.MenuGroupCode!,
-                    MenuCode = p.MenuCode ?? null,
-                    PermissionCode = p.PermissionCode ?? null,
+                    MenuCode = p.MenuCode,
+                    PermissionCode = p.PermissionCode,
                     CreatedDateTime = p.CreatedAt,
                     CreatedUserId = p.CreatedBy
-                }).ToList();
-
-            var response = new CreateRoleMenuPermissionResponseModel()
-            {
-                RoleMenuPermissions = permissions
+                }).ToList()
             };
 
             return Result<CreateRoleMenuPermissionResponseModel>.Success(response);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            _logger.LogError(e.ToString());
+            _logger.LogError(ex, "Failed to create role menu permissions");
             return Result<CreateRoleMenuPermissionResponseModel>
-                .SystemError("Failed to create role menu permissions for role - {}");
+                .SystemError("Failed to create role menu permissions.");
         }
     }
 }
