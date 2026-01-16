@@ -9,13 +9,13 @@ public partial class TblPayroll
 
     public string PayrollCode { get; set; } = null!;
 
-    public string? EmployeeCode { get; set; }
+    public string EmployeeCode { get; set; } = null!;
 
-    public DateTime? PayrollDate { get; set; }
+    public string PayrollMonth { get; set; } = null!;
 
     public string? Status { get; set; }
 
-    public int? TotalWorkingHour { get; set; }
+    public decimal? TotalWorkingHour { get; set; }
 
     public decimal? LeaveHour { get; set; }
 
@@ -43,5 +43,9 @@ public partial class TblPayroll
 
     public DateTime? ModifiedAt { get; set; }
 
-    public bool? DeleteFlag { get; set; }
+    public bool DeleteFlag { get; set; }
+
+    public string PayrollSummaryCode { get; set; } = null!;
+
+    public DateTime PayrollDate { get; set; }
 }

@@ -195,7 +195,7 @@ public class DA_Project
             .AsNoTracking()
             .Where(e => e.DeleteFlag == false
                         && e.ProjectCode == projectCode
-                        && reqModel.EmployeeCodes.Contains(e.EmployeeCode))
+                        && reqModel.EmployeeCodes.Contains(e.EmployeeCode!))
             .Select(e => e.EmployeeCode)
             .ToListAsync();
 
@@ -205,7 +205,7 @@ public class DA_Project
                 $"Employees with code(s): {string.Join(", ", alreadyAddedEmployees)} are already added to Project - {projectCode}",
                 new AddEmployeeToProjectResponseModel
                 {
-                    EmployeeCodes = alreadyAddedEmployees
+                    EmployeeCodes = alreadyAddedEmployees!
                 }
             );
         }
@@ -215,8 +215,71 @@ public class DA_Project
             {
                 EmployeeCodes = new List<string>()
             },
-            $"No duplicate employees found for Project - {projectCode}"
+            $"None of these employees has added to the Project - {projectCode}"
         );
+    }
+
+    public async Task<Result<EmployeesProjectResponseModel>> EmployeesAssignedToProject(string projectCode,
+        EmployeesProjectRequestModel reqModel)
+    {
+        var query = _appDbContext.TblEmployees.AsNoTracking()
+            .Join(_appDbContext.TblEmployeeProjects.AsNoTracking(),
+                e => e.EmployeeCode,
+                ep => ep.EmployeeCode,
+                (e, ep) => new { e, ep })
+            .Where(x => x.ep.ProjectCode == projectCode
+                        && !x.ep.DeleteFlag && !x.e.DeleteFlag)
+            .OrderByDescending(x => x.ep.CreatedAt)
+            .Select(x => new EmployeesInfo
+            {
+                EmployeeCode = x.e.EmployeeCode,
+                EmployeeName = x.e.Name
+            });
+
+        var employeePagedResult = await query.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+        var result = new EmployeesProjectResponseModel
+        {
+            ProjectCode = projectCode,
+            EmployeeList = employeePagedResult
+        };
+
+        return Result<EmployeesProjectResponseModel>.Success(result);
+    }
+
+    public async Task<Result<EmployeesProjectResponseModel>> EmployeesUnassignedToProject(string projectCode,
+        EmployeesProjectRequestModel reqModel)
+    {
+        try
+        {
+            var query = _appDbContext.TblEmployees.AsNoTracking()
+                .Where(e => !e.DeleteFlag && !_appDbContext.TblEmployeeProjects
+                    .Any(ep => ep.EmployeeCode == e.EmployeeCode
+                               && ep.ProjectCode == projectCode
+                               && !ep.DeleteFlag))
+                .OrderBy(e => e.Name)
+                .Select(e => new EmployeesInfo
+                {
+                    EmployeeCode = e.EmployeeCode,
+                    EmployeeName = e.Name
+                });
+
+            var employeePagedResult = await query.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new EmployeesProjectResponseModel
+            {
+                ProjectCode = projectCode,
+                EmployeeList = employeePagedResult
+            };
+
+            return Result<EmployeesProjectResponseModel>.Success(result);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.ToString(), $"Error fetching employees unassigned to the project {projectCode}");
+            return Result<EmployeesProjectResponseModel>.SystemError(
+                $"Error fetching employees unassigned to the project {projectCode}");
+        }
     }
 
     public async Task<Result<AddEmployeeToProjectResponseModel>> AddEmployee(
@@ -270,4 +333,74 @@ public class DA_Project
             );
         }
     }
+
+    public async Task<Result<AddEmployeeToProjectResponseModel>> RemoveEmployee(
+        string projectCode,
+        AddEmployeeToProjectRequestModel reqModel)
+    {
+        await using var transaction = await _appDbContext.Database.BeginTransactionAsync();
+
+        try
+        {
+            /*var entries = new List<TblEmployeeProject>(reqModel.EmployeeCodes.Count);
+            foreach (var employeeCode in reqModel.EmployeeCodes)
+            {
+                entries.Add(new TblEmployeeProject
+                {
+                    DeleteFlag = true
+                });
+            }*/
+
+            var entries = await _appDbContext.TblEmployeeProjects
+                .Where(ep => ep.ProjectCode == projectCode
+                             && reqModel.EmployeeCodes.Contains(ep.EmployeeCode))
+                .ToListAsync();
+
+            foreach (var entry in entries)
+            {
+                entry.DeleteFlag = true;
+            }
+
+            _appDbContext.TblEmployeeProjects.UpdateRange(entries);
+            await _appDbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return Result<AddEmployeeToProjectResponseModel>.Success(
+                new AddEmployeeToProjectResponseModel { EmployeeCodes = reqModel.EmployeeCodes },
+                $"Successfully remove {reqModel.EmployeeCodes.Count} employee(s) to project {projectCode}."
+            );
+        }
+        catch (DbUpdateException ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, $"Insert failed for project {projectCode}");
+            return Result<AddEmployeeToProjectResponseModel>.ValidationError(
+                $"Failed to remove employees to project {projectCode}. No records were added."
+            );
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, $"Unexpected error for removing employees to project {projectCode}");
+            return Result<AddEmployeeToProjectResponseModel>.SystemError(
+                "Unexpected error. No records were added."
+            );
+        }
+    }
+
+    public async Task<List<ProjectOverviewResponseModel>> GetProjectStatusCountsAsync()
+    {
+        var response = await _appDbContext.TblProjects
+            .Where(p => !p.DeleteFlag)
+            .GroupBy(p => p.ProjectStatus)
+            .Select(g => new ProjectOverviewResponseModel
+            {
+                ProjectStatus = g.Key,
+                StatusCount = g.Count()
+            })
+            .ToListAsync();
+
+        return response;
+    }
+
 }

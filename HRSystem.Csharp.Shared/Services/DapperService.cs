@@ -32,13 +32,13 @@ public class DapperService
             // The output parameters are populated in the 'parameters' object after this call.
             var result = await multi.ReadSingleOrDefaultAsync<T>();
 
-            return result;
+            return result!;
         }
         catch (Exception ex)
         {
             // Log the custom error and return a default value.
             _logger.LogError(ex.ToString());
-            return default(T);
+            return default!;
         }
     }
 
@@ -61,5 +61,28 @@ public class DapperService
             _logger.LogError(ex.ToString());
             return Enumerable.Empty<T>();
         }
+    }
+    
+    public async Task<int> ExecuteAsync(
+        string query,
+        object parameters = null,
+        CommandType commandType = CommandType.Text)
+    {
+        var result = await _dbConnection.ExecuteAsync(
+            query,
+            parameters,
+            commandType: commandType);
+        return result;
+    }
+    
+    public async Task<List<T>> GetListAsync<T>(string query, object parameters = null,
+        CommandType commandType = CommandType.Text)
+    {
+        var result = await _dbConnection.QueryAsync<T>(
+            query,
+            parameters,
+            commandType: commandType
+        );
+        return result.ToList();
     }
 }

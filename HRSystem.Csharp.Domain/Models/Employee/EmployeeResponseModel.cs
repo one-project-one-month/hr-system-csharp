@@ -2,7 +2,7 @@
 
 namespace HRSystem.Csharp.Domain.Models.Employee;
 
-public class EmployeeListResponseModel: PagedResult<EmployeeResponseModel>
+public class EmployeeListResponseModel : PagedResult<EmployeeResponseModel>
 {
 }
 
@@ -21,6 +21,7 @@ public class EmployeeResponseModel
     public string? Email { get; set; }
 
     public string? PhoneNo { get; set; }
+    public bool? IsFirstTimeLogin { get; set; }
     public DateTime? CreatedAt { get; set; }
     public MenuTreeResponseModel MenuTree { get; set; } = null!;
 }
@@ -36,6 +37,7 @@ public class EmployeeEditResponseModel
     public decimal? Salary { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? ResignDate { get; set; }
+    public string Gender { get; set; } = null!;
 }
 
 public class EmployeeCreateResponseModel
@@ -59,4 +61,16 @@ public class UserProfileResponseModel
     public string? Name { get; set; }
     public string? Email { get; set; }
     public string? PhoneNo { get; set; }
+    public string? Gender { get; set; }
+}
+
+public class EmployeEditProfileResponseModel
+{
+    public string EmployeeCode { get; set; } = null!;
+    public string ProfileImage { get; set; } = null!;
+    public string Username { get; set; } = null!;
+    public string Name { get; set; } = null!;
+    public string RoleName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string PhoneNo { get; set; } = null!;
 }

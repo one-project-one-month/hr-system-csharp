@@ -25,7 +25,9 @@ public class AttendanceEditModel
 
     public string? Remark { get; set; }
 
-    public bool? IsSavedLocation { get; set; }
+    public bool? IsCheckInLocationSaved { get; set; }
+
+    public bool? IsCheckOutLocationSaved { get; set; }
 
     public static AttendanceEditModel FromTblAttendance(TblAttendance tblAttendance)
     {
@@ -40,7 +42,8 @@ public class AttendanceEditModel
             CheckOutLocation = tblAttendance.CheckOutLocation,
             WorkingHour = tblAttendance.WorkingHour,
             Remark = tblAttendance.Remark,
-            IsSavedLocation = tblAttendance.IsSavedLocation
+            IsCheckInLocationSaved = tblAttendance.IsCheckInLocationSaved,
+            IsCheckOutLocationSaved = tblAttendance.IsCheckOutLocationSaved
         };
         return attendanceModel;
     }

@@ -1,5 +1,4 @@
 ﻿using HRSystem.Csharp.Domain.Features.MenuGroup;
-using HRSystem.Csharp.Domain.Models.Common;
 using HRSystem.Csharp.Domain.Models.MenuGroup;
 using HRSystem.Csharp.Shared;
 using Microsoft.AspNetCore.Authorization;

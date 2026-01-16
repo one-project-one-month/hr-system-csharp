@@ -17,9 +17,7 @@ public class BL_Attendance
         return data;
     }
 
-<<<<<<< Updated upstream
-    public async Task<Result<AttendanceCreateResponseModel>> Create(AttendanceCreateRequestModel requestModel)
-=======
+
     public async Task<Result<AttendanceListResponseModel>> ListByCode(String? empCode, DateTime startDate, DateTime endDate, int pageNo, int PageSize)
     {
         var data = await _attendance.ListByCode(empCode, startDate, endDate, pageNo, PageSize);
@@ -27,15 +25,14 @@ public class BL_Attendance
     }
 
     public async Task<Result<AttendanceCreateResponseModel>> Create(string userId,AttendanceCreateRequestModel requestModel)
->>>>>>> Stashed changes
     {
-        var data = await _attendance.Create(requestModel);
+        var data = await _attendance.Create(userId,requestModel);
         return data;
     }
 
-    public async Task<Result<AttendanceUpdateResponseModel>> Update(AttendanceUpdateRequestModel requestModel)
+    public async Task<Result<AttendanceUpdateResponseModel>> Update(string userId, AttendanceUpdateRequestModel requestModel)
     {
-        var data = await _attendance.Update(requestModel);
+        var data = await _attendance.Update(userId,requestModel);
         return data;
     }
 

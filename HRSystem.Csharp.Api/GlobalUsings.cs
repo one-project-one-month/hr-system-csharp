@@ -8,3 +8,5 @@ global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OpenApi.Models;
 global using System.Text;
+global using HRSystem.Csharp.Domain.Features.EmployeeAttendance;
+global using HRSystem.Csharp.Domain.Models.EmployeeAttendance;

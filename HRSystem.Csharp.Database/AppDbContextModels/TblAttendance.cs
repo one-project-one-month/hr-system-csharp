@@ -31,7 +31,7 @@ public partial class TblAttendance
 
     public string? Remark { get; set; }
 
-    public bool? IsSavedLocation { get; set; }
+    public bool? IsCheckInLocationSaved { get; set; }
 
     public string? CreatedBy { get; set; }
 
@@ -42,4 +42,6 @@ public partial class TblAttendance
     public DateTime? ModifiedAt { get; set; }
 
     public bool DeleteFlag { get; set; }
+
+    public bool? IsCheckOutLocationSaved { get; set; }
 }

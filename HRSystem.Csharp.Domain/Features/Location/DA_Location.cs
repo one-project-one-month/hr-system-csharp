@@ -64,7 +64,7 @@ public class DA_Location
 
             return Result<LocationListResponseModel>.Success(result);
         }
-        catch (Exception ex)
+        catch
         {
             return Result<LocationListResponseModel>.SystemError("An error occurred while retrieving locations.");
         }

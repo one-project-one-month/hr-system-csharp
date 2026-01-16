@@ -61,7 +61,7 @@ public class BL_Role
         var roleResult = await _daRole.GetByRoleCode(reqModel.RoleCode);
         if (!roleResult.IsSuccess)
         {
-            return Result<RoleResponseModel>.Error(roleResult.Message);
+            return Result<RoleResponseModel>.Error(roleResult.Message!);
         }
 
         var role = roleResult.Data!;
@@ -91,7 +91,7 @@ public class BL_Role
         var existing = await _daRole.GetByRoleCode(roleCode);
         if (!existing.IsSuccess)
         {
-            return Result<bool>.Error(existing.Message);
+            return Result<bool>.Error(existing.Message!);
         }
 
         var role = existing.Data!;
@@ -102,19 +102,13 @@ public class BL_Role
         return await _daRole.UpdateRole(role);
     }
 
-    public async Task<Result<bool>> DeleteRole(RoleDeleteRequestModel reqModel)
+    public async Task<Result<bool>> DeleteRole(string roleCode)
     {
-        if (string.IsNullOrWhiteSpace(reqModel.RoleCode))
+        if (string.IsNullOrWhiteSpace(roleCode))
         {
             return Result<bool>.BadRequestError("Role code cannot be empty");
         }
 
-        var roleResult = await _daRole.GetByRoleCode(reqModel.RoleCode);
-        if (!roleResult.IsSuccess)
-        {
-            return Result<bool>.Error(roleResult.Message);
-        }
-
-        return await _daRole.DeleteRole(roleResult.Data!);
+        return await _daRole.DeleteRole(roleCode);
     }
 }

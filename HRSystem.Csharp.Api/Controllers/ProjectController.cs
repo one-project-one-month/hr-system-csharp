@@ -1,12 +1,13 @@
 ﻿using HRSystem.Csharp.Domain.Features.Project;
 using HRSystem.Csharp.Domain.Models.Project;
 using HRSystem.Csharp.Shared;
-using Sprache;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class ProjectController : ControllerBase
 {
     private readonly BL_Project _blProject;
@@ -85,8 +86,47 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
+    [HttpGet("{projectCode}/assigned-employees")]
+    public async Task<IActionResult> EmployeesAssignedToProject(string projectCode,
+        [FromQuery] EmployeesProjectRequestModel reqModel)
+    {
+        if (string.IsNullOrWhiteSpace(projectCode))
+        {
+            var error = Result<bool>.ValidationError("Project code is required!");
+            return BadRequest(error);
+        }
+
+        var result = await _blProject.EmployeesAssignedToProject(projectCode, reqModel);
+        if (result.IsError)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("{projectCode}/unassigned-employees")]
+    public async Task<IActionResult> EmployeesUnassignedToProject(string projectCode,
+        [FromQuery] EmployeesProjectRequestModel reqModel)
+    {
+        if (string.IsNullOrWhiteSpace(projectCode))
+        {
+            var error = Result<bool>.ValidationError("Project code is required!");
+            return BadRequest(error);
+        }
+
+        var result = await _blProject.EmployeesUnassignedToProject(projectCode, reqModel);
+        if (result.IsError)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
     [HttpPost("add-employee/{projectCode}")]
-    public async Task<IActionResult> AddEmployee(string projectCode, AddEmployeeToProjectRequestModel reqModel)
+    public async Task<IActionResult> AddEmployee(string projectCode,
+        AddEmployeeToProjectRequestModel reqModel)
     {
         if (reqModel.EmployeeCodes.Count == 0)
         {
@@ -96,6 +136,38 @@ public class ProjectController : ControllerBase
         }
 
         var result = await _blProject.AddEmployee(projectCode, reqModel);
+        if (result.IsError)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPost("remove-employee/{projectCode}")]
+    public async Task<IActionResult> RemoveEmployeeFromProject(string projectCode,
+        AddEmployeeToProjectRequestModel reqModel)
+    {
+        if (reqModel.EmployeeCodes.Count == 0)
+        {
+            var response = Result<AddEmployeeToProjectResponseModel>
+                .BadRequestError("At least one employee is required!");
+            return BadRequest(response);
+        }
+
+        var result = await _blProject.RemoveEmployee(projectCode, reqModel);
+        if (result.IsError)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("overview")]
+    public async Task<IActionResult> ProjectOverview()
+    {
+        var result = await _blProject.ProjectOverviewAsync();
         if (result.IsError)
         {
             return BadRequest(result);

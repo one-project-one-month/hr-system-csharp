@@ -1,8 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features.Sequence;
-using HRSystem.Csharp.Domain.Models.Task;
-using HRSystem.Csharp.Shared.Enums;
-using Microsoft.IdentityModel.Tokens;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+﻿using HRSystem.Csharp.Domain.Models.Task;
 
 namespace HRSystem.Csharp.Domain.Features.Task;
 
@@ -24,7 +20,7 @@ public class DA_Task
             var tasksQuery = _db.TblTasks.Where(t => t.DeleteFlag == false);
             if (!string.IsNullOrWhiteSpace(TaskName))
             {
-                tasksQuery = tasksQuery.Where(t => t.TaskName.ToLower().Contains(TaskName.ToLower()));
+                tasksQuery = tasksQuery.Where(t => t.TaskName!.ToLower().Contains(TaskName.ToLower()));
             }
             var tasks = await tasksQuery
                 .OrderByDescending(t => t.CreatedAt)
@@ -63,7 +59,7 @@ public class DA_Task
         }
     }
 
-    public async Task<Result<TaskCreateResponseModel>> Create(TaskCreateRequestModel requestModel)
+    public async Task<Result<TaskCreateResponseModel>> Create(string userId, TaskCreateRequestModel requestModel)
     {
         try
         {
@@ -85,6 +81,7 @@ public class DA_Task
                 WorkingHour = requestModel.WorkingHour,
                 DeleteFlag = false,
                 CreatedAt = DateTime.UtcNow,
+                CreatedBy = userId
             };
 
             await _db.TblTasks.AddAsync(task);
@@ -92,7 +89,7 @@ public class DA_Task
 
             //UpdateSequenceNoAsync("T", taskCode.Substring(1));
 
-            return Result<TaskCreateResponseModel>.Success(null, "Task created successfully.");
+            return Result<TaskCreateResponseModel>.Success("Task created successfully.");
         }
         catch (Exception ex)
         {
@@ -140,7 +137,7 @@ public class DA_Task
         }
     }
 
-    public async Task<Result<TaskUpdateResponseModel>> Update(TaskUpdateRequestModel requestModel)
+    public async Task<Result<TaskUpdateResponseModel>> Update(string userId, TaskUpdateRequestModel requestModel)
     {
         try
         {
@@ -162,11 +159,12 @@ public class DA_Task
             task.TaskStatus = requestModel.TaskStatus;
             task.WorkingHour = requestModel.WorkingHour;
             task.ModifiedAt = DateTime.UtcNow;
+            task.ModifiedBy = userId;
 
             _db.Entry(task).State = EntityState.Modified;
             await _db.SaveChangesAsync();
 
-            return Result<TaskUpdateResponseModel>.Success(null, "Task is updated successfully.");
+            return Result<TaskUpdateResponseModel>.Success("Task is updated successfully.");
         }
         catch (Exception ex)
         {
@@ -196,7 +194,7 @@ public class DA_Task
             _db.Entry(task).State = EntityState.Modified;
             _db.SaveChanges();
 
-            return Result<TaskDeleteResponseModel>.Success(null, "Task is deleted successfully.");
+            return Result<TaskDeleteResponseModel>.Success("Task is deleted successfully.");
         }
 
         catch (Exception ex)

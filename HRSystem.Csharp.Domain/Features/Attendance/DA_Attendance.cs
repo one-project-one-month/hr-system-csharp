@@ -1,23 +1,13 @@
-﻿using HRSystem.Csharp.Domain.Features.Sequence;
-using HRSystem.Csharp.Domain.Models.Attendance;
-using HRSystem.Csharp.Shared.Enums;
-using Microsoft.IdentityModel.Tokens;
-using System.Linq;
+﻿using HRSystem.Csharp.Domain.Models.Attendance;
 
 namespace HRSystem.Csharp.Domain.Features.Attendance;
 
-public class DA_Attendance
+public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence)
 {
-    private readonly DA_Sequence _daSequence;
-    private readonly AppDbContext _db;
+    private readonly DA_Sequence _daSequence = daSequence;
+    private readonly AppDbContext _db = appDbContext;
 
-    public DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence)
-    {
-        _db = appDbContext;
-        _daSequence = daSequence;
-    }
-
-    public async Task<Result<AttendanceListResponseModel>> List(String? EmpName, DateTime startDate, DateTime endDate,int pageNo, int PageSize)
+    public async Task<Result<AttendanceListResponseModel>> List(String? EmpName, DateTime startDate, DateTime endDate, int pageNo, int PageSize)
     {
         try
         {
@@ -36,15 +26,15 @@ public class DA_Attendance
 
             if (startDate != DateTime.MinValue && endDate == DateTime.MinValue)
             {
-                attQuery = attQuery.Where(x=> DateOnly.FromDateTime(x.AttendanceDate.Value) == DateOnly.FromDateTime(startDate));
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(startDate));
             }
             else if (startDate == DateTime.MinValue && endDate != DateTime.MinValue)
             {
-                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate.Value) == DateOnly.FromDateTime(endDate));
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(endDate));
             }
             else if (startDate != DateTime.MinValue && endDate != DateTime.MinValue)
             {
-                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate.Value) >= DateOnly.FromDateTime(startDate) && DateOnly.FromDateTime(x.AttendanceDate.Value) <= DateOnly.FromDateTime(endDate));
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) >= DateOnly.FromDateTime(startDate) && DateOnly.FromDateTime(x.AttendanceDate.Value) <= DateOnly.FromDateTime(endDate));
             }
             var attendanceList = await attQuery
                     .OrderByDescending(x => x.AttendanceDate)
@@ -53,12 +43,12 @@ public class DA_Attendance
                     .AsNoTracking()
                     .ToListAsync();
 
-            if (!attendanceList.Any() || attendanceList is null)
+            if (attendanceList.Count == 0 || attendanceList is null)
                 return Result<AttendanceListResponseModel>.NotFoundError("No attendance found.");
 
             var model = new AttendanceListResponseModel
             {
-                AttendanceList = attendanceList
+                AttendanceList = [.. attendanceList
                     .Select(t =>
                     {
                         var attendance = AttendanceListModel.FromTblAttendance(t);
@@ -67,8 +57,7 @@ public class DA_Attendance
                             .Select(e => e.Name)
                             .FirstOrDefault();
                         return attendance;
-                    })
-                    .ToList()
+                    })]
             };
 
             return Result<AttendanceListResponseModel>.Success(model);
@@ -79,9 +68,6 @@ public class DA_Attendance
         }
     }
 
-<<<<<<< Updated upstream
-    public async Task<Result<AttendanceCreateResponseModel>> Create(AttendanceCreateRequestModel requestModel)
-=======
     public async Task<Result<AttendanceListResponseModel>> ListByCode(String? empCode, DateTime startDate, DateTime endDate, int pageNo, int PageSize)
     {
         try
@@ -138,7 +124,6 @@ public class DA_Attendance
     }
 
     public async Task<Result<AttendanceCreateResponseModel>> Create(string userId, AttendanceCreateRequestModel requestModel)
->>>>>>> Stashed changes
     {
         if (requestModel.EmployeeCode.IsNullOrEmpty())
         {
@@ -161,7 +146,7 @@ public class DA_Attendance
 
             //Working Hour
             DateTime checkIn = (DateTime)requestModel.CheckInTime;
-            DateTime checkOut = (DateTime)requestModel.CheckOutTime;
+            DateTime checkOut = (DateTime)requestModel.CheckOutTime!;
             TimeSpan workingHours = CalculateWorkingHours(checkIn, checkOut);
 
             //Hourly Late
@@ -203,15 +188,16 @@ public class DA_Attendance
                 HalfDayFlag = HalfDayFlag,
                 FullDayFlag = FullDayFlag,
                 Remark = requestModel.Remark,
-                IsSavedLocation = IsSavedLocation,
-                CreatedBy = null,
+                IsCheckInLocationSaved = IsSavedLocation,
+                IsCheckOutLocationSaved = IsSavedLocation,
+                CreatedBy = userId,
                 CreatedAt = DateTime.UtcNow,
                 DeleteFlag = false
             };
             await _db.AddAsync(newAttendance);
             await _db.SaveChangesAsync();
 
-            return Result<AttendanceCreateResponseModel>.Success(null, "Attendance is successfully created");
+            return Result<AttendanceCreateResponseModel>.Success("Attendance is successfully created");
         }
         catch (Exception ex)
         {
@@ -222,9 +208,9 @@ public class DA_Attendance
     public TimeSpan CalculateWorkingHours(DateTime checkIn, DateTime checkOut)
     {
         var StartTimeValue = "";
-        TimeSpan officeStartTime = new System.TimeSpan();
+        TimeSpan officeStartTime = new();
         var OfficeEndValue = "";
-        TimeSpan officeEndTime = new System.TimeSpan();
+        TimeSpan officeEndTime = new();
 
         #region Office Start Time
 
@@ -232,7 +218,7 @@ public class DA_Attendance
         if (ComRuleOfficeStart != null)
         {
             StartTimeValue = ComRuleOfficeStart.Value;
-            if (StartTimeValue.Contains(":"))
+            if (StartTimeValue!.Contains(':'))
             {
                 officeStartTime = TimeSpan.Parse(StartTimeValue);
             }
@@ -253,7 +239,7 @@ public class DA_Attendance
         if (ComRuleOfficeEnd != null)
         {
             OfficeEndValue = ComRuleOfficeEnd.Value;
-            if (OfficeEndValue.Contains(":"))
+            if (OfficeEndValue!.Contains(':'))
             {
                 officeEndTime = TimeSpan.Parse(OfficeEndValue);
             }
@@ -282,17 +268,17 @@ public class DA_Attendance
     public int CalculateHourlyLate(DateTime checkIn, DateTime checkOut)
     {
         var StartTimeValue = "";
-        TimeSpan StartTime = new System.TimeSpan();
+        TimeSpan StartTime = new();
         var CheckInAcceptValue = "";
-        TimeSpan CheckInAccept = new System.TimeSpan();
+        TimeSpan CheckInAccept = new();
         var CheckInLateValue = "";
-        TimeSpan CheckInLate = new System.TimeSpan();
+        TimeSpan CheckInLate = new();
         var OfficeEndValue = "";
-        TimeSpan OfficeEnd = new System.TimeSpan();
+        TimeSpan OfficeEnd = new();
         var CheckoutAcceptValue = "";
-        TimeSpan CheckoutAccept = new System.TimeSpan();
+        TimeSpan CheckoutAccept = new();
         var CheckoutLateValue = "";
-        TimeSpan CheckoutLate = new System.TimeSpan();
+        TimeSpan CheckoutLate = new();
 
         #region Office Start Time
 
@@ -300,7 +286,7 @@ public class DA_Attendance
         if (ComRuleOfficeStart != null)
         {
             StartTimeValue = ComRuleOfficeStart.Value;
-            if (StartTimeValue.Contains(":"))
+            if (StartTimeValue!.Contains(':'))
             {
                 StartTime = TimeSpan.Parse(StartTimeValue);
             }
@@ -321,7 +307,7 @@ public class DA_Attendance
         if (ComRuleCheckinAccept != null)
         {
             CheckInAcceptValue = ComRuleCheckinAccept.Value;
-            if (CheckInAcceptValue.Contains(":"))
+            if (CheckInAcceptValue!.Contains(':'))
             {
                 CheckInAccept = TimeSpan.Parse(CheckInAcceptValue);
             }
@@ -342,7 +328,7 @@ public class DA_Attendance
         if (ComRuleCheckinLate != null)
         {
             CheckInLateValue = ComRuleCheckinLate.Value;
-            if (CheckInLateValue.Contains(":"))
+            if (CheckInLateValue!.Contains(':'))
             {
                 CheckInLate = TimeSpan.Parse(CheckInLateValue);
             }
@@ -368,7 +354,7 @@ public class DA_Attendance
         if (ComRuleOfficeEnd != null)
         {
             OfficeEndValue = ComRuleOfficeEnd.Value;
-            if (OfficeEndValue.Contains(":"))
+            if (OfficeEndValue!.Contains(':'))
             {
                 OfficeEnd = TimeSpan.Parse(OfficeEndValue);
             }
@@ -388,7 +374,7 @@ public class DA_Attendance
         if (ComRuleCheckoutAccept != null)
         {
             CheckoutAcceptValue = ComRuleCheckoutAccept.Value;
-            if (CheckoutAcceptValue.Contains(":"))
+            if (CheckoutAcceptValue!.Contains(':'))
             {
                 CheckoutAccept = TimeSpan.Parse(CheckoutAcceptValue);
             }
@@ -408,7 +394,7 @@ public class DA_Attendance
         if (ComRuleCheckoutLate != null)
         {
             CheckoutLateValue = ComRuleCheckoutLate.Value;
-            if (CheckoutLateValue.Contains(":"))
+            if (CheckoutLateValue!.Contains(':'))
             {
                 CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
             }
@@ -435,9 +421,9 @@ public class DA_Attendance
     {
         int halfDayLate = 0;
         var CheckInLateValue = "";
-        TimeSpan CheckInLate = new System.TimeSpan();
+        TimeSpan CheckInLate = new();
         var CheckoutLateValue = "";
-        TimeSpan CheckoutLate = new System.TimeSpan();
+        TimeSpan CheckoutLate = new();
 
         //For Morning Part
         #region One Hour Late CheckIn
@@ -446,7 +432,7 @@ public class DA_Attendance
         if (ComRuleCheckinLate != null)
         {
             CheckInLateValue = ComRuleCheckinLate.Value;
-            if (CheckInLateValue.Contains(":"))
+            if (CheckInLateValue!.Contains(':'))
             {
                 CheckInLate = TimeSpan.Parse(CheckInLateValue);
             }
@@ -469,7 +455,7 @@ public class DA_Attendance
         if (ComRuleCheckoutLate != null)
         {
             CheckoutLateValue = ComRuleCheckoutLate.Value;
-            if (CheckoutLateValue.Contains(":"))
+            if (CheckoutLateValue!.Contains(':'))
             {
                 CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
             }
@@ -493,7 +479,7 @@ public class DA_Attendance
         return halfDayLate;
     }
 
-    public async Task<Result<AttendanceUpdateResponseModel>> Update(AttendanceUpdateRequestModel requestModel)
+    public async Task<Result<AttendanceUpdateResponseModel>> Update(string userId, AttendanceUpdateRequestModel requestModel)
     {
         try
         {
@@ -508,8 +494,8 @@ public class DA_Attendance
             }
 
             //Working Hour
-            DateTime checkIn = (DateTime)requestModel.CheckInTime;
-            DateTime checkOut = (DateTime)requestModel.CheckOutTime;
+            DateTime checkIn = (DateTime)requestModel.CheckInTime!;
+            DateTime checkOut = (DateTime)requestModel.CheckOutTime!;
             TimeSpan workingHours = CalculateWorkingHours(checkIn, checkOut);
 
             //Hourly Late
@@ -546,9 +532,10 @@ public class DA_Attendance
             item.HourLateFlag = HourLateFlag;
             item.HalfDayFlag = HalfDayFlag;
             item.FullDayFlag = FullDayFlag;
-            item.IsSavedLocation = IsSavedLocation;
+            item.IsCheckInLocationSaved = IsSavedLocation;
+            item.IsCheckOutLocationSaved = IsSavedLocation;
             item.Remark = requestModel.Remark;
-            item.ModifiedBy = "";
+            item.ModifiedBy = userId;
             item.ModifiedAt = DateTime.UtcNow;
             _db.Entry(item).State = EntityState.Modified;
             var res = await _db.SaveChangesAsync();
@@ -557,7 +544,7 @@ public class DA_Attendance
                 entry.State = EntityState.Detached;
             }
 
-            return Result<AttendanceUpdateResponseModel>.Success(null, "Attendance updated successfully!");
+            return Result<AttendanceUpdateResponseModel>.Success("Attendance updated successfully!");
         }
         catch (Exception ex)
         {
@@ -620,7 +607,7 @@ public class DA_Attendance
                 entry.State = EntityState.Detached;
             }
 
-            return Result<AttendanceDeleteResponseModel>.Success(null, "Attendance successfully deleted!");
+            return Result<AttendanceDeleteResponseModel>.Success("Attendance successfully deleted!");
 
         }
         catch (Exception ex)
@@ -632,14 +619,8 @@ public class DA_Attendance
     public async Task<string> GenerateSequenceCodeAsync(string uniqueName)
     {
         var sequence = await _db.TblSequences
-            .FirstOrDefaultAsync(s => s.UniqueName == uniqueName);
-
-        if (sequence is null)
-        {
-            throw new Exception("Sequence not found.");
-        }
-
-        var sequenceNo = Int32.Parse(sequence.SequenceNo!) + 1;
+            .FirstOrDefaultAsync(s => s.UniqueName == uniqueName) ?? throw new Exception("Sequence not found.");
+        var sequenceNo = int.Parse(sequence.SequenceNo!) + 1;
 
         var sequenceCode = uniqueName + sequenceNo.ToString("D6");
         return sequenceCode;
@@ -648,13 +629,7 @@ public class DA_Attendance
     public void UpdateSequenceNoAsync(string uniqueName, string sequenceNo)
     {
         var sequence = _db.TblSequences
-            .FirstOrDefault(s => s.UniqueName == uniqueName);
-
-        if (sequence is null)
-        {
-            throw new Exception("Sequence not found.");
-        }
-
+            .FirstOrDefault(s => s.UniqueName == uniqueName) ?? throw new Exception("Sequence not found.");
         sequence.SequenceNo = sequenceNo;
 
         _db.Entry(sequence).State = EntityState.Modified;

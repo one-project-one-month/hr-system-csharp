@@ -1,12 +1,13 @@
 ﻿using HRSystem.Csharp.Domain.Models.Roles;
-using System.Threading.Tasks;
 using HRSystem.Csharp.Domain.Features.Role;
 using HRSystem.Csharp.Shared;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class RoleController : ControllerBase
 {
     private readonly BL_Role _blRole;
@@ -101,10 +102,7 @@ public class RoleController : ControllerBase
             return BadRequest(response);
         }
 
-        var result = await _blRole.DeleteRole(new RoleDeleteRequestModel()
-        {
-            RoleCode = roleCode
-        });
+        var result = await _blRole.DeleteRole(roleCode);
 
         if (result.IsSuccess)
         {

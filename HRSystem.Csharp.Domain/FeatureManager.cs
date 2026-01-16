@@ -1,17 +1,16 @@
 ﻿using DotNetEnv;
-using HRSystem.Csharp.Domain.Features.Reports;
-using HRSystem.Csharp.Domain.Features.Role;
-using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
-using HRSystem.Csharp.Domain.Features.Rule;
-using HRSystem.Csharp.Domain.Features.Sequence;
-using HRSystem.Csharp.Domain.Features.Verification;
 using Microsoft.Data.SqlClient;
-using System.Data;
 using System.Net;
 using System.Net.Mail;
-using DotNetEnv;
 using HRSystem.Csharp.Domain.Features.AdminDashboard;
+using HRSystem.Csharp.Domain.Features.AttendanceReports;
 using HRSystem.Csharp.Domain.Features.Payroll;
+using HRSystem.Csharp.Domain.Features.CompanyRule;
+using HRSystem.Csharp.Shared.Services;
+using HRSystem.Csharp.Domain.Features.EmployeeAttendance;
+using HRSystem.Csharp.Domain.Features.Leave;
+using HRSystem.Csharp.Domain.Features.Reports;
+using HRSystem.Csharp.Domain.Features.Rule;
 
 namespace HRSystem.Csharp.Domain;
 
@@ -30,10 +29,10 @@ public static class FeatureManager
         builder.Services.AddScoped<BL_Employee>();
         builder.Services.AddScoped<BL_Auth>();
         builder.Services.AddScoped<BL_Sequence>();
-        builder.Services.AddScoped<BL_CompanyRules>();
+        builder.Services.AddScoped<BL_CompanyRule>();
         builder.Services.AddScoped<BL_Verification>();
         builder.Services.AddScoped<BL_AdminDashboard>();
-
+        builder.Services.AddScoped<BL_EmployeeAttendance>();
         builder.Services.AddScoped<BL_Payroll>();
         builder.Services.AddScoped<BL_AttendanceReports>();
 
@@ -56,10 +55,10 @@ public static class FeatureManager
         builder.Services.AddScoped<DA_Employee>();
         builder.Services.AddScoped<DA_Auth>();
         builder.Services.AddScoped<DA_Sequence>();
-        builder.Services.AddScoped<DA_CompanyRules>();
+        builder.Services.AddScoped<DA_CompanyRule>();
         builder.Services.AddScoped<DA_Verification>();
         builder.Services.AddScoped<DA_AdminDashboard>();
-
+        builder.Services.AddScoped<DA_EmployeeAttendance>();
         builder.Services.AddScoped<DA_Permission>();
         builder.Services.AddScoped<DA_Payroll>();
         builder.Services.AddScoped<DA_AttendanceReports>();
@@ -76,6 +75,27 @@ public static class FeatureManager
 
         builder.Services.AddScoped<BL_RoleMenuPermission>();
         builder.Services.AddScoped<DA_RoleMenuPermission>();
+
+        #endregion
+
+        #region Report
+
+        builder.Services.AddScoped<AdminReportService>();
+        builder.Services.AddScoped<EmployeeReportService>();
+        builder.Services.AddScoped<ExportService>();
+
+        #endregion
+
+        #region Leave
+
+        builder.Services.AddScoped<DA_Leave>();
+        builder.Services.AddScoped<BL_Leave>();
+
+        #endregion
+
+        #region Rule
+
+        builder.Services.AddScoped<DA_Rule>();
 
         #endregion
 
@@ -100,13 +120,10 @@ public static class FeatureManager
             $"Server=tcp:{host},1433;Database={db};User Id={user};Password={password};TrustServerCertificate=True";
 
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(mssqlConnection));
-
-        //builder.Services.AddDbContext<AppDbContext>(opt => { opt.UseSqlServer(mssqlConnection)
-        //    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking); },
-        //    ServiceLifetime.Transient, 
-        //    ServiceLifetime.Transient);
-
+                options.UseSqlServer(mssqlConnection)
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking),
+            ServiceLifetime.Transient,
+            ServiceLifetime.Transient);
 
         builder.Services.AddScoped<IDbConnection>(sp =>
         {
@@ -114,6 +131,8 @@ public static class FeatureManager
             conn.Open();
             return conn;
         });
+
+        builder.Services.AddScoped<DapperService>();
 
         builder.Services
             .AddFluentEmail("hrsystem.opom@gmail.com")

@@ -121,7 +121,7 @@ public class DA_Menu
         if(foundMenu == null)
             return false;
         foundMenu.MenuGroupCode = menu.MenuGroupCode;
-        foundMenu.MenuName = menu.MenuName;
+        foundMenu.MenuName = menu.MenuName!;
         foundMenu.Url = menu.Url;
         foundMenu.Icon = menu.Icon;
         foundMenu.ModifiedAt = menu.ModifiedAt;

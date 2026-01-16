@@ -1,32 +1,44 @@
-﻿using HRSystem.Csharp.Domain.Features.Rule;
-using HRSystem.Csharp.Domain.Models.CompanyRules;
+﻿using HRSystem.Csharp.Domain.Features.CompanyRule;
+using HRSystem.Csharp.Domain.Models.CompanyRule;
+using Microsoft.AspNetCore.Authorization;
 
-namespace HRSystem.Csharp.Api.Controllers
+namespace HRSystem.Csharp.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Authorize]
+public class CompanyRulesController(BL_CompanyRule blCompanyRules) : Controller
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CompanyRulesController : Controller
+    private readonly BL_CompanyRule _blCompanyRules = blCompanyRules;
+
+    [HttpGet("list")]
+    public async Task<IActionResult> GetAllCompanyRules([FromQuery] CompanyRuleListRequestModel reqModel)
     {
-        private readonly BL_CompanyRules _blCompanyRules;
+        var result = await _blCompanyRules.GetAllCompanyRulesAsync(reqModel);
+        return Ok(result);
+    }
 
-        public CompanyRulesController(BL_CompanyRules blCompanyRules)
-        {
-            _blCompanyRules = blCompanyRules;
-        }
+    [HttpPost("update/{ruleCode}")]
+    public async Task<IActionResult> UpdateCompanyRule(string ruleCode, RuleUpdateRequestModel reqModel)
+    {
+        reqModel.CompanyRuleCode = ruleCode;
+        var result = await _blCompanyRules.Update(reqModel);
+        return Ok(result);
+    }
 
-        [HttpGet("list")]
-        public async Task<IActionResult> GetAllCompanyRules([FromQuery] CompanyRuleListRequestModel reqModel)
-        {
-            var result = await _blCompanyRules.GetAllCompanyRulesAsync(reqModel);
-            return Ok(result);
-        }
+    [HttpGet("update/{ruleCode}")]
+    public async Task<IActionResult> GetRuleById (string ruleCode)
+    {
+        if (ruleCode is null)
+            return BadRequest("Code is required!");
+        var result = await _blCompanyRules.GetCompanyRuleByIdAysnc(ruleCode);
 
-        [HttpPost("update/{ruleCode}")]
-        public async Task<IActionResult> UpdateCompanyRule(string ruleCode, RuleUpdateRequestModel reqModel)
-        {
-            reqModel.CompanyRuleCode = ruleCode;
-            var result = await _blCompanyRules.Update(reqModel);
-            return Ok(result);
-        }
+        if (result.IsNotFound)
+            return NotFound("Company Rule not found!");
+
+        if (result.IsError)
+            return BadRequest("Code is required");
+        
+        return Ok(result);
     }
 }

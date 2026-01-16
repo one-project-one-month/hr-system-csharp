@@ -1,10 +1,13 @@
 ﻿using HRSystem.Csharp.Domain.Features.Attendance;
 using HRSystem.Csharp.Domain.Models.Attendance;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class AttendanceController : ControllerBase
 {
     private readonly BL_Attendance _bL_Attendance;
@@ -15,9 +18,10 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpGet("AttendanceList")]
-    public async Task<IActionResult> AttendanceLists(String? EmpName, DateTime startDate, DateTime endDate, int pageNo=1, int PageSize=10)
+    public async Task<IActionResult> AttendanceLists(String? EmpName, DateTime startDate, DateTime endDate,
+        int pageNo = 1, int PageSize = 10)
     {
-        var data = await _bL_Attendance.List(EmpName,startDate, endDate, pageNo, PageSize);
+        var data = await _bL_Attendance.List(EmpName, startDate, endDate, pageNo, PageSize);
         return Ok(data);
     }
 
@@ -32,14 +36,24 @@ public class AttendanceController : ControllerBase
     [HttpPost("AttendanceCreate")]
     public async Task<IActionResult> AttendanceCreate(AttendanceCreateRequestModel requestModel)
     {
-        var data = await _bL_Attendance.Create(requestModel);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+            return Unauthorized("Invalid user token.");
+
+        var data = await _bL_Attendance.Create(userId, requestModel);
         return Ok(data);
     }
 
     [HttpPut("AttendanceUpdate")]
     public async Task<IActionResult> AttendanceUpdate(AttendanceUpdateRequestModel requestModel)
     {
-        var data = await _bL_Attendance.Update(requestModel);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+            return Unauthorized("Invalid user token.");
+
+        var data = await _bL_Attendance.Update(userId, requestModel);
         return Ok(data);
     }
 

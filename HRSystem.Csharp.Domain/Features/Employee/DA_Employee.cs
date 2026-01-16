@@ -1,31 +1,22 @@
-﻿using HRSystem.Csharp.Domain.Models.Employee;
-using System.Data;
-using HRSystem.Csharp.Domain.Features.Sequence;
+﻿using Azure.Core;
 using HRSystem.Csharp.Domain.Models.Project;
-using HRSystem.Csharp.Shared.Enums;
-using Microsoft.Extensions.Logging;
+using static Dapper.SqlMapper;
 
 namespace HRSystem.Csharp.Domain.Features.Employee;
 
-public class DA_Employee
+public class DA_Employee(
+    IHttpContextAccessor httpContextAccessor,
+    AppDbContext appDbContext,
+    ILogger<DA_Employee> logger,
+    DA_Sequence daSequence,
+    JwtService jwtService) : AuthorizationService(httpContextAccessor)
 {
-    string currentUser = "Admin"; //for testing only
+    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly ILogger<DA_Employee> _logger = logger;
+    private readonly JwtService _jwtService = jwtService;
+    private readonly DA_Sequence _daSequence = daSequence;
 
-    private readonly AppDbContext _appDbContext;
-    private readonly ILogger<DA_Employee> _logger;
-    private readonly JwtService _jwtService;
-    private readonly DA_Sequence _daSequence;
-
-    public DA_Employee(AppDbContext appDbContext, ILogger<DA_Employee> logger, DA_Sequence daSequence,
-        JwtService jwtService)
-    {
-        _appDbContext = appDbContext;
-        _logger = logger;
-        _daSequence = daSequence;
-        _jwtService = jwtService;
-    }
-
-    public async Task<Result<EmployeeListResponseModel>> GetAllEmployee(EmployeeListRequestModel reqModel)
+    public async Task<Result<EmployeeListResponseModel>> GetEmployeeList(EmployeeListRequestModel reqModel)
     {
         try
         {
@@ -53,6 +44,11 @@ public class DA_Employee
                                          && r.Name.ToLower().Contains(reqModel.EmployeeName.ToLower()));
             }
 
+            if (!string.IsNullOrWhiteSpace(reqModel.RoleName))
+            {
+                query = query.Where(r => r.RoleName != null
+                                         && r.RoleName.ToLower().Equals(reqModel.RoleName.ToLower()));
+            }
 
             query = query.OrderByDescending(r => r.CreatedAt);
 
@@ -97,7 +93,8 @@ public class DA_Employee
                 PhoneNo = employee.PhoneNo,
                 Salary = employee.Salary,
                 StartDate = employee.StartDate,
-                ResignDate = employee.ResignDate
+                ResignDate = employee.ResignDate,
+                Gender = employee.Gender
             };
             return Result<EmployeeEditResponseModel>.Success(result);
         }
@@ -119,7 +116,7 @@ public class DA_Employee
 
         var invalidEmployees = reqModel.EmployeeCodes.Except(existingEmployees).ToList();
 
-        if (invalidEmployees.Any())
+        if (invalidEmployees.Count != 0)
         {
             return Result<AddEmployeeToProjectResponseModel>.ValidationError(
                 $"Employees not found: {string.Join(", ", invalidEmployees)}",
@@ -152,11 +149,12 @@ public class DA_Employee
                         Name = e.Name,
                         RoleName = r.RoleName,
                         Email = e.Email,
-                        PhoneNo = e.PhoneNo
+                        PhoneNo = e.PhoneNo,
+                        Gender = e.Gender
                     })
                 .FirstOrDefaultAsync();
 
-            if (result == null)
+            if (result is null)
             {
                 return Result<UserProfileResponseModel>.ValidationError("Employee doesn't exist!");
             }
@@ -169,7 +167,7 @@ public class DA_Employee
                 $"An error occurred while retrieving employees: {ex.Message}");
         }
     }
-    
+
     public async Task<Result<EmployeeCreateResponseModel>> CreateEmployee(
         EmployeeCreateRequestModel reqModel)
     {
@@ -194,7 +192,7 @@ public class DA_Employee
                 StartDate = reqModel.StartDate,
                 ResignDate = reqModel.ResignDate,
                 CreatedAt = DateTime.UtcNow,
-                CreatedBy = currentUser,
+                CreatedBy = UserCode!,
                 DeleteFlag = false
             };
 
@@ -233,12 +231,16 @@ public class DA_Employee
             existingEmp.StartDate = emp.StartDate;
             existingEmp.ResignDate = emp.ResignDate;
             existingEmp.ModifiedAt = DateTime.UtcNow;
+<<<<<<< HEAD
 <<<<<<< Updated upstream
             existingEmp.ModifiedBy = currentUser;
 =======
             existingEmp.ModifiedBy = UserCode!;
             _appDbContext.TblEmployees.Update(existingEmp);
 >>>>>>> Stashed changes
+=======
+            existingEmp.ModifiedBy = UserCode!;
+>>>>>>> dev
             var updated = await _appDbContext.SaveChangesAsync() > 0;
 
             return updated
@@ -247,7 +249,7 @@ public class DA_Employee
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString());
+            _logger.LogExceptionError(ex);
             return Result<EmployeeUpdateResponseModel>.Error("Employee Update failed!");
         }
     }
@@ -264,7 +266,7 @@ public class DA_Employee
 
         model.DeleteFlag = true;
         model.ModifiedAt = DateTime.UtcNow;
-        model.ModifiedBy = currentUser;
+        model.ModifiedBy = UserCode!;
 
         await _appDbContext.SaveChangesAsync();
 
@@ -402,4 +404,77 @@ public class DA_Employee
             return Result<bool>.SystemError("An error occurred while checking phone no duplication.");
         }
     }
+
+    public async Task<Result<EmployeEditProfileResponseModel>> EditProfile(EmployeeEditProfileRequestModel requestModel)
+    {
+        try
+        {
+            #region Validation
+           
+            if (requestModel.EmployeeCode.IsNullOrEmpty())
+            {
+                return Result<EmployeEditProfileResponseModel>.ValidationError("Employee code required.");
+            }
+
+            var employee = await _appDbContext.TblEmployees
+                //.Include(e => e.RoleCode)
+                .FirstOrDefaultAsync(e => e.EmployeeCode == requestModel.EmployeeCode && !e.DeleteFlag);
+
+            if (employee is null)
+            {
+                return Result<EmployeEditProfileResponseModel>.NotFoundError("Employee not found.");
+            }
+
+            if (!requestModel.Email.IsNullOrEmpty() &&
+                requestModel.Email != employee.Email &&
+                await _appDbContext.TblEmployees.AnyAsync(e => e.Email == requestModel.Email && e.EmployeeCode != requestModel.EmployeeCode))
+            {
+                return Result<EmployeEditProfileResponseModel>.ValidationError("Email already exists.");
+            }
+
+            if (requestModel.ProfileImage is not null && requestModel.ProfileImage.Length > 0)
+            {
+                var upload = await EnumDirectory.ProfileImage.UploadFilesAsync([requestModel.ProfileImage]);
+                if (upload is not null && upload.Count != 0)
+                {
+                    employee.ProfileImage = upload.First().FilePath;
+                }
+            }
+
+            #endregion
+
+            if (!string.IsNullOrWhiteSpace(requestModel.Name)) employee.Name = requestModel.Name;
+            if (!string.IsNullOrWhiteSpace(requestModel.Email)) employee.Email = requestModel.Email;
+            if (!string.IsNullOrWhiteSpace(requestModel.PhoneNo)) employee.PhoneNo = requestModel.PhoneNo;
+            if (!string.IsNullOrWhiteSpace(requestModel.Gender)) employee.Gender = requestModel.Gender;
+
+            employee.ModifiedAt = DateTime.UtcNow;
+            employee.ModifiedBy = UserCode;
+            _appDbContext.Update(employee);
+            await _appDbContext.SaveChangesAsync();
+
+            return Result<EmployeEditProfileResponseModel>.Success("Profile Updated Successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogExceptionError(ex);
+            return Result<EmployeEditProfileResponseModel>.Error($"An error occurred while editing profile: {ex.Message}");
+        }
+    }
+
+    public async Task<TblEmployee?> GetEmployeeByEmail(string employeeEmail)
+    {
+            var employee = await _appDbContext.TblEmployees
+                .FirstOrDefaultAsync(e => e.Email.ToLower() == employeeEmail.ToLower() && e.DeleteFlag == false);
+            return employee;
+    }
+
+    public async Task<bool> UpdateEmployee (TblEmployee employee)
+    {
+         _appDbContext.TblEmployees.Update(employee);
+        var result = await _appDbContext.SaveChangesAsync();
+        return result > 0;
+    }
+
+
 }

@@ -1,17 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features.Role;
-using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
-using HRSystem.Csharp.Domain.Features.Sequence;
-using HRSystem.Csharp.Domain.Models.Auth;
-using HRSystem.Csharp.Domain.Models.Employee;
-using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
-using HRSystem.Csharp.Shared;
-using HRSystem.Csharp.Shared.Enums;
-using HRSystem.Csharp.Database.AppDbContextModels;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
-using System.IdentityModel.Tokens.Jwt;
-
-namespace HRSystem.Csharp.Domain.Features.Auth;
+﻿namespace HRSystem.Csharp.Domain.Features.Auth;
 
 public class DA_Auth : AuthorizationService
 {
@@ -20,19 +7,22 @@ public class DA_Auth : AuthorizationService
     private readonly DA_Role _role;
     private readonly DA_RoleMenuPermission _roleMenuPermission;
     private readonly DA_Sequence _daSequence;
+    private readonly BL_Verification _blVerification;
 
     public DA_Auth(IHttpContextAccessor contextAccessor,
-            JwtService jwtService, 
+            JwtService jwtService,
             AppDbContext appDbContext,
             DA_Role role,
             DA_RoleMenuPermission roleMenuPermission,
-            DA_Sequence daSequence) : base(contextAccessor)
+            DA_Sequence daSequence,
+            BL_Verification blVerification) : base(contextAccessor)
     {
         _jwtService = jwtService;
         _appDbContext = appDbContext;
         _role = role;
         _roleMenuPermission = roleMenuPermission;
         _daSequence = daSequence;
+        _blVerification = blVerification;
     }
 
     public async Task<Result<AuthResponseModel>> LoginAsync(LoginRequestModel requestModel)
@@ -49,7 +39,7 @@ public class DA_Auth : AuthorizationService
                 return Result<AuthResponseModel>.ValidationError("Password cannot be blank or empty.");
             }
 
-            _jwtService.HashPassword(requestModel.Password);
+            var hashPass = _jwtService.HashPassword(requestModel.Password);
             var user = _appDbContext.TblEmployees.FirstOrDefault(x => x.Username == requestModel.UserName);
 
             if (user is null)
@@ -79,9 +69,10 @@ public class DA_Auth : AuthorizationService
                             Name = user.Name,
                             Email = user.Email,
                             PhoneNo = user.PhoneNo,
-                            RoleName = role.Data.RoleName,
+                            RoleName = role.Data!.RoleName,
+                            IsFirstTimeLogin = true
                         }
-                    }, 
+                    },
                     "User is First Time.");
             }
 
@@ -91,12 +82,12 @@ public class DA_Auth : AuthorizationService
 
             var model = new MenuTreeRequestModel
             {
-                RoleCode = role.Data.RoleCode
+                RoleCode = role.Data!.RoleCode
             };
-            
-            var roleMenuPermission = await  _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
 
-            if(roleMenuPermission is null)
+            var roleMenuPermission = await _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
+
+            if (roleMenuPermission is null)
                 return Result<AuthResponseModel>.InvalidDataError("Employee needs permissions to access");
 
             var refreshToken = new TblRefreshToken
@@ -109,13 +100,10 @@ public class DA_Auth : AuthorizationService
                 CreatedBy = user.EmployeeCode,
                 ExpiryDate = DateTime.Now.AddDays(7),
                 DeleteFlag = false,
-                
             };
 
             _appDbContext.TblRefreshTokens.Add(refreshToken);
             await _appDbContext.SaveChangesAsync();
-            Console.WriteLine("refresh token is ________________" + refreshToken.ToString());
-            Console.WriteLine("jwtId is -------------" + jwtId);
             var response = new AuthResponseModel
             {
                 AccessToken = token,
@@ -129,7 +117,7 @@ public class DA_Auth : AuthorizationService
                     Name = user.Name,
                     Email = user.Email,
                     PhoneNo = user.PhoneNo,
-                    MenuTree = roleMenuPermission.Data,
+                    MenuTree = roleMenuPermission.Data!,
                 },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo,
             };
@@ -171,9 +159,19 @@ public class DA_Auth : AuthorizationService
             if (user is null)
                 Result<AuthResponseModel>.NotFoundError("User not found");
 
-            var role = await _role.GetByRoleCode(user.RoleCode);
+            var role = await _role.GetByRoleCode(user!.RoleCode);
             if (role is null)
                 Result<AuthResponseModel>.NotFoundError("Role with the user not found");
+
+            var model = new MenuTreeRequestModel
+            {
+                RoleCode = role!.Data!.RoleCode
+            };
+
+            var roleMenuPermission = await _roleMenuPermission.GetMenuTreeWithPermissionsAsync(model);
+
+            if (roleMenuPermission is null)
+                return Result<AuthResponseModel>.InvalidDataError("Employee needs permissions to access");
 
             var newToken = _jwtService.GenerateJwtToken(user.Username, user.Email, user.EmployeeCode);
 
@@ -206,7 +204,8 @@ public class DA_Auth : AuthorizationService
                     RoleName = role.Data.RoleName,
                     Name = user.Name,
                     Email = user.Email,
-                    PhoneNo = user.PhoneNo
+                    PhoneNo = user.PhoneNo,
+                    MenuTree = roleMenuPermission.Data!,
                 },
                 ExpiresAt = new JwtSecurityTokenHandler().ReadJwtToken(newToken).ValidTo,
             };
@@ -281,8 +280,8 @@ public class DA_Auth : AuthorizationService
             return Result<bool>.ValidationError("New password must be at least 6 characters long.");
         }
 
-        var user = await _appDbContext.TblEmployees
-            .FirstOrDefaultAsync(x => x.EmployeeCode == requestModel.EmployeeCode);
+        TblEmployee? user = await _appDbContext.TblEmployees
+            .FirstOrDefaultAsync(x => x.EmployeeCode == requestModel.EmployeeCode && x.DeleteFlag == false);
 
         if (user is null)
         {
@@ -296,6 +295,8 @@ public class DA_Auth : AuthorizationService
 
         user.Password = _jwtService.HashPassword(requestModel.NewPassword);
         user.IsFirstTimeLogin = false;
+        user.ModifiedAt = DateTime.UtcNow;
+        user.ModifiedBy = user.Username;
 
         _appDbContext.TblEmployees.Update(user);
         var result = await _appDbContext.SaveChangesAsync();
@@ -392,4 +393,33 @@ public class DA_Auth : AuthorizationService
             return Result<AuthResponseModel>.SystemError($"An error occurred during auto-login: {ex.Message}");
         }
     }
+
+    public async Task<Result<string>> ForgotPassword(string email)
+    {
+        try
+        {
+            var user = await _appDbContext.TblEmployees.FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower() && x.DeleteFlag == false);
+            if (user is null)
+            {
+                return Result<string>.NotFoundError("Email not found");
+            }
+            var emailRequest = new VerificationRequestModel()
+            {
+                Email = email
+            };
+            var emailResponse = await _blVerification.SendEmail(emailRequest, user.EmployeeCode);
+            if (!emailResponse.IsSuccess)
+            {
+                return Result<string>.Error("Failed to send password reset email.");
+            }
+
+            return Result<string>.Success("New Passcode has been sent to your email.");
+        }
+        catch (Exception ex)
+        {
+            return Result<string>.SystemError(ex.Message);
+        }
+    }
+
+
 }

@@ -1,10 +1,12 @@
 using HRSystem.Csharp.Domain.Features.RoleMenuPermission;
 using HRSystem.Csharp.Domain.Models.RoleMenuPermission;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/role-menu-permission")]
 [ApiController]
+[Authorize]
 public class RoleMenuPermissionController : ControllerBase
 {
     private readonly ILogger<RoleMenuPermissionController> _logger;
@@ -26,7 +28,7 @@ public class RoleMenuPermissionController : ControllerBase
             if (result.IsError)
                 return BadRequest(result);
 
-            return Ok(result.Data);
+            return Ok(result);
         }
         catch (Exception e)
         {
@@ -55,12 +57,11 @@ public class RoleMenuPermissionController : ControllerBase
     {
         try
         {
-
             var result = await _blRoleMenuPermission.CreateRoleMenuPermission(reqModel);
             if (result.IsError)
                 return BadRequest(result);
 
-            return Ok(result.Data);
+            return Ok(result);
         }
         catch (Exception e)
         {

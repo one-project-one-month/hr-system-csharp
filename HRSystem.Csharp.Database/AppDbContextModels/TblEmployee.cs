@@ -40,4 +40,6 @@ public partial class TblEmployee
     public string? ModifiedBy { get; set; }
 
     public bool DeleteFlag { get; set; }
+
+    public string? Gender { get; set; }
 }

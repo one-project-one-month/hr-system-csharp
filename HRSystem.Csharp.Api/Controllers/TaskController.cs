@@ -1,10 +1,13 @@
 ﻿using HRSystem.Csharp.Domain.Features.Task;
 using HRSystem.Csharp.Domain.Models.Task;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace HRSystem.Csharp.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class TaskController : ControllerBase
 {
     private readonly BL_Task _blTask;
@@ -17,14 +20,19 @@ public class TaskController : ControllerBase
     [HttpGet("list")]
     public async Task<IActionResult> ListAsync(string? TaskName, int pageNo = 1, int PageSize = 10)
     {
-        var result = await _blTask.ListAsync(TaskName, pageNo, PageSize);
+        var result = await _blTask.ListAsync(TaskName!, pageNo, PageSize);
         return Ok(result);
     }
 
     [HttpPost("create")]
     public async Task<IActionResult> CreateAsync(TaskCreateRequestModel requestModel)
     {
-        var result = await _blTask.CreateAsync(requestModel);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+            return Unauthorized("Invalid user token.");
+
+        var result = await _blTask.CreateAsync(userId, requestModel);
         return Ok(result);
     }
 
@@ -38,7 +46,12 @@ public class TaskController : ControllerBase
     [HttpPut("update")]
     public async Task<IActionResult> UpdateAsync(TaskUpdateRequestModel requestModel)
     {
-        var result = await _blTask.UpdateAsync(requestModel);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+            return Unauthorized("Invalid user token.");
+
+        var result = await _blTask.UpdateAsync(userId, requestModel);
         return Ok(result);
     }
 

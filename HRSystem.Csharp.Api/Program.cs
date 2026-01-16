@@ -2,6 +2,7 @@
 using HRSystem.Csharp.Database.AppDbContextModels;
 using HRSystem.Csharp.Shared.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -87,7 +88,7 @@ try
                         Id = "Bearer"
                     }
                 },
-                new string[] { }
+                Array.Empty<string>()
             }
         });
     });
@@ -103,6 +104,12 @@ try
     //    app.UseSwagger();
     //    app.UseSwaggerUI();
     //}
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "ProfileImage")),
+        RequestPath = "/ProfileImage"
+    });
 
     app.UseSwagger();
     app.UseSwaggerUI();
