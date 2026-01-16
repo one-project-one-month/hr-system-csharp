@@ -21,6 +21,14 @@ public class BL_Project
         return await _daProject.GetAllProjects(reqModel);
     }
 
+    public async Task<Result<ProjectListResponseModel>> GetAllProjectsByCode(string empCode, ProjectListRequestModel reqModel)
+    {
+        if (empCode is null)
+            return Result<ProjectListResponseModel>.BadRequestError("Employee code is requried!");
+        
+        return await _daProject.GetAllProjectsByCode(empCode, reqModel);
+    }
+
     public async Task<Result<bool>> CreateProject(ProjectRequestModel project)
     {
         var validation = RequestValidator.ValidateProject(project);

@@ -26,6 +26,15 @@ public class ProjectController : ControllerBase
         return StatusCode(500, result);
     }
 
+    [HttpGet("list/{empCode}")]
+    public async Task<IActionResult> GetALlProjectsByCode(string empCode ,[FromQuery] ProjectListRequestModel reqModel)
+    {
+        var result = await _blProject.GetAllProjectsByCode(empCode, reqModel);
+        if (result.IsSuccess) return Ok(result);
+        if (result.IsNotFound) return NotFound(result);
+        return StatusCode(500, result);
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> CreateProject([FromBody] ProjectRequestModel project)
     {

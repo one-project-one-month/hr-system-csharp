@@ -82,6 +82,42 @@ public class DA_Project
         }
     }
 
+    public async Task<Result<ProjectListResponseModel>> GetAllProjectsByCode(string empCode, ProjectListRequestModel reqModel)
+    {
+        try
+        {
+            var query =
+                from ep in _appDbContext.TblEmployeeProjects.AsNoTracking()
+                join p in _appDbContext.TblProjects.AsNoTracking()
+                    on ep.ProjectCode equals p.ProjectCode
+                where !ep.DeleteFlag
+                      && !p.DeleteFlag
+                      && ep.EmployeeCode == empCode
+                orderby p.CreatedAt descending
+                select p;
+
+            var pagedResult = await query.GetPagedResultAsync(
+                reqModel.PageNo,
+                reqModel.PageSize
+            );
+
+            var result = new ProjectListResponseModel
+            {
+                Items = pagedResult?.Items?.Select(p => p.Map()).ToList(),
+                TotalCount = pagedResult?.TotalCount ?? 0,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<ProjectListResponseModel>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result<ProjectListResponseModel>
+                .Error($"Error occurred while retrieving projects: {ex.Message}");
+        }
+    }
+
     public async Task<Result<ProjectResponseModel>> GetProjectByCode(ProjectEditRequestModel reqModel)
     {
         try

@@ -231,16 +231,9 @@ public class DA_Employee(
             existingEmp.StartDate = emp.StartDate;
             existingEmp.ResignDate = emp.ResignDate;
             existingEmp.ModifiedAt = DateTime.UtcNow;
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-            existingEmp.ModifiedBy = currentUser;
-=======
+
             existingEmp.ModifiedBy = UserCode!;
             _appDbContext.TblEmployees.Update(existingEmp);
->>>>>>> Stashed changes
-=======
-            existingEmp.ModifiedBy = UserCode!;
->>>>>>> dev
             var updated = await _appDbContext.SaveChangesAsync() > 0;
 
             return updated
