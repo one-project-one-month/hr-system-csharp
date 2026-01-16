@@ -69,17 +69,17 @@ public class BL_Employee
 
         #region Duplicate Data Validation
 
-        var userNameExist = await _daEmployee.GetEmployeeByUserName(reqModel.Username);
-        if (userNameExist.IsSuccess)
-        {
-            return Result<EmployeeCreateResponseModel>.DuplicateRecordError("UserName already exists!");
-        }
+        //var userNameExist = await _daEmployee.GetEmployeeByUserName(reqModel.Username);
+        //if (userNameExist.IsSuccess)
+        //{
+        //    return Result<EmployeeCreateResponseModel>.DuplicateRecordError("UserName already exists!");
+        //}
 
-        var nameExist = await _daEmployee.GetEmployeeByName(reqModel.Name);
-        if (nameExist.IsSuccess)
-        {
-            return Result<EmployeeCreateResponseModel>.DuplicateRecordError("Name already exists!");
-        }
+        //var nameExist = await _daEmployee.GetEmployeeByName(reqModel.Name);
+        //if (nameExist.IsSuccess)
+        //{
+        //    return Result<EmployeeCreateResponseModel>.DuplicateRecordError("Name already exists!");
+        //}
 
         var emailExist = await _daEmployee.DuplicateEmail(reqModel.Email);
         if (emailExist.IsSuccess)
@@ -93,13 +93,11 @@ public class BL_Employee
             return Result<EmployeeCreateResponseModel>.BadRequestError("Invalid email format.");
         }
 
-
         var phoneExist = await _daEmployee.DuplicatePhoneNo(reqModel.PhoneNo);
         if (phoneExist.IsSuccess)
         {
             return Result<EmployeeCreateResponseModel>.DuplicateRecordError("PhoneNo already exists!");
         }
-
         #endregion
 
         var result = await _daEmployee.CreateEmployee(reqModel);

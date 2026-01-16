@@ -21,6 +21,14 @@ public class AttendanceController : ControllerBase
         return Ok(data);
     }
 
+    [HttpGet("AttendanceList/{empCode}")]
+    public async Task<IActionResult> AttendanceListsByEmpCode(String? empCode, DateTime startDate, DateTime endDate,
+        int pageNo = 1, int PageSize = 10)
+    {
+        var data = await _bL_Attendance.ListByCode(empCode, startDate, endDate, pageNo, PageSize);
+        return Ok(data);
+    }
+
     [HttpPost("AttendanceCreate")]
     public async Task<IActionResult> AttendanceCreate(AttendanceCreateRequestModel requestModel)
     {

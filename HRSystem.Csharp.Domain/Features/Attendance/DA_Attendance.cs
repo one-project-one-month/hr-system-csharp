@@ -79,7 +79,66 @@ public class DA_Attendance
         }
     }
 
+<<<<<<< Updated upstream
     public async Task<Result<AttendanceCreateResponseModel>> Create(AttendanceCreateRequestModel requestModel)
+=======
+    public async Task<Result<AttendanceListResponseModel>> ListByCode(String? empCode, DateTime startDate, DateTime endDate, int pageNo, int PageSize)
+    {
+        try
+        {
+            var attQuery = _db.TblAttendances.Where(x => x.DeleteFlag == false);
+
+            if (!string.IsNullOrWhiteSpace(empCode))
+            {
+                attQuery = attQuery.Where(x => x.EmployeeCode == empCode);
+            }
+
+            if (startDate != DateTime.MinValue && endDate == DateTime.MinValue)
+            {
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(startDate));
+            }
+            else if (startDate == DateTime.MinValue && endDate != DateTime.MinValue)
+            {
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(endDate));
+            }
+            else if (startDate != DateTime.MinValue && endDate != DateTime.MinValue)
+            {
+                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) >= DateOnly.FromDateTime(startDate) && DateOnly.FromDateTime(x.AttendanceDate.Value) <= DateOnly.FromDateTime(endDate));
+            }
+            var attendanceList = await attQuery
+                    .OrderByDescending(x => x.AttendanceDate)
+                    .Skip((pageNo - 1) * PageSize)
+                    .Take(PageSize)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+            if (attendanceList.Count == 0 || attendanceList is null)
+                return Result<AttendanceListResponseModel>.NotFoundError("No attendance found.");
+
+            var model = new AttendanceListResponseModel
+            {
+                AttendanceList = [.. attendanceList
+                    .Select(t =>
+                    {
+                        var attendance = AttendanceListModel.FromTblAttendance(t);
+                        attendance.EmployeeName = _db.TblEmployees
+                            .Where(e => e.EmployeeCode == t.EmployeeCode && e.DeleteFlag == false)
+                            .Select(e => e.Name)
+                            .FirstOrDefault();
+                        return attendance;
+                    })]
+            };
+
+            return Result<AttendanceListResponseModel>.Success(model);
+        }
+        catch (Exception ex)
+        {
+            return Result<AttendanceListResponseModel>.SystemError(ex.Message);
+        }
+    }
+
+    public async Task<Result<AttendanceCreateResponseModel>> Create(string userId, AttendanceCreateRequestModel requestModel)
+>>>>>>> Stashed changes
     {
         if (requestModel.EmployeeCode.IsNullOrEmpty())
         {

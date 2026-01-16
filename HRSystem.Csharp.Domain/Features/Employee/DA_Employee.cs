@@ -233,7 +233,12 @@ public class DA_Employee
             existingEmp.StartDate = emp.StartDate;
             existingEmp.ResignDate = emp.ResignDate;
             existingEmp.ModifiedAt = DateTime.UtcNow;
+<<<<<<< Updated upstream
             existingEmp.ModifiedBy = currentUser;
+=======
+            existingEmp.ModifiedBy = UserCode!;
+            _appDbContext.TblEmployees.Update(existingEmp);
+>>>>>>> Stashed changes
             var updated = await _appDbContext.SaveChangesAsync() > 0;
 
             return updated
@@ -267,20 +272,18 @@ public class DA_Employee
             "Employee Deleted Successfully");
     }
 
-    public async Task<Result<TblEmployee>> GetEmployeeByUserName(string username)
+    public async Task<TblEmployee?> GetEmployeeByUserName(string username)
     {
         try
         {
-            var employee = await _appDbContext.TblEmployees.AsNoTracking()
+            var employee = await _appDbContext.TblEmployees
                 .FirstOrDefaultAsync(x => x.Username == username && !x.DeleteFlag);
-            return employee != null
-                ? Result<TblEmployee>.Success(employee)
-                : Result<TblEmployee>.NotFoundError("Employee not found.");
+            return employee;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching employee by name");
-            return Result<TblEmployee>.SystemError("An error occurred while retrieving the employee.");
+            throw new Exception("unexpected error occurred!");
         }
     }
 
