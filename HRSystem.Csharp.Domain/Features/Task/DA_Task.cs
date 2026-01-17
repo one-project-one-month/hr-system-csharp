@@ -59,6 +59,51 @@ public class DA_Task
         }
     }
 
+    public async Task<Result<TaskListResponseModel>> ListByEmpCodeAsync(string empCode,TaskListRequestModel model)
+    {
+        try
+        {
+            var tasksQuery = _db.TblTasks.Where(t => t.DeleteFlag == false && t.EmployeeCode == empCode);
+            if (!string.IsNullOrWhiteSpace(model.Name))
+            {
+                tasksQuery = tasksQuery.Where(t => t.TaskName!.ToLower().Contains(model.Name.ToLower()));
+            }
+            var tasks = await tasksQuery
+                .OrderByDescending(t => t.CreatedAt)
+                .Skip((model.PageNo - 1) * model.PageSize)
+                .Take(model.PageSize)
+                .ToListAsync();
+
+            if (!tasks.Any() || tasks is null)
+            {
+                return Result<TaskListResponseModel>.NotFoundError("No tasks found.");
+            }
+
+            var responseModel = new TaskListResponseModel()
+            {
+                Tasks = tasks.Select(t =>
+                {
+                    var task = TaskModel.FromTblTask(t);
+                    task.EmployeeName = _db.TblEmployees
+                        .Where(e => e.EmployeeCode == empCode && e.DeleteFlag == false)
+                        .Select(e => e.Name)
+                        .FirstOrDefault();
+                    task.ProjectName = _db.TblProjects
+                        .Where(p => p.ProjectCode == t.ProjectCode && p.DeleteFlag == false)
+                        .Select(p => p.ProjectName)
+                        .FirstOrDefault();
+                    return task;
+                }).ToList()
+            };
+
+            return Result<TaskListResponseModel>.Success(responseModel);
+        }
+        catch (Exception ex)
+        {
+            return Result<TaskListResponseModel>.SystemError(ex.Message);
+        }
+    }
+
     public async Task<Result<TaskCreateResponseModel>> Create(string userId, TaskCreateRequestModel requestModel)
     {
         try
