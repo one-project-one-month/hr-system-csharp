@@ -55,13 +55,16 @@ public class AttendanceListModel
         // Set Status
         if (attendance.HourLateFlag == 1)
             model.Status = "Late Arrival";
+        
         else if (attendance.HourLateFlag == 2)
             model.Status = "Early Departure";
+        
         else if (attendance.HourLateFlag == 3)
             model.Status = "Late Arrival & Early Departure";
 
         else if (attendance.HalfDayFlag == 1)
             model.Status = "Half Day Late Arrival";
+        
         else if (attendance.HalfDayFlag == 2)
             model.Status = "Half Day Early Departure";
 
@@ -77,6 +80,5 @@ public class AttendanceListModel
         else if (attendance.HourLateFlag == 2 & attendance.HalfDayFlag == 1)
             model.Status = "Half Day Late Arrival & Early Departure Hourly";
         return model;
-
     }
 }
