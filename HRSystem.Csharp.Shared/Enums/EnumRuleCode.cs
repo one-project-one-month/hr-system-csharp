@@ -12,5 +12,9 @@ public enum EnumRuleCode
     [Description("RL006")] HalfWorkingHour,
     [Description("RL007")] OfficeHourStartTime,
     [Description("RL008")] OfficeHourEndTime,
-    [Description("RL009")] OfficeHourHalfTime
+    [Description("RL009")] OfficeHourHalfTime,
+    [Description("RL010")] CheckInAcceptable,
+    [Description("RL011")] CheckOutAcceptable,
+    [Description("RL012")] CheckInOneHourLate,
+    [Description("RL013")] CheckOutOneHourLate
 }

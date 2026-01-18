@@ -1,4 +1,4 @@
-﻿using HRSystem.Csharp.Domain.Features.CompanyRule;
+using HRSystem.Csharp.Domain.Features.CompanyRule;
 using HRSystem.Csharp.Domain.Models.Attendance;
 
 namespace HRSystem.Csharp.Domain.Features.Attendance;
@@ -9,7 +9,8 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
     private readonly AppDbContext _db = appDbContext;
     private readonly DA_CompanyRule _daCompanyRule = _daCompanyRule;
 
-    public async Task<Result<AttendanceListResponseModel>> List(String? EmpName, DateTime startDate, DateTime endDate, int pageNo, int PageSize)
+    public async Task<Result<AttendanceListResponseModel>> List(String? EmpName, DateTime startDate, DateTime endDate,
+        int pageNo, int PageSize)
     {
         try
         {
@@ -18,48 +19,52 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
             if (!string.IsNullOrWhiteSpace(EmpName))
             {
                 var employees = _db.TblEmployees
-                            .Where(e => e.Name.Contains(EmpName) && e.DeleteFlag == false)
-                            .Select(e => e.EmployeeCode);
+                    .Where(e => e.Name.Contains(EmpName) && e.DeleteFlag == false)
+                    .Select(e => e.EmployeeCode);
 
                 attQuery = attQuery.Where(x => employees.Contains(x.EmployeeCode));
-
             }
 
 
             if (startDate != DateTime.MinValue && endDate == DateTime.MinValue)
             {
-                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(startDate));
+                attQuery = attQuery.Where(x =>
+                    DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(startDate));
             }
             else if (startDate == DateTime.MinValue && endDate != DateTime.MinValue)
             {
-                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(endDate));
+                attQuery = attQuery.Where(x =>
+                    DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(endDate));
             }
             else if (startDate != DateTime.MinValue && endDate != DateTime.MinValue)
             {
-                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) >= DateOnly.FromDateTime(startDate) && DateOnly.FromDateTime(x.AttendanceDate.Value) <= DateOnly.FromDateTime(endDate));
+                attQuery = attQuery.Where(x =>
+                    DateOnly.FromDateTime(x.AttendanceDate!.Value) >= DateOnly.FromDateTime(startDate) &&
+                    DateOnly.FromDateTime(x.AttendanceDate.Value) <= DateOnly.FromDateTime(endDate));
             }
+
             var attendanceList = await attQuery
-                    .OrderByDescending(x => x.AttendanceDate)
-                    .Skip((pageNo - 1) * PageSize)
-                    .Take(PageSize)
-                    .AsNoTracking()
-                    .ToListAsync();
+                .OrderByDescending(x => x.AttendanceDate)
+                .Skip((pageNo - 1) * PageSize)
+                .Take(PageSize)
+                .AsNoTracking()
+                .ToListAsync();
 
             if (attendanceList.Count == 0 || attendanceList is null)
                 return Result<AttendanceListResponseModel>.NotFoundError("No attendance found.");
 
             var model = new AttendanceListResponseModel
             {
-                AttendanceList = [.. attendanceList
-                    .Select(t =>
-                    {
-                        var attendance = AttendanceListModel.FromTblAttendance(t);
-                        attendance.EmployeeName = _db.TblEmployees
-                            .Where(e => e.EmployeeCode == t.EmployeeCode && e.DeleteFlag == false)
-                            .Select(e => e.Name)
-                            .FirstOrDefault();
-                        return attendance;
-                    })]
+                AttendanceList =  [.. attendanceList
+                .Select(t =>
+                {
+                var attendance = AttendanceListModel.FromTblAttendance(t);
+                attendance.EmployeeName = _db.TblEmployees
+                .Where(e => e.EmployeeCode == t.EmployeeCode && e.DeleteFlag == false)
+                .Select(e => e.Name)
+                .FirstOrDefault();
+                return attendance;
+            })]
             };
 
             return Result<AttendanceListResponseModel>.Success(model);
@@ -70,7 +75,8 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
         }
     }
 
-    public async Task<Result<AttendanceListResponseModel>> ListByCode(String? empCode, DateTime startDate, DateTime endDate, int pageNo, int PageSize)
+    public async Task<Result<AttendanceListResponseModel>> ListByCode(String? empCode, DateTime startDate,
+        DateTime endDate, int pageNo, int PageSize)
     {
         try
         {
@@ -83,38 +89,43 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
 
             if (startDate != DateTime.MinValue && endDate == DateTime.MinValue)
             {
-                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(startDate));
+                attQuery = attQuery.Where(x =>
+                    DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(startDate));
             }
             else if (startDate == DateTime.MinValue && endDate != DateTime.MinValue)
             {
-                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(endDate));
+                attQuery = attQuery.Where(x =>
+                    DateOnly.FromDateTime(x.AttendanceDate!.Value) == DateOnly.FromDateTime(endDate));
             }
             else if (startDate != DateTime.MinValue && endDate != DateTime.MinValue)
             {
-                attQuery = attQuery.Where(x => DateOnly.FromDateTime(x.AttendanceDate!.Value) >= DateOnly.FromDateTime(startDate) && DateOnly.FromDateTime(x.AttendanceDate.Value) <= DateOnly.FromDateTime(endDate));
+                attQuery = attQuery.Where(x =>
+                    DateOnly.FromDateTime(x.AttendanceDate!.Value) >= DateOnly.FromDateTime(startDate) &&
+                    DateOnly.FromDateTime(x.AttendanceDate.Value) <= DateOnly.FromDateTime(endDate));
             }
+
             var attendanceList = await attQuery
-                    .OrderByDescending(x => x.AttendanceDate)
-                    .Skip((pageNo - 1) * PageSize)
-                    .Take(PageSize)
-                    .AsNoTracking()
-                    .ToListAsync();
+                .OrderByDescending(x => x.AttendanceDate)
+                .Skip((pageNo - 1) * PageSize)
+                .Take(PageSize)
+                .AsNoTracking()
+                .ToListAsync();
 
             if (attendanceList.Count == 0 || attendanceList is null)
                 return Result<AttendanceListResponseModel>.NotFoundError("No attendance found.");
 
             var model = new AttendanceListResponseModel
             {
-                AttendanceList = [.. attendanceList
-                    .Select(t =>
-                    {
-                        var attendance = AttendanceListModel.FromTblAttendance(t);
-                        attendance.EmployeeName = _db.TblEmployees
-                            .Where(e => e.EmployeeCode == t.EmployeeCode && e.DeleteFlag == false)
-                            .Select(e => e.Name)
-                            .FirstOrDefault();
-                        return attendance;
-                    })]
+                AttendanceList =  [.. attendanceList
+                .Select(t =>
+                {
+                var attendance = AttendanceListModel.FromTblAttendance(t);
+                attendance.EmployeeName = _db.TblEmployees
+                .Where(e => e.EmployeeCode == t.EmployeeCode && e.DeleteFlag == false)
+                .Select(e => e.Name)
+                .FirstOrDefault();
+                return attendance;
+            })]
             };
 
             return Result<AttendanceListResponseModel>.Success(model);
@@ -125,7 +136,8 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
         }
     }
 
-    public async Task<Result<AttendanceCreateResponseModel>> Create(string userId, AttendanceCreateRequestModel requestModel)
+    public async Task<Result<AttendanceCreateResponseModel>> Create(string userId,
+        AttendanceCreateRequestModel requestModel)
     {
         if (requestModel.EmployeeCode.IsNullOrEmpty())
         {
@@ -148,8 +160,8 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
 
             //Working Hour
             DateTime checkIn = (DateTime)requestModel.CheckInTime;
-            DateTime checkOut = (DateTime)requestModel.CheckOutTime!;
-            TimeSpan workingHours = CalculateWorkingHours(checkIn, checkOut);
+            DateTime checkOut = (DateTime)requestModel.CheckOutTime;
+            TimeSpan workingHours = await CalculateWorkingHours(checkIn, checkOut);
 
             //Hourly Late
             int HourLateFlag = CalculateHourlyLate(checkIn, checkOut);
@@ -167,8 +179,8 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
             //Check Location
             bool IsSavedLocation = false;
             var location = await _db.TblLocations
-                .FirstOrDefaultAsync(x => x.Name == requestModel.CheckInLocation
-                && x.DeleteFlag == false);
+                .FirstOrDefaultAsync(x => x.LocationCode == requestModel.CheckInLocation
+                                          && x.DeleteFlag == false);
 
             if (location != null)
             {
@@ -197,7 +209,11 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
                 DeleteFlag = false
             };
             await _db.AddAsync(newAttendance);
-            await _db.SaveChangesAsync();
+            var res = await _db.SaveChangesAsync();
+            foreach (var entry in _db.ChangeTracker.Entries().ToArray())
+            {
+                entry.State = EntityState.Detached;
+            }
 
             return Result<AttendanceCreateResponseModel>.Success("Attendance is successfully created");
         }
@@ -207,295 +223,15 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
         }
     }
 
-    public TimeSpan CalculateWorkingHours(DateTime checkIn, DateTime checkOut)
-    {
-        var StartTimeValue = "";
-        TimeSpan officeStartTime = new();
-        var OfficeEndValue = "";
-        TimeSpan officeEndTime = new();
-
-        #region Office Start Time
-        
-        var ComRuleOfficeStart = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_START_TIME" && x.DeleteFlag == false);
-        if (ComRuleOfficeStart != null)
-        {
-            StartTimeValue = ComRuleOfficeStart.Value;
-            if (StartTimeValue!.Contains(':'))
-            {
-                officeStartTime = TimeSpan.Parse(StartTimeValue);
-            }
-            else
-            {
-                officeStartTime = TimeSpan.FromHours(int.Parse(StartTimeValue));
-            }
-
-        }
-
-        #endregion
-
-        DateTime officeStart = checkIn.Date.Add(officeStartTime);
-
-        #region Office End Time
-
-        var ComRuleOfficeEnd = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_END_TIME" && x.DeleteFlag == false);
-        if (ComRuleOfficeEnd != null)
-        {
-            OfficeEndValue = ComRuleOfficeEnd.Value;
-            if (OfficeEndValue!.Contains(':'))
-            {
-                officeEndTime = TimeSpan.Parse(OfficeEndValue);
-            }
-            else
-            {
-                officeEndTime = TimeSpan.FromHours(int.Parse(OfficeEndValue));
-            }
-
-        }
-
-        #endregion
-
-        DateTime officeEnd = checkIn.Date.Add(officeEndTime);
-
-        if (checkIn < officeStart)
-        {
-            checkIn = officeStart;
-        }
-
-        if (checkOut > officeEnd)
-        {
-            checkOut = officeEnd;
-        }
-
-        if (checkOut < checkIn)
-        {
-            return TimeSpan.Zero;
-        }
-        
-        return checkOut - checkIn;
-    }
-
-    public int CalculateHourlyLate(DateTime checkIn, DateTime checkOut)
-    {
-        var StartTimeValue = "";
-        TimeSpan StartTime = new();
-        var CheckInAcceptValue = "";
-        TimeSpan CheckInAccept = new();
-        var CheckInLateValue = "";
-        TimeSpan CheckInLate = new();
-        var OfficeEndValue = "";
-        TimeSpan OfficeEnd = new();
-        var CheckoutAcceptValue = "";
-        TimeSpan CheckoutAccept = new();
-        var CheckoutLateValue = "";
-        TimeSpan CheckoutLate = new();
-
-        #region Office Start Time
-
-        var ComRuleOfficeStart = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_START_TIME" && x.DeleteFlag == false);
-        if (ComRuleOfficeStart != null)
-        {
-            StartTimeValue = ComRuleOfficeStart.Value;
-            if (StartTimeValue!.Contains(':'))
-            {
-                StartTime = TimeSpan.Parse(StartTimeValue);
-            }
-            else
-            {
-                StartTime = TimeSpan.FromHours(int.Parse(StartTimeValue));
-            }
-
-        }
-
-        #endregion
-
-        DateTime officeStart = checkIn.Date.Add(StartTime);
-
-        #region Office Acceptable CheckIn
-
-        var ComRuleCheckinAccept = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKIN_ACCEPTABLE" && x.DeleteFlag == false);
-        if (ComRuleCheckinAccept != null)
-        {
-            CheckInAcceptValue = ComRuleCheckinAccept.Value;
-            if (CheckInAcceptValue!.Contains(':'))
-            {
-                CheckInAccept = TimeSpan.Parse(CheckInAcceptValue);
-            }
-            else
-            {
-                CheckInAccept = TimeSpan.FromHours(int.Parse(CheckInAcceptValue));
-            }
-
-        }
-
-        #endregion
-
-        DateTime MorningFirstLate = checkIn.Date.Add(CheckInAccept);
-
-        #region One Hour Late CheckIn
-
-        var ComRuleCheckinLate = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
-        if (ComRuleCheckinLate != null)
-        {
-            CheckInLateValue = ComRuleCheckinLate.Value;
-            if (CheckInLateValue!.Contains(':'))
-            {
-                CheckInLate = TimeSpan.Parse(CheckInLateValue);
-            }
-            else
-            {
-                CheckInLate = TimeSpan.FromHours(int.Parse(CheckInLateValue));
-            }
-        }
-
-        #endregion
-
-        DateTime MorningSecondLate = checkIn.Date.Add(CheckInLate);
-
-        int hourLate = 0;
-        if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate)
-            hourLate = 1;
-
-
-        //For CheckOut Late
-        #region Office End Time
-
-        var ComRuleOfficeEnd = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_END_TIME" && x.DeleteFlag == false);
-        if (ComRuleOfficeEnd != null)
-        {
-            OfficeEndValue = ComRuleOfficeEnd.Value;
-            if (OfficeEndValue!.Contains(':'))
-            {
-                OfficeEnd = TimeSpan.Parse(OfficeEndValue);
-            }
-            else
-            {
-                OfficeEnd = TimeSpan.FromHours(int.Parse(OfficeEndValue));
-            }
-        }
-
-        #endregion
-
-        DateTime officeEnd = checkIn.Date.Add(OfficeEnd);
-
-        #region Office Acceptable Checkout
-
-        var ComRuleCheckoutAccept = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_ACCEPTABLE" && x.DeleteFlag == false);
-        if (ComRuleCheckoutAccept != null)
-        {
-            CheckoutAcceptValue = ComRuleCheckoutAccept.Value;
-            if (CheckoutAcceptValue!.Contains(':'))
-            {
-                CheckoutAccept = TimeSpan.Parse(CheckoutAcceptValue);
-            }
-            else
-            {
-                CheckoutAccept = TimeSpan.FromHours(int.Parse(CheckoutAcceptValue));
-            }
-        }
-
-        #endregion
-
-        DateTime eveningFirstLate = checkIn.Date.Add(CheckoutAccept);
-
-        #region One Hour Late Checkout 
-
-        var ComRuleCheckoutLate = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
-        if (ComRuleCheckoutLate != null)
-        {
-            CheckoutLateValue = ComRuleCheckoutLate.Value;
-            if (CheckoutLateValue!.Contains(':'))
-            {
-                CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
-            }
-            else
-            {
-                CheckoutLate = TimeSpan.FromHours(int.Parse(CheckoutLateValue));
-            }
-        }
-
-        #endregion
-
-        DateTime eveningSecondLate = checkIn.Date.Add(CheckoutLate);
-
-        if (checkOut < eveningFirstLate && checkOut >= eveningSecondLate)
-            hourLate = 2;  // Can assume Evening Late for 2
-
-        if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate && checkOut < eveningFirstLate && checkOut >= eveningSecondLate)
-            hourLate = 3;  // both late
-
-        return hourLate;
-    }
-
-    public int CalculateHalfDayLate(DateTime checkIn, DateTime checkOut)
-    {
-        int halfDayLate = 0;
-        var CheckInLateValue = "";
-        TimeSpan CheckInLate = new();
-        var CheckoutLateValue = "";
-        TimeSpan CheckoutLate = new();
-
-        //For Morning Part
-        #region One Hour Late CheckIn
-
-        var ComRuleCheckinLate = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
-        if (ComRuleCheckinLate != null)
-        {
-            CheckInLateValue = ComRuleCheckinLate.Value;
-            if (CheckInLateValue!.Contains(':'))
-            {
-                CheckInLate = TimeSpan.Parse(CheckInLateValue);
-            }
-            else
-            {
-                CheckInLate = TimeSpan.FromHours(int.Parse(CheckInLateValue));
-            }
-        }
-
-        #endregion
-
-        DateTime MorningLate = checkIn.Date.Add(CheckInLate);
-        if (checkIn > MorningLate)
-            halfDayLate = 1;
-
-        //For Evening Part
-        #region One Hour Late Checkout
-
-        var ComRuleCheckoutLate = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
-        if (ComRuleCheckoutLate != null)
-        {
-            CheckoutLateValue = ComRuleCheckoutLate.Value;
-            if (CheckoutLateValue!.Contains(':'))
-            {
-                CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
-            }
-            else
-            {
-                CheckoutLate = TimeSpan.FromHours(int.Parse(CheckoutLateValue));
-            }
-        }
-
-        #endregion
-
-        DateTime eveningLate = checkIn.Date.Add(CheckoutLate);
-
-        if (checkOut < eveningLate)
-            halfDayLate = 2;
-
-
-        if (checkIn > MorningLate && checkOut < eveningLate)
-            halfDayLate = 3;
-
-        return halfDayLate;
-    }
-
-    public async Task<Result<AttendanceUpdateResponseModel>> Update(string userId, AttendanceUpdateRequestModel requestModel)
+    public async Task<Result<AttendanceUpdateResponseModel>> Update(string userId,
+        AttendanceUpdateRequestModel requestModel)
     {
         try
         {
             var item = await _db.TblAttendances
-           .FirstOrDefaultAsync(
-           x => x.AttendanceCode == requestModel.AttendanceCode
-            && x.DeleteFlag == false);
+                .FirstOrDefaultAsync(
+                    x => x.AttendanceCode == requestModel.AttendanceCode
+                         && x.DeleteFlag == false);
 
             if (item is null)
             {
@@ -505,7 +241,7 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
             //Working Hour
             DateTime checkIn = (DateTime)requestModel.CheckInTime!;
             DateTime checkOut = (DateTime)requestModel.CheckOutTime!;
-            TimeSpan workingHours = CalculateWorkingHours(checkIn, checkOut);
+            TimeSpan workingHours = await CalculateWorkingHours(checkIn, checkOut);
 
             //Hourly Late
             int HourLateFlag = CalculateHourlyLate(checkIn, checkOut);
@@ -524,7 +260,7 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
             bool IsSavedLocation = false;
             var location = await _db.TblLocations
                 .FirstOrDefaultAsync(x => x.LocationCode == requestModel.CheckInLocation
-                && x.DeleteFlag == false);
+                                          && x.DeleteFlag == false);
 
             if (location != null)
             {
@@ -568,11 +304,12 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
         {
             return Result<AttendanceEditResponseModel>.ValidationError("Attendance Code required.");
         }
+
         try
         {
             var item = await _db.TblAttendances
-            .FirstOrDefaultAsync(x => x.AttendanceCode == attendanceCode
-            && x.DeleteFlag == false);
+                .FirstOrDefaultAsync(x => x.AttendanceCode == attendanceCode
+                                          && x.DeleteFlag == false);
 
             if (item is null)
             {
@@ -595,11 +332,12 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
         {
             return Result<AttendanceDeleteResponseModel>.ValidationError("Attendance Code required.");
         }
+
         try
         {
             var item = await _db.TblAttendances
-            .FirstOrDefaultAsync(x => x.AttendanceCode == attendanceCode
-            && x.DeleteFlag == false);
+                .FirstOrDefaultAsync(x => x.AttendanceCode == attendanceCode
+                                          && x.DeleteFlag == false);
 
             if (item is null)
             {
@@ -617,12 +355,318 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
             }
 
             return Result<AttendanceDeleteResponseModel>.Success("Attendance successfully deleted!");
-
         }
         catch (Exception ex)
         {
             return Result<AttendanceDeleteResponseModel>.SystemError(ex.Message);
         }
+    }
+
+    public async Task<TimeSpan> CalculateWorkingHours(DateTime checkIn, DateTime checkOut)
+    {
+        // Old approach - commented out
+        /*
+        var StartTimeValue = "";
+        TimeSpan officeStartTime = new();
+        var OfficeEndValue = "";
+        TimeSpan officeEndTime = new();
+
+        #region Office Start Time
+
+        var ComRuleOfficeStart = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_START_TIME" && x.DeleteFlag == false);
+        if (ComRuleOfficeStart != null)
+        {
+            StartTimeValue = ComRuleOfficeStart.Value;
+            if (StartTimeValue!.Contains(':'))
+            {
+                officeStartTime = TimeSpan.Parse(StartTimeValue);
+            }
+            else
+            {
+                officeStartTime = TimeSpan.FromHours(int.Parse(StartTimeValue));
+            }
+
+        }
+
+        #endregion
+
+        DateTime officeStart = checkIn.Date.Add(officeStartTime);
+
+        #region Office End Time
+
+        var ComRuleOfficeEnd = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_END_TIME" && x.DeleteFlag == false);
+        if (ComRuleOfficeEnd != null)
+        {
+            OfficeEndValue = ComRuleOfficeEnd.Value;
+            if (OfficeEndValue!.Contains(':'))
+            {
+                officeEndTime = TimeSpan.Parse(OfficeEndValue);
+            }
+            else
+            {
+                officeEndTime = TimeSpan.FromHours(int.Parse(OfficeEndValue));
+            }
+
+        }
+
+        #endregion
+
+        DateTime officeEnd = checkIn.Date.Add(officeEndTime);
+        */
+
+        // New approach using DA_CompanyRule
+        var officeStartTimeValue =
+            await _daCompanyRule.GetRuleValue(EnumRuleCode.OfficeHourStartTime.ToEnumDescription());
+        var officeEndTimeValue = await _daCompanyRule.GetRuleValue(EnumRuleCode.OfficeHourEndTime.ToEnumDescription());
+
+        TimeSpan officeStartTime = TimeSpan.FromHours(officeStartTimeValue);
+        TimeSpan officeEndTime = TimeSpan.FromHours(officeEndTimeValue);
+
+        DateTime officeStart = checkIn.Date.Add(officeStartTime);
+        DateTime officeEnd = checkIn.Date.Add(officeEndTime);
+
+        if (checkIn < officeStart)
+        {
+            checkIn = officeStart;
+        }
+
+        if (checkOut > officeEnd)
+        {
+            checkOut = officeEnd;
+        }
+
+        if (checkOut < checkIn)
+        {
+            return TimeSpan.Zero;
+        }
+
+        return checkOut - checkIn;
+    }
+
+    public int CalculateHourlyLate(DateTime checkIn, DateTime checkOut)
+    {
+        var StartTimeValue = "";
+        TimeSpan StartTime = new();
+        var CheckInAcceptValue = "";
+        TimeSpan CheckInAccept = new();
+        var CheckInLateValue = "";
+        TimeSpan CheckInLate = new();
+        var OfficeEndValue = "";
+        TimeSpan OfficeEnd = new();
+        var CheckoutAcceptValue = "";
+        TimeSpan CheckoutAccept = new();
+        var CheckoutLateValue = "";
+        TimeSpan CheckoutLate = new();
+
+        #region Office Start Time
+
+        var ComRuleOfficeStart =
+            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_START_TIME" && x.DeleteFlag == false);
+        if (ComRuleOfficeStart != null)
+        {
+            StartTimeValue = ComRuleOfficeStart.Value;
+            if (StartTimeValue!.Contains(':'))
+            {
+                StartTime = TimeSpan.Parse(StartTimeValue);
+            }
+            else
+            {
+                StartTime = TimeSpan.FromHours(int.Parse(StartTimeValue));
+            }
+        }
+
+        #endregion
+
+        DateTime officeStart = checkIn.Date.Add(StartTime);
+
+        #region Office Acceptable CheckIn
+
+        var ComRuleCheckinAccept =
+            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKIN_ACCEPTABLE" && x.DeleteFlag == false);
+        if (ComRuleCheckinAccept != null)
+        {
+            CheckInAcceptValue = ComRuleCheckinAccept.Value;
+            if (CheckInAcceptValue!.Contains(':'))
+            {
+                CheckInAccept = TimeSpan.Parse(CheckInAcceptValue);
+            }
+            else
+            {
+                CheckInAccept = TimeSpan.FromHours(int.Parse(CheckInAcceptValue));
+            }
+        }
+
+        #endregion
+
+        DateTime MorningFirstLate = checkIn.Date.Add(CheckInAccept);
+
+        #region One Hour Late CheckIn
+
+        var ComRuleCheckinLate =
+            _db.TblCompanyRules.FirstOrDefault(x =>
+                x.CompanyRuleCode == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
+        if (ComRuleCheckinLate != null)
+        {
+            CheckInLateValue = ComRuleCheckinLate.Value;
+            if (CheckInLateValue!.Contains(':'))
+            {
+                CheckInLate = TimeSpan.Parse(CheckInLateValue);
+            }
+            else
+            {
+                CheckInLate = TimeSpan.FromHours(int.Parse(CheckInLateValue));
+            }
+        }
+
+        #endregion
+
+        DateTime MorningSecondLate = checkIn.Date.Add(CheckInLate);
+
+        int hourLate = 0;
+        if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate)
+            hourLate = 1;
+
+
+        //For CheckOut Late
+
+        #region Office End Time
+
+        var ComRuleOfficeEnd =
+            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_END_TIME" && x.DeleteFlag == false);
+        if (ComRuleOfficeEnd != null)
+        {
+            OfficeEndValue = ComRuleOfficeEnd.Value;
+            if (OfficeEndValue!.Contains(':'))
+            {
+                OfficeEnd = TimeSpan.Parse(OfficeEndValue);
+            }
+            else
+            {
+                OfficeEnd = TimeSpan.FromHours(int.Parse(OfficeEndValue));
+            }
+        }
+
+        #endregion
+
+        DateTime officeEnd = checkIn.Date.Add(OfficeEnd);
+
+        #region Office Acceptable Checkout
+
+        var ComRuleCheckoutAccept =
+            _db.TblCompanyRules.FirstOrDefault(x =>
+                x.CompanyRuleCode == "CHECKOUT_ACCEPTABLE" && x.DeleteFlag == false);
+        if (ComRuleCheckoutAccept != null)
+        {
+            CheckoutAcceptValue = ComRuleCheckoutAccept.Value;
+            if (CheckoutAcceptValue!.Contains(':'))
+            {
+                CheckoutAccept = TimeSpan.Parse(CheckoutAcceptValue);
+            }
+            else
+            {
+                CheckoutAccept = TimeSpan.FromHours(int.Parse(CheckoutAcceptValue));
+            }
+        }
+
+        #endregion
+
+        DateTime eveningFirstLate = checkIn.Date.Add(CheckoutAccept);
+
+        #region One Hour Late Checkout
+
+        var ComRuleCheckoutLate =
+            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
+        if (ComRuleCheckoutLate != null)
+        {
+            CheckoutLateValue = ComRuleCheckoutLate.Value;
+            if (CheckoutLateValue!.Contains(':'))
+            {
+                CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
+            }
+            else
+            {
+                CheckoutLate = TimeSpan.FromHours(int.Parse(CheckoutLateValue));
+            }
+        }
+
+        #endregion
+
+        DateTime eveningSecondLate = checkIn.Date.Add(CheckoutLate);
+
+        if (checkOut < eveningFirstLate && checkOut >= eveningSecondLate)
+            hourLate = 2; // Can assume Evening Late for 2
+
+        if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate && checkOut < eveningFirstLate &&
+            checkOut >= eveningSecondLate)
+            hourLate = 3; // both late
+
+        return hourLate;
+    }
+
+    public int CalculateHalfDayLate(DateTime checkIn, DateTime checkOut)
+    {
+        int halfDayLate = 0;
+        var CheckInLateValue = "";
+        TimeSpan CheckInLate = new();
+        var CheckoutLateValue = "";
+        TimeSpan CheckoutLate = new();
+
+        //For Morning Part
+
+        #region One Hour Late CheckIn
+
+        var ComRuleCheckinLate =
+            _db.TblCompanyRules.FirstOrDefault(x =>
+                x.CompanyRuleCode == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
+        if (ComRuleCheckinLate != null)
+        {
+            CheckInLateValue = ComRuleCheckinLate.Value;
+            if (CheckInLateValue!.Contains(':'))
+            {
+                CheckInLate = TimeSpan.Parse(CheckInLateValue);
+            }
+            else
+            {
+                CheckInLate = TimeSpan.FromHours(int.Parse(CheckInLateValue));
+            }
+        }
+
+        #endregion
+
+        DateTime MorningLate = checkIn.Date.Add(CheckInLate);
+        if (checkIn > MorningLate)
+            halfDayLate = 1;
+
+        //For Evening Part
+
+        #region One Hour Late Checkout
+
+        var ComRuleCheckoutLate =
+            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
+        if (ComRuleCheckoutLate != null)
+        {
+            CheckoutLateValue = ComRuleCheckoutLate.Value;
+            if (CheckoutLateValue!.Contains(':'))
+            {
+                CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
+            }
+            else
+            {
+                CheckoutLate = TimeSpan.FromHours(int.Parse(CheckoutLateValue));
+            }
+        }
+
+        #endregion
+
+        DateTime eveningLate = checkIn.Date.Add(CheckoutLate);
+
+        if (checkOut < eveningLate)
+            halfDayLate = 2;
+        
+        if (checkIn > MorningLate && checkOut < eveningLate)
+            halfDayLate = 3;
+
+        return halfDayLate;
     }
 
     public async Task<string> GenerateSequenceCodeAsync(string uniqueName)

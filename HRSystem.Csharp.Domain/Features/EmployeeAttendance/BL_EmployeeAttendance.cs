@@ -1,4 +1,4 @@
-﻿namespace HRSystem.Csharp.Domain.Features.EmployeeAttendance;
+namespace HRSystem.Csharp.Domain.Features.EmployeeAttendance;
 
 public class BL_EmployeeAttendance
 {
@@ -61,16 +61,16 @@ public class BL_EmployeeAttendance
 
             if (requestModel.CheckInStatus == EnumCheckInStatus.CheckIn.ToString())
             {
-                checkIn = DateTime.UtcNow;
+                checkIn = DateTime.Now;
             }
             else
             {
-                checkOut = DateTime.UtcNow;
+                checkOut = DateTime.Now;
                 checkInData = await _da.GetCheckInTime(requestModel.EmployeeCode!);
                 checkIn = DateTime.Parse(checkInData.Data!.CheckInTime.ToString()!);
 
                 // Working Hour
-                workingHours = _daAttendance.CalculateWorkingHours(checkIn, checkOut.Value);
+                workingHours = await _daAttendance.CalculateWorkingHours(checkIn, checkOut.Value);
 
                 // Hourly Late
                 hourLateFlag = _daAttendance.CalculateHourlyLate(checkIn, checkOut.Value);
