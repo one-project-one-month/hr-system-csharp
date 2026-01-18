@@ -79,10 +79,10 @@ public class BL_EmployeeAttendance
                 halfDayFlag = await _daAttendance.CalculateHalfDayLate(checkIn, checkOut.Value);
 
                 // Full Day late
-                if (halfDayFlag == 3)
+                /*if (halfDayFlag == 3)
                 {
                     fullDayFlag = 1;
-                }
+                }*/
             }
 
             #endregion
