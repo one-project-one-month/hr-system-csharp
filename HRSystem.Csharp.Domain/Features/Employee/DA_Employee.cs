@@ -32,6 +32,7 @@ public class DA_Employee(
                         ProfileImage = e.ProfileImage,
                         Username = e.Username,
                         Name = e.Name,
+                        Gender = e.Gender,
                         RoleName = r.RoleName,
                         Email = e.Email,
                         PhoneNo = e.PhoneNo,
@@ -88,13 +89,13 @@ public class DA_Employee(
                 EmployeeCode = employee.EmployeeCode,
                 Username = employee.Username,
                 Name = employee.Name,
+                Gender = employee.Gender,
                 RoleCode = employee.RoleCode,
                 Email = employee.Email,
                 PhoneNo = employee.PhoneNo,
                 Salary = employee.Salary,
                 StartDate = employee.StartDate,
-                ResignDate = employee.ResignDate,
-                Gender = employee.Gender
+                ResignDate = employee.ResignDate
             };
             return Result<EmployeeEditResponseModel>.Success(result);
         }
@@ -183,6 +184,7 @@ public class DA_Employee(
                 RoleCode = reqModel.RoleCode,
                 Username = reqModel.Username,
                 Name = reqModel.Name,
+                Gender = reqModel.Gender,
                 Email = reqModel.Email,
                 PhoneNo = reqModel.PhoneNo,
                 Password = hashPassword,
@@ -224,6 +226,7 @@ public class DA_Employee(
                 return Result<EmployeeUpdateResponseModel>.NotFoundError("Cannot find the role to be updated");
 
             existingEmp.Name = emp.Name;
+            existingEmp.Gender = emp.Gender;
             existingEmp.RoleCode = emp.RoleCode;
             existingEmp.Email = emp.Email;
             existingEmp.PhoneNo = emp.PhoneNo;
@@ -403,7 +406,7 @@ public class DA_Employee(
         try
         {
             #region Validation
-           
+
             if (requestModel.EmployeeCode.IsNullOrEmpty())
             {
                 return Result<EmployeEditProfileResponseModel>.ValidationError("Employee code required.");
@@ -420,7 +423,9 @@ public class DA_Employee(
 
             if (!requestModel.Email.IsNullOrEmpty() &&
                 requestModel.Email != employee.Email &&
-                await _appDbContext.TblEmployees.AnyAsync(e => e.Email == requestModel.Email && e.EmployeeCode != requestModel.EmployeeCode))
+                await _appDbContext.TblEmployees
+                    .AnyAsync(e => e.Email == requestModel.Email
+                                   && e.EmployeeCode != requestModel.EmployeeCode))
             {
                 return Result<EmployeEditProfileResponseModel>.ValidationError("Email already exists.");
             }
@@ -451,23 +456,22 @@ public class DA_Employee(
         catch (Exception ex)
         {
             _logger.LogExceptionError(ex);
-            return Result<EmployeEditProfileResponseModel>.Error($"An error occurred while editing profile: {ex.Message}");
+            return Result<EmployeEditProfileResponseModel>.Error(
+                $"An error occurred while editing profile: {ex.Message}");
         }
     }
 
     public async Task<TblEmployee?> GetEmployeeByEmail(string employeeEmail)
     {
-            var employee = await _appDbContext.TblEmployees
-                .FirstOrDefaultAsync(e => e.Email.ToLower() == employeeEmail.ToLower() && e.DeleteFlag == false);
-            return employee;
+        var employee = await _appDbContext.TblEmployees
+            .FirstOrDefaultAsync(e => e.Email.ToLower() == employeeEmail.ToLower() && e.DeleteFlag == false);
+        return employee;
     }
 
-    public async Task<bool> UpdateEmployee (TblEmployee employee)
+    public async Task<bool> UpdateEmployee(TblEmployee employee)
     {
-         _appDbContext.TblEmployees.Update(employee);
+        _appDbContext.TblEmployees.Update(employee);
         var result = await _appDbContext.SaveChangesAsync();
         return result > 0;
     }
-
-
 }

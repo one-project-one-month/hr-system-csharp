@@ -37,6 +37,11 @@ public class BL_Employee(DA_Employee daEmployee)
         {
             return Result<EmployeeCreateResponseModel>.ValidationError("Name is required!");
         }
+        
+        if (string.IsNullOrWhiteSpace(reqModel.Gender))
+        {
+            return Result<EmployeeCreateResponseModel>.ValidationError("Gender is required!");
+        }
 
         if (string.IsNullOrWhiteSpace(reqModel.Email))
         {
@@ -105,6 +110,11 @@ public class BL_Employee(DA_Employee daEmployee)
         if (string.IsNullOrWhiteSpace(reqModel.Name))
         {
             return Result<EmployeeUpdateResponseModel>.ValidationError("Name is required!");
+        }
+        
+        if (string.IsNullOrWhiteSpace(reqModel.Gender))
+        {
+            return Result<EmployeeUpdateResponseModel>.ValidationError("Gender is required!");
         }
 
         if (string.IsNullOrWhiteSpace(reqModel.Email))

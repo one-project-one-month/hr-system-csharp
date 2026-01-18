@@ -24,7 +24,7 @@ public class DA_Payroll : AuthorizationService
         return await _appDbContext.TblPayrolls
             .AnyAsync(p => !p.DeleteFlag && p.PayrollMonth == payrollMonth);
     }
-    
+
     public async Task<Result<bool>> ProcessPayroll(PayrollProcessRequestModel reqModel)
     {
         try
@@ -246,7 +246,7 @@ public class DA_Payroll : AuthorizationService
         try
         {
             var payrolls = await _appDbContext.TblPayrolls
-                .Where(p => p.EmployeeCode == "EMP_251114_0001" &&
+                .Where(p => p.EmployeeCode == UserCode &&
                             p.PayrollMonth.EndsWith(reqModel.Year.ToString()))
                 .ToListAsync();
 

@@ -1,11 +1,13 @@
-﻿using HRSystem.Csharp.Domain.Models.Attendance;
+﻿using HRSystem.Csharp.Domain.Features.CompanyRule;
+using HRSystem.Csharp.Domain.Models.Attendance;
 
 namespace HRSystem.Csharp.Domain.Features.Attendance;
 
-public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence)
+public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA_CompanyRule _daCompanyRule)
 {
     private readonly DA_Sequence _daSequence = daSequence;
     private readonly AppDbContext _db = appDbContext;
+    private readonly DA_CompanyRule _daCompanyRule = _daCompanyRule;
 
     public async Task<Result<AttendanceListResponseModel>> List(String? EmpName, DateTime startDate, DateTime endDate, int pageNo, int PageSize)
     {
@@ -165,7 +167,7 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence)
             //Check Location
             bool IsSavedLocation = false;
             var location = await _db.TblLocations
-                .FirstOrDefaultAsync(x => x.LocationCode == requestModel.CheckInLocation
+                .FirstOrDefaultAsync(x => x.Name == requestModel.CheckInLocation
                 && x.DeleteFlag == false);
 
             if (location != null)
@@ -213,7 +215,7 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence)
         TimeSpan officeEndTime = new();
 
         #region Office Start Time
-
+        
         var ComRuleOfficeStart = _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_START_TIME" && x.DeleteFlag == false);
         if (ComRuleOfficeStart != null)
         {
@@ -255,13 +257,20 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence)
         DateTime officeEnd = checkIn.Date.Add(officeEndTime);
 
         if (checkIn < officeStart)
+        {
             checkIn = officeStart;
+        }
+
         if (checkOut > officeEnd)
+        {
             checkOut = officeEnd;
+        }
 
         if (checkOut < checkIn)
+        {
             return TimeSpan.Zero;
-
+        }
+        
         return checkOut - checkIn;
     }
 

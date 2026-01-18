@@ -21,6 +21,7 @@ public class EmployeeCreateRequestModel
 {
     public string Username { get; set; } = null!;
     public string Name { get; set; } = null!;
+    public string Gender { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string Password { get; set; } = null!;
     public string RoleCode { get; set; } = string.Empty;
@@ -33,6 +34,7 @@ public class EmployeeCreateRequestModel
 public class EmployeeUpdateRequestModel
 {
     public string Name { get; set; } = null!;
+    public string Gender { get; set; } = null!;
 
     public string RoleCode { get; set; } = null!;
 
