@@ -117,7 +117,7 @@ BEGIN
     JOIN Tbl_Menu m
         ON m.MenuGroupCode = mg.MenuGroupCode
     CROSS JOIN Tbl_Permission p
-    WHERE mg.MenuGroupCode NOT IN ('DASHBOARD', 'PAYROLL', 'COMPANY_RULES')
+    WHERE mg.MenuGroupCode NOT IN ('DASHBOARD', 'PAYROLL', 'COMPANY_RULES', 'LEAVE', 'ROLE_MENU_PERMISSION')
     AND NOT EXISTS (
         SELECT 1 FROM Tbl_RoleAndMenuPermission x
         WHERE x.RoleCode = @RoleCode
@@ -132,4 +132,8 @@ GO
 
 EXEC InitializeFullAdminPermissions;
 
-SELECT * FROM Tbl_RoleAndMenuPermission;
+SELECT * FROM Tbl_RoleAndMenuPermission
+WHERE DeleteFlag = 0
+
+
+delete Tbl_RoleAndMenuPermission

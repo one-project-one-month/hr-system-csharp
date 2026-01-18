@@ -163,6 +163,7 @@ public class DA_RoleMenuPermission
                 item.DeleteFlag = true;
                 item.ModifiedAt = DateTime.UtcNow;
                 item.ModifiedBy = "admin";
+                _dbContext.TblRoleAndMenuPermissions.Update(item);
             }
 
             var newPermissions = reqModel.MenuPermissions
