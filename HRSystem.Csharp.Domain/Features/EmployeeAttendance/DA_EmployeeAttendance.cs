@@ -92,8 +92,8 @@ public class DA_EmployeeAttendance : AuthorizationService
             AttendanceDate = todayLocal,
             IsCheckIn = attendance?.CheckInTime.HasValue ?? false,
             IsCheckOut = attendance?.CheckOutTime.HasValue ?? false,
-            CheckInTime = attendance?.CheckInTime?.ToLocalTime().ToString("HH:mm") ?? "",
-            CheckOutTime = attendance?.CheckOutTime?.ToLocalTime().ToString("HH:mm") ?? ""
+            CheckInTime = attendance?.CheckInTime?.ToString("HH:mm") ?? "",
+            CheckOutTime = attendance?.CheckOutTime?.ToString("HH:mm") ?? ""
         };
     }
     

@@ -254,7 +254,8 @@ public class BL_Verification : AuthorizationService
                     Token = resetToken,
                     ExpiresAt = DateTime.Now.AddMinutes(10),
                     IsUsed = false,
-                    DeleteFlag = false
+                    DeleteFlag = false,
+                    CreatedAt = DateTime.Now
                 });
 
                 return Result<ResetTokenResponse>.Success(
