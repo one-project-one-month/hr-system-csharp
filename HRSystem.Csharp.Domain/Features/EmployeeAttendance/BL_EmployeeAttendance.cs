@@ -73,10 +73,10 @@ public class BL_EmployeeAttendance
                 workingHours = await _daAttendance.CalculateWorkingHours(checkIn, checkOut.Value);
 
                 // Hourly Late
-                hourLateFlag = _daAttendance.CalculateHourlyLate(checkIn, checkOut.Value);
+                hourLateFlag = await _daAttendance.CalculateHourlyLate(checkIn, checkOut.Value);
 
                 // Half Day late
-                halfDayFlag = _daAttendance.CalculateHalfDayLate(checkIn, checkOut.Value);
+                halfDayFlag = await _daAttendance.CalculateHalfDayLate(checkIn, checkOut.Value);
 
                 // Full Day late
                 if (halfDayFlag == 3)

@@ -164,10 +164,10 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
             TimeSpan workingHours = await CalculateWorkingHours(checkIn, checkOut);
 
             //Hourly Late
-            int HourLateFlag = CalculateHourlyLate(checkIn, checkOut);
+            int HourLateFlag = await CalculateHourlyLate(checkIn, checkOut);
 
             //Half Day late
-            int HalfDayFlag = CalculateHalfDayLate(checkIn, checkOut);
+            int HalfDayFlag = await CalculateHalfDayLate(checkIn, checkOut);
 
             //Full Day late
             int FullDayFlag = 0;
@@ -244,10 +244,10 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
             TimeSpan workingHours = await CalculateWorkingHours(checkIn, checkOut);
 
             //Hourly Late
-            int HourLateFlag = CalculateHourlyLate(checkIn, checkOut);
+            int HourLateFlag = await CalculateHourlyLate(checkIn, checkOut);
 
             //Half Day late
-            int HalfDayFlag = CalculateHalfDayLate(checkIn, checkOut);
+            int HalfDayFlag = await CalculateHalfDayLate(checkIn, checkOut);
 
             //Full Day late
             int FullDayFlag = 0;
@@ -443,228 +443,78 @@ public class DA_Attendance(AppDbContext appDbContext, DA_Sequence daSequence, DA
         return checkOut - checkIn;
     }
 
-    public int CalculateHourlyLate(DateTime checkIn, DateTime checkOut)
+    public async Task<int> CalculateHourlyLate(DateTime checkIn, DateTime checkOut)
     {
-        var StartTimeValue = "";
-        TimeSpan StartTime = new();
-        var CheckInAcceptValue = "";
-        TimeSpan CheckInAccept = new();
-        var CheckInLateValue = "";
-        TimeSpan CheckInLate = new();
-        var OfficeEndValue = "";
-        TimeSpan OfficeEnd = new();
-        var CheckoutAcceptValue = "";
-        TimeSpan CheckoutAccept = new();
-        var CheckoutLateValue = "";
-        TimeSpan CheckoutLate = new();
+        // Get all rule values using DA_CompanyRule
+        var officeStartTimeValue = await _daCompanyRule.GetRuleValue(EnumRuleCode.OfficeHourStartTime.ToEnumDescription());
+        var checkInAcceptableValue = await _daCompanyRule.GetRuleTimeValue(EnumRuleCode.CheckInAcceptable.ToEnumDescription());
+        var checkInOneHourLateValue = await _daCompanyRule.GetRuleValue(EnumRuleCode.CheckInOneHourLate.ToEnumDescription());
+        
+        var officeEndTimeValue = await _daCompanyRule.GetRuleValue(EnumRuleCode.OfficeHourEndTime.ToEnumDescription());
+        var checkOutAcceptableValue = await _daCompanyRule.GetRuleTimeValue(EnumRuleCode.CheckOutAcceptable.ToEnumDescription());
+        var checkOutOneHourLateValue = await _daCompanyRule.GetRuleValue(EnumRuleCode.CheckOutOneHourLate.ToEnumDescription());
 
-        #region Office Start Time
+        TimeSpan officeStartTime = TimeSpan.FromHours(officeStartTimeValue);
+        TimeSpan checkInAcceptable = checkInAcceptableValue;
+        TimeSpan checkInOneHourLate = TimeSpan.FromHours(checkInOneHourLateValue);
+        
+        TimeSpan officeEndTime = TimeSpan.FromHours(officeEndTimeValue);
+        TimeSpan checkOutAcceptable = checkOutAcceptableValue;
+        TimeSpan checkOutOneHourLate = TimeSpan.FromHours(checkOutOneHourLateValue);
 
-        var ComRuleOfficeStart =
-            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_START_TIME" && x.DeleteFlag == false);
-        if (ComRuleOfficeStart != null)
-        {
-            StartTimeValue = ComRuleOfficeStart.Value;
-            if (StartTimeValue!.Contains(':'))
-            {
-                StartTime = TimeSpan.Parse(StartTimeValue);
-            }
-            else
-            {
-                StartTime = TimeSpan.FromHours(int.Parse(StartTimeValue));
-            }
-        }
-
-        #endregion
-
-        DateTime officeStart = checkIn.Date.Add(StartTime);
-
-        #region Office Acceptable CheckIn
-
-        var ComRuleCheckinAccept =
-            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKIN_ACCEPTABLE" && x.DeleteFlag == false);
-        if (ComRuleCheckinAccept != null)
-        {
-            CheckInAcceptValue = ComRuleCheckinAccept.Value;
-            if (CheckInAcceptValue!.Contains(':'))
-            {
-                CheckInAccept = TimeSpan.Parse(CheckInAcceptValue);
-            }
-            else
-            {
-                CheckInAccept = TimeSpan.FromHours(int.Parse(CheckInAcceptValue));
-            }
-        }
-
-        #endregion
-
-        DateTime MorningFirstLate = checkIn.Date.Add(CheckInAccept);
-
-        #region One Hour Late CheckIn
-
-        var ComRuleCheckinLate =
-            _db.TblCompanyRules.FirstOrDefault(x =>
-                x.CompanyRuleCode == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
-        if (ComRuleCheckinLate != null)
-        {
-            CheckInLateValue = ComRuleCheckinLate.Value;
-            if (CheckInLateValue!.Contains(':'))
-            {
-                CheckInLate = TimeSpan.Parse(CheckInLateValue);
-            }
-            else
-            {
-                CheckInLate = TimeSpan.FromHours(int.Parse(CheckInLateValue));
-            }
-        }
-
-        #endregion
-
-        DateTime MorningSecondLate = checkIn.Date.Add(CheckInLate);
+        DateTime officeStart = checkIn.Date.Add(officeStartTime);
+        DateTime checkInAcceptableTime = checkIn.Date.Add(checkInAcceptable);
+        DateTime checkInOneHourLateTime = checkIn.Date.Add(checkInOneHourLate);
+        
+        DateTime officeEnd = checkIn.Date.Add(officeEndTime);
+        DateTime checkOutAcceptableTime = checkIn.Date.Add(checkOutAcceptable);
+        DateTime checkOutOneHourLateTime = checkIn.Date.Add(checkOutOneHourLate);
 
         int hourLate = 0;
-        if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate)
-            hourLate = 1;
 
-
-        //For CheckOut Late
-
-        #region Office End Time
-
-        var ComRuleOfficeEnd =
-            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "OFFICE_END_TIME" && x.DeleteFlag == false);
-        if (ComRuleOfficeEnd != null)
+        // Check-in logic: when check in time is between office start time and check in acceptable time (9:30), it's ok
+        // When check in time is between CheckInAcceptable (9:30) and CheckInOneHourLate, set hour late flag to 1
+        if (checkIn > checkInAcceptableTime && checkIn <= checkInOneHourLateTime)
         {
-            OfficeEndValue = ComRuleOfficeEnd.Value;
-            if (OfficeEndValue!.Contains(':'))
-            {
-                OfficeEnd = TimeSpan.Parse(OfficeEndValue);
-            }
-            else
-            {
-                OfficeEnd = TimeSpan.FromHours(int.Parse(OfficeEndValue));
-            }
+            hourLate = 1; // Check-in hour late
         }
 
-        #endregion
-
-        DateTime officeEnd = checkIn.Date.Add(OfficeEnd);
-
-        #region Office Acceptable Checkout
-
-        var ComRuleCheckoutAccept =
-            _db.TblCompanyRules.FirstOrDefault(x =>
-                x.CompanyRuleCode == "CHECKOUT_ACCEPTABLE" && x.DeleteFlag == false);
-        if (ComRuleCheckoutAccept != null)
+        // Check-out logic: when check out time is before office end time and between office end time and check out acceptable (16:30), it's ok
+        // When check out time is between check out acceptable (16:30) and check out one hour late, set hour late flag to 1
+        if (checkOut < checkOutAcceptableTime && checkOut >= checkOutOneHourLateTime)
         {
-            CheckoutAcceptValue = ComRuleCheckoutAccept.Value;
-            if (CheckoutAcceptValue!.Contains(':'))
-            {
-                CheckoutAccept = TimeSpan.Parse(CheckoutAcceptValue);
-            }
-            else
-            {
-                CheckoutAccept = TimeSpan.FromHours(int.Parse(CheckoutAcceptValue));
-            }
+            hourLate += 1; // Add 1 for check-out hour late
         }
-
-        #endregion
-
-        DateTime eveningFirstLate = checkIn.Date.Add(CheckoutAccept);
-
-        #region One Hour Late Checkout
-
-        var ComRuleCheckoutLate =
-            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
-        if (ComRuleCheckoutLate != null)
-        {
-            CheckoutLateValue = ComRuleCheckoutLate.Value;
-            if (CheckoutLateValue!.Contains(':'))
-            {
-                CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
-            }
-            else
-            {
-                CheckoutLate = TimeSpan.FromHours(int.Parse(CheckoutLateValue));
-            }
-        }
-
-        #endregion
-
-        DateTime eveningSecondLate = checkIn.Date.Add(CheckoutLate);
-
-        if (checkOut < eveningFirstLate && checkOut >= eveningSecondLate)
-            hourLate = 2; // Can assume Evening Late for 2
-
-        if (checkIn > MorningFirstLate && checkIn <= MorningSecondLate && checkOut < eveningFirstLate &&
-            checkOut >= eveningSecondLate)
-            hourLate = 3; // both late
 
         return hourLate;
     }
 
-    public int CalculateHalfDayLate(DateTime checkIn, DateTime checkOut)
+    public async Task<int> CalculateHalfDayLate(DateTime checkIn, DateTime checkOut)
     {
+        // Get all rule values using DA_CompanyRule
+        var checkInOneHourLateValue = await _daCompanyRule.GetRuleValue(EnumRuleCode.CheckInOneHourLate.ToEnumDescription());
+        var checkOutOneHourLateValue = await _daCompanyRule.GetRuleValue(EnumRuleCode.CheckOutOneHourLate.ToEnumDescription());
+
+        TimeSpan checkInOneHourLate = TimeSpan.FromHours(checkInOneHourLateValue);
+        TimeSpan checkOutOneHourLate = TimeSpan.FromHours(checkOutOneHourLateValue);
+
+        DateTime checkInOneHourLateTime = checkIn.Date.Add(checkInOneHourLate);
+        DateTime checkOutOneHourLateTime = checkIn.Date.Add(checkOutOneHourLate);
+
         int halfDayLate = 0;
-        var CheckInLateValue = "";
-        TimeSpan CheckInLate = new();
-        var CheckoutLateValue = "";
-        TimeSpan CheckoutLate = new();
 
-        //For Morning Part
-
-        #region One Hour Late CheckIn
-
-        var ComRuleCheckinLate =
-            _db.TblCompanyRules.FirstOrDefault(x =>
-                x.CompanyRuleCode == "CHECKIN_ONE_HOUR_LATE" && x.DeleteFlag == false);
-        if (ComRuleCheckinLate != null)
+        // When check in time is over CheckInOneHourLate, set half day late to 1
+        if (checkIn > checkInOneHourLateTime)
         {
-            CheckInLateValue = ComRuleCheckinLate.Value;
-            if (CheckInLateValue!.Contains(':'))
-            {
-                CheckInLate = TimeSpan.Parse(CheckInLateValue);
-            }
-            else
-            {
-                CheckInLate = TimeSpan.FromHours(int.Parse(CheckInLateValue));
-            }
+            halfDayLate = 1; // Check-in half day late
         }
 
-        #endregion
-
-        DateTime MorningLate = checkIn.Date.Add(CheckInLate);
-        if (checkIn > MorningLate)
-            halfDayLate = 1;
-
-        //For Evening Part
-
-        #region One Hour Late Checkout
-
-        var ComRuleCheckoutLate =
-            _db.TblCompanyRules.FirstOrDefault(x => x.CompanyRuleCode == "CHECKOUT_HOURLATE" && x.DeleteFlag == false);
-        if (ComRuleCheckoutLate != null)
+        // When check out time is before check out one hour late, set half day late to 1
+        // If half day late is already 1 (from check in), increase it by 1 to make it 2
+        if (checkOut < checkOutOneHourLateTime)
         {
-            CheckoutLateValue = ComRuleCheckoutLate.Value;
-            if (CheckoutLateValue!.Contains(':'))
-            {
-                CheckoutLate = TimeSpan.Parse(CheckoutLateValue);
-            }
-            else
-            {
-                CheckoutLate = TimeSpan.FromHours(int.Parse(CheckoutLateValue));
-            }
+            halfDayLate += 1; // Add 1 for check-out half day late
         }
-
-        #endregion
-
-        DateTime eveningLate = checkIn.Date.Add(CheckoutLate);
-
-        if (checkOut < eveningLate)
-            halfDayLate = 2;
-        
-        if (checkIn > MorningLate && checkOut < eveningLate)
-            halfDayLate = 3;
 
         return halfDayLate;
     }

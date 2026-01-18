@@ -1,5 +1,5 @@
-﻿using HRSystem.Csharp.Domain.Models.CompanyRule;
-using Entity = HRSystem.Csharp.Database.AppDbContextModels.TblCompanyRule;
+using HRSystem.Csharp.Domain.Models.CompanyRule;
+using Microsoft.EntityFrameworkCore;
 
 namespace HRSystem.Csharp.Domain.Features.CompanyRule;
 
@@ -19,8 +19,8 @@ public class DA_CompanyRule(AppDbContext context)
             if (!string.IsNullOrWhiteSpace(reqModel.RuleDescription))
             {
                 query = query.Where(r => r.Description != null
-                                         && r.Description.Equals(reqModel.RuleDescription,
-                                             StringComparison.CurrentCultureIgnoreCase));
+                                          && r.Description.Equals(reqModel.RuleDescription,
+                                              StringComparison.CurrentCultureIgnoreCase));
             }
 
             query = query.OrderByDescending(r => r.CreatedAt);
@@ -58,7 +58,7 @@ public class DA_CompanyRule(AppDbContext context)
         }
     }
 
-    public async Task<Entity> GetCompanyRuleByIdAsync(string code)
+    public async Task<TblCompanyRule> GetCompanyRuleByIdAsync(string code)
     {
         var result = await _context.TblCompanyRules.FirstOrDefaultAsync(cr => cr.CompanyRuleCode == code);
         return result;
@@ -87,7 +87,7 @@ public class DA_CompanyRule(AppDbContext context)
         }
         catch (Exception ex)
         {
-            return Result<bool>.Error($"An error occurred while updating the company rule: {ex.Message}");
+            return Result<bool>.Error($"An error occurred while updating company rule: {ex.Message}");
         }
     }
 
@@ -101,5 +101,29 @@ public class DA_CompanyRule(AppDbContext context)
 
         ruleValue = rule.ToInt();
         return ruleValue;
+    }
+
+    public async Task<TimeSpan> GetRuleTimeValue(string ruleCode)
+    {
+        TimeSpan ruleTimeValue = TimeSpan.Zero;
+        var rule = await _context.TblCompanyRules.AsNoTracking()
+            .Where(r => r.CompanyRuleCode == ruleCode
+                        && r.DeleteFlag == false)
+            .Select(r => r.Value).FirstOrDefaultAsync();
+        
+        if (rule != null)
+        {
+            // Handle time format like "09:30" or simple integer like "9"
+            if (rule.Contains(':'))
+            {
+                ruleTimeValue = TimeSpan.Parse(rule);
+            }
+            else
+            {
+                ruleTimeValue = TimeSpan.FromHours(int.Parse(rule));
+            }
+        }
+        
+        return ruleTimeValue;
     }
 }
