@@ -27,6 +27,18 @@ public class EmployeeController : ControllerBase
 
         return BadRequest(result);
     }
+    
+    [HttpGet("emp-role-list")]
+    public async Task<IActionResult> GetEmployeeUserList([FromQuery] EmployeeListRequestModel reqModel)
+    {
+        var result = await _blEmployee.GetEmployeeUserList(reqModel);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Data);
+        }
+
+        return BadRequest(result);
+    }
 
     [HttpGet("edit/{employeeCode}")]
     public async Task<IActionResult> EditEmployee(string employeeCode)

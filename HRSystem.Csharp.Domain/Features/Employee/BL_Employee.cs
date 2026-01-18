@@ -12,6 +12,12 @@ public class BL_Employee(DA_Employee daEmployee)
         return employees;
     }
 
+    public async Task<Result<EmployeeListResponseModel>> GetEmployeeUserList(EmployeeListRequestModel reqModel)
+    {
+        var employees = await _daEmployee.GetEmployeeUserList(reqModel);
+        return employees;
+    }
+
     public async Task<Result<EmployeeEditResponseModel>> EditEmployee(string employeeCode)
     {
         var employees = await _daEmployee.GetEmployeeByCode(employeeCode);

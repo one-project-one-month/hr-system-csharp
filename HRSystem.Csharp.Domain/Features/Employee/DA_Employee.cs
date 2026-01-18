@@ -71,6 +71,62 @@ public class DA_Employee(
                 $"An error occurred while retrieving employees: {ex.Message}");
         }
     }
+    
+    public async Task<Result<EmployeeListResponseModel>> GetEmployeeUserList(EmployeeListRequestModel reqModel)
+    {
+        try
+        {
+            var query = _appDbContext.TblEmployees
+                .AsNoTracking()
+                .Where(e => !e.DeleteFlag)
+                .Join(_appDbContext.TblRoles,
+                    e => e.RoleCode,
+                    r => r.RoleCode,
+                    (e, r) => new EmployeeResponseModel
+                    {
+                        EmployeeCode = e.EmployeeCode,
+                        ProfileImage = e.ProfileImage,
+                        Username = e.Username,
+                        Name = e.Name,
+                        Gender = e.Gender,
+                        RoleName = r.RoleName,
+                        Email = e.Email,
+                        PhoneNo = e.PhoneNo,
+                        CreatedAt = e.CreatedAt
+                    }).Where(r => r.RoleName != null && r.RoleName.ToLower() == "employee");;
+
+            if (!string.IsNullOrWhiteSpace(reqModel.EmployeeName))
+            {
+                query = query.Where(r => r.Name != null
+                                         && r.Name.ToLower().Contains(reqModel.EmployeeName.ToLower()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(reqModel.RoleName))
+            {
+                query = query.Where(r => r.RoleName != null
+                                         && r.RoleName.ToLower().Equals(reqModel.RoleName.ToLower()));
+            }
+
+            query = query.OrderByDescending(r => r.CreatedAt);
+
+            var pagedResult = await query.GetPagedResultAsync(reqModel.PageNo, reqModel.PageSize);
+
+            var result = new EmployeeListResponseModel
+            {
+                Items = pagedResult.Items,
+                TotalCount = pagedResult.TotalCount,
+                PageNo = reqModel.PageNo,
+                PageSize = reqModel.PageSize
+            };
+
+            return Result<EmployeeListResponseModel>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result<EmployeeListResponseModel>.Error(
+                $"An error occurred while retrieving employees: {ex.Message}");
+        }
+    }
 
     public async Task<Result<EmployeeEditResponseModel>> GetEmployeeByCode(string employeeCode)
     {
